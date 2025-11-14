@@ -1,0 +1,25 @@
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+*.sqlite3
+*.db
+
+# Venv
+.venv/
+venv/
+env/
+
+# Env-файлы
+.env
+*.env
+
+# IDE
+.vscode/
+.idea/
+*.iml
+
+# Misc
+.DS_Store
+*.log
