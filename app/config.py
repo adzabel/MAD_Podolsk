@@ -1,7 +1,8 @@
 from functools import lru_cache
 from typing import List
 
-from pydantic import BaseSettings, Field, validator
+from pydantic import Field, field_validator
+from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
 class Settings(BaseSettings):
@@ -10,7 +11,9 @@ class Settings(BaseSettings):
     db_dsn: str = Field(..., env="DB_DSN")
     allowed_origins: str = Field("*", env="ALLOWED_ORIGINS")
 
-    @validator("db_dsn")
+    model_config = SettingsConfigDict(env_file=".env", case_sensitive=False)
+
+    @field_validator("db_dsn")
     def validate_dsn(cls, value: str) -> str:  # noqa: D417
         value = value.strip()
         if not value:
@@ -25,11 +28,6 @@ class Settings(BaseSettings):
         if raw == "*":
             return ["*"]
         return [origin.strip() for origin in raw.split(",") if origin.strip()]
-
-    class Config:
-        env_file = ".env"
-        case_sensitive = False
-
 
 @lru_cache
 def get_settings() -> Settings:
