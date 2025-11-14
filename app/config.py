@@ -8,7 +8,10 @@ from pydantic_settings import BaseSettings, SettingsConfigDict
 class Settings(BaseSettings):
     """Конфигурация приложения с валидацией переменных окружения."""
 
-    db_dsn: str = Field(..., env="DB_DSN")
+    db_dsn: str = Field(
+        "postgresql://postgres:postgres@localhost:5432/postgres",
+        env="DB_DSN",
+    )
     allowed_origins: str = Field("*", env="ALLOWED_ORIGINS")
 
     model_config = SettingsConfigDict(env_file=".env", case_sensitive=False)
