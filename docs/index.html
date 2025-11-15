@@ -4,19 +4,28 @@
   <meta charset="utf-8" />
   <title>СКПДИ · МАД · Подольск</title>
   <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
   <style>
     :root {
-      --bg: #f5f7fb;
+      --bg: #f1f4fa;
       --bg-card: #ffffff;
-      --border-soft: #e0e4ef;
-      --text-main: #1e293b;
-      --text-muted: #6b7280;
-      --accent: #2563eb;
-      --accent-soft: #dbeafe;
-      --danger: #b91c1c;
-      --success: #15803d;
-      --radius-lg: 16px;
-      --shadow-soft: 0 10px 30px rgba(15, 23, 42, 0.08);
+      --bg-muted: #f7f8fc;
+      --border-soft: #d8deec;
+      --border-strong: #b8c1d8;
+      --text-main: #0f172a;
+      --text-muted: #5e6473;
+      --accent: #2f6fed;
+      --accent-strong: #1e4fd8;
+      --accent-soft: #e0e7ff;
+      --danger: #c0342b;
+      --success: #0f9d58;
+      --radius-lg: 18px;
+      --radius-md: 12px;
+      --radius-sm: 8px;
+      --shadow-soft: 0 16px 40px rgba(15, 23, 42, 0.08);
+      --shadow-card: 0 6px 16px rgba(15, 23, 42, 0.05);
     }
 
     * {
@@ -25,27 +34,28 @@
 
     body {
       margin: 0;
-      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-      background: radial-gradient(circle at top, #f9fbff 0, #f3f4f6 40%, #eef2ff 100%);
+      font-family: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      background: linear-gradient(180deg, #f6f8fd 0%, #eef2fb 60%, #edf1fb 100%);
       color: var(--text-main);
+      -webkit-font-smoothing: antialiased;
     }
 
     .page {
-      max-width: 1100px;
+      max-width: 1180px;
       margin: 0 auto;
-      padding: 12px 12px 40px;
+      padding: 16px clamp(12px, 3vw, 28px) 48px;
     }
 
     header {
       display: flex;
       flex-direction: column;
-      gap: 12px;
-      margin-bottom: 16px;
+      gap: 16px;
+      margin-bottom: 24px;
     }
 
     @media (min-width: 768px) {
       .page {
-        padding: 24px 20px 60px;
+        padding: 32px 32px 72px;
       }
       header {
         flex-direction: row;
@@ -91,44 +101,48 @@
     .title-block {
       display: flex;
       flex-direction: column;
-      gap: 4px;
+      gap: 6px;
     }
 
     .title {
-      font-size: 1.4rem;
+      font-size: clamp(1.4rem, 2vw, 1.75rem);
       font-weight: 700;
-      letter-spacing: 0.03em;
+      letter-spacing: 0.04em;
       text-transform: uppercase;
+      color: #050b19;
     }
 
     .subtitle {
-      font-size: 0.9rem;
+      font-size: 0.92rem;
       color: var(--text-muted);
+      max-width: 640px;
     }
 
     .controls {
       display: flex;
       flex-wrap: wrap;
-      gap: 8px;
-      align-items: center;
+      gap: 12px;
+      align-items: stretch;
+      justify-content: flex-start;
     }
 
     .month-info {
       display: flex;
       align-items: center;
-      gap: 8px;
+      gap: 10px;
       flex-wrap: nowrap;
     }
 
     .month-select {
       display: flex;
       align-items: center;
-      gap: 6px;
-      padding: 6px 10px;
-      background: rgba(255,255,255,0.9);
-      border-radius: 999px;
+      gap: 8px;
+      padding: 8px 14px;
+      background: var(--bg-card);
+      border-radius: var(--radius-md);
       border: 1px solid var(--border-soft);
-      box-shadow: 0 4px 15px rgba(15, 23, 42, 0.06);
+      box-shadow: var(--shadow-card);
+      min-height: 54px;
     }
 
     .month-select label {
@@ -139,21 +153,24 @@
     select {
       border: none;
       background: transparent;
-      font-size: 0.9rem;
+      font-size: 0.95rem;
       color: var(--text-main);
       outline: none;
+      font-weight: 600;
     }
 
     .pill {
-      font-size: 0.8rem;
-      padding: 4px 10px;
-      border-radius: 999px;
-      border: 1px solid var(--accent-soft);
-      background: #eff6ff;
-      color: var(--accent);
+      font-size: 0.82rem;
+      padding: 8px 14px;
+      border-radius: var(--radius-md);
+      border: 1px solid var(--border-soft);
+      background: var(--bg-muted);
+      color: var(--text-main);
       display: inline-flex;
       align-items: center;
-      gap: 8px;
+      gap: 10px;
+      box-shadow: inset 0 1px 0 rgba(255,255,255,0.6);
+      min-height: 54px;
     }
 
     .pill-info {
@@ -163,40 +180,49 @@
     }
 
     .pill-label {
-      font-size: 0.7rem;
-      letter-spacing: 0.06em;
+      font-size: 0.72rem;
+      letter-spacing: 0.08em;
       text-transform: uppercase;
       color: var(--text-muted);
     }
 
     .pill-value {
       font-weight: 600;
-      color: var(--accent);
+      color: var(--text-main);
       word-break: break-word;
     }
 
     .pill-dot {
-      width: 8px;
-      height: 8px;
+      width: 10px;
+      height: 10px;
       border-radius: 50%;
-      background: #22c55e;
-      box-shadow: 0 0 0 4px rgba(34, 197, 94, 0.2);
+      background: #0f9d58;
+      box-shadow: 0 0 0 4px rgba(15, 157, 88, 0.15);
     }
 
     .btn {
       border: none;
-      border-radius: 999px;
-      font-size: 0.85rem;
-      padding: 7px 14px;
+      border-radius: var(--radius-md);
+      font-size: 0.9rem;
+      padding: 10px 18px;
       display: inline-flex;
       align-items: center;
-      gap: 6px;
+      gap: 10px;
       cursor: pointer;
       background: var(--accent);
       color: #fff;
-      box-shadow: 0 6px 18px rgba(37, 99, 235, 0.35);
-      transition: transform 0.1s ease, box-shadow 0.1s ease, opacity 0.15s ease;
+      box-shadow: 0 14px 24px rgba(47, 111, 237, 0.25);
+      transition: transform 0.1s ease, box-shadow 0.2s ease, opacity 0.15s ease;
       white-space: nowrap;
+      font-weight: 600;
+      letter-spacing: 0.02em;
+    }
+
+    .btn svg {
+      width: 16px;
+      height: 16px;
+      stroke: currentColor;
+      stroke-width: 1.6;
     }
 
     .btn:disabled {
@@ -206,8 +232,8 @@
     }
 
     .btn-outline {
-      background: transparent;
-      color: var(--accent);
+      background: #f4f6ff;
+      color: var(--accent-strong);
       border: 1px solid var(--accent-soft);
       box-shadow: none;
     }
@@ -221,9 +247,9 @@
 
     .summary-grid {
       display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 8px;
-      margin-bottom: 16px;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 14px;
+      margin-bottom: 20px;
     }
 
     @media (min-width: 768px) {
@@ -235,31 +261,31 @@
     }
 
     .summary-card {
-      background: linear-gradient(135deg, #ffffff, #f9fafb);
+      background: var(--bg-card);
       border-radius: var(--radius-lg);
-      padding: 10px 12px;
-      box-shadow: var(--shadow-soft);
-      border: 1px solid rgba(226, 232, 240, 0.9);
+      padding: 14px 18px;
+      box-shadow: var(--shadow-card);
+      border: 1px solid rgba(209, 214, 229, 0.8);
       display: flex;
       flex-direction: column;
-      gap: 4px;
-      min-height: 70px;
+      gap: 6px;
+      min-height: 110px;
     }
 
     .summary-label {
-      font-size: 0.75rem;
+      font-size: 0.78rem;
       color: var(--text-muted);
       text-transform: uppercase;
-      letter-spacing: 0.06em;
+      letter-spacing: 0.08em;
     }
 
     .summary-value {
-      font-size: 1.05rem;
+      font-size: 1.2rem;
       font-weight: 600;
     }
 
     .summary-sub {
-      font-size: 0.75rem;
+      font-size: 0.78rem;
       color: var(--text-muted);
     }
 
@@ -274,16 +300,16 @@
     /* Таблица / список работ */
 
     .panel {
-      background: rgba(255,255,255,0.9);
-      border-radius: 20px;
+      background: rgba(255,255,255,0.95);
+      border-radius: 22px;
       box-shadow: var(--shadow-soft);
       border: 1px solid var(--border-soft);
-      padding: 12px;
+      padding: 18px;
     }
 
     @media (min-width: 768px) {
       .panel {
-        padding: 16px 18px;
+        padding: 24px 26px;
       }
     }
 
@@ -297,24 +323,26 @@
     }
 
     .panel-title {
-      font-size: 0.95rem;
+      font-size: 1.05rem;
       font-weight: 600;
     }
 
     .panel-subtitle {
-      font-size: 0.8rem;
+      font-size: 0.82rem;
       color: var(--text-muted);
     }
 
     .search {
       display: flex;
       align-items: center;
-      gap: 6px;
-      padding: 4px 8px;
-      border-radius: 999px;
+      gap: 8px;
+      padding: 6px 12px;
+      border-radius: var(--radius-md);
       border: 1px solid var(--border-soft);
-      background: #f9fafb;
+      background: var(--bg-muted);
       flex: 1;
+      min-width: 220px;
+      color: var(--text-muted);
     }
 
     .search input {
@@ -325,37 +353,36 @@
       width: 100%;
     }
 
-    .tag {
-      font-size: 0.75rem;
-      padding: 3px 8px;
-      border-radius: 999px;
-      background: #f3f4ff;
-      color: var(--accent);
-      white-space: nowrap;
+    .search svg {
+      width: 16px;
+      height: 16px;
+      stroke: currentColor;
+      stroke-width: 1.6;
     }
 
     .category-grid {
       display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-      gap: 10px;
-      margin-top: 10px;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 16px;
+      margin-top: 16px;
     }
 
     .category-card {
       border: 1px solid var(--border-soft);
-      border-radius: var(--radius-lg);
-      padding: 12px;
-      background: #ffffff;
+      border-radius: 18px;
+      padding: 16px;
+      background: var(--bg-card);
       display: flex;
       flex-direction: column;
-      gap: 6px;
+      gap: 8px;
       cursor: pointer;
-      transition: transform 0.15s ease, box-shadow 0.15s ease, border-color 0.15s ease;
-      border-top: 5px solid var(--accent-soft, #e0e7ff);
+      transition: transform 0.15s ease, box-shadow 0.2s ease, border-color 0.15s ease;
+      border-left: 4px solid transparent;
       text-align: left;
       width: 100%;
       color: inherit;
       font: inherit;
+      box-shadow: var(--shadow-card);
     }
 
     .category-card:hover {
@@ -365,7 +392,8 @@
 
     .category-card.active {
       border-color: var(--accent);
-      box-shadow: var(--shadow-soft);
+      border-left-color: var(--accent);
+      box-shadow: 0 18px 28px rgba(47, 111, 237, 0.15);
     }
 
     .category-title {
@@ -380,8 +408,8 @@
     .category-pill {
       font-size: 0.7rem;
       padding: 2px 6px;
-      border-radius: 999px;
-      background: rgba(99, 102, 241, 0.1);
+      border-radius: var(--radius-sm);
+      background: rgba(47, 111, 237, 0.12);
       color: var(--text-muted);
       text-transform: uppercase;
     }
@@ -389,8 +417,8 @@
     .category-values {
       display: grid;
       grid-template-columns: repeat(3, minmax(0, 1fr));
-      gap: 6px;
-      font-size: 0.75rem;
+      gap: 8px;
+      font-size: 0.78rem;
     }
 
     .category-values span {
@@ -403,7 +431,7 @@
       font-size: 0.7rem;
       color: var(--text-muted);
       text-transform: uppercase;
-      letter-spacing: 0.04em;
+      letter-spacing: 0.06em;
     }
 
     .category-values strong {
@@ -432,7 +460,7 @@
 
     .work-list.has-data {
       border: 1px solid var(--border-soft);
-      border-radius: var(--radius-lg);
+      border-radius: 20px;
       overflow: hidden;
       background: rgba(255,255,255,0.95);
       box-shadow: var(--shadow-soft);
@@ -440,12 +468,12 @@
 
     .work-row {
       display: grid;
-      grid-template-columns: minmax(0, 2.2fr) repeat(3, minmax(0, 1fr));
-      gap: 8px;
-      padding: 8px 12px;
+      grid-template-columns: minmax(0, 2.4fr) repeat(3, minmax(0, 1fr));
+      gap: 10px;
+      padding: 12px 18px;
       border-bottom: 1px solid var(--border-soft);
       align-items: center;
-      font-size: 0.85rem;
+      font-size: 0.88rem;
       background: #fff;
       font-variant-numeric: tabular-nums;
     }
@@ -455,10 +483,10 @@
     }
 
     .work-row-header {
-      background: #eef2ff;
-      font-size: 0.7rem;
+      background: #f3f6ff;
+      font-size: 0.72rem;
       font-weight: 600;
-      letter-spacing: 0.06em;
+      letter-spacing: 0.08em;
       text-transform: uppercase;
       color: var(--text-muted);
     }
@@ -472,7 +500,7 @@
     }
 
     .work-row-name {
-      font-size: 0.95rem;
+      font-size: 0.98rem;
       font-weight: 600;
       color: var(--text-main);
     }
@@ -489,9 +517,9 @@
 
     .work-row-label {
       display: none;
-      font-size: 0.7rem;
+      font-size: 0.72rem;
       text-transform: uppercase;
-      letter-spacing: 0.04em;
+      letter-spacing: 0.05em;
       color: var(--text-muted);
     }
 
@@ -532,21 +560,26 @@
     }
 
     .status-bar {
-      margin-top: 12px;
-      font-size: 0.8rem;
+      margin-top: 16px;
+      font-size: 0.82rem;
       color: var(--text-muted);
       display: flex;
       justify-content: space-between;
-      gap: 6px;
+      gap: 8px;
       flex-wrap: wrap;
       align-items: center;
+      border-top: 1px solid var(--border-soft);
+      padding-top: 12px;
     }
 
     .empty-state {
-      padding: 40px 20px;
+      padding: 46px 20px;
       text-align: center;
       color: var(--text-muted);
-      font-size: 0.9rem;
+      font-size: 0.92rem;
+      border: 1px dashed var(--border-soft);
+      border-radius: 18px;
+      background: var(--bg-muted);
     }
 
     /* Печатная версия */
@@ -661,7 +694,11 @@
           </div>
         </div>
         <button class="btn-outline btn" type="button" id="download-pdf" aria-live="polite">
-          📄 Отчёт в PDF
+          <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false" stroke="currentColor">
+            <path d="M6 3h8l4 4v14H6z" fill="none"></path>
+            <path d="M14 3v4h4M9 12h6m-6 4h6M8 8h1m2-5h3" fill="none" stroke-linecap="round" stroke-linejoin="round"></path>
+          </svg>
+          <span>Отчёт в PDF</span>
         </button>
       </div>
     </header>
@@ -709,7 +746,10 @@
           <div class="panel-subtitle" id="active-category-meta">Нажмите на карточку выше, чтобы увидеть работы</div>
         </div>
         <div class="search">
-          🔍
+          <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false" stroke="currentColor">
+            <circle cx="11" cy="11" r="6" fill="none" stroke-linecap="round" stroke-linejoin="round"></circle>
+            <path d="m15.5 15.5 3.5 3.5" fill="none" stroke-linecap="round" stroke-linejoin="round"></path>
+          </svg>
           <input type="text" id="search" placeholder="Найти работу в смете..." />
         </div>
       </div>
@@ -1172,7 +1212,7 @@
         };
 
         pdfButton.disabled = true;
-        pdfButton.innerHTML = "⌛ Формируем PDF…";
+        pdfButton.innerHTML = "Формируем PDF…";
 
         try {
           await html2pdf().set(options).from(temporaryNode).save();
