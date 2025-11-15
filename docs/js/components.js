@@ -351,7 +351,9 @@ export class UIManager {
     const workName = item.work_name || item.description || "Без названия";
     const delta = calculateDelta(item);
     const deltaClass = delta > 0 ? "delta-positive" : delta < 0 ? "delta-negative" : "";
-    const arrow = delta < 0 ? "▼" : delta > 0 ? "▲" : "●";
+    const plannedFormatted = formatMoney(item.planned_amount);
+    const factFormatted = formatMoney(item.fact_amount);
+    const deltaFormatted = formatMoney(delta);
     const row = document.createElement("div");
     row.className = "work-row";
     if (index === total - 1) {
@@ -371,15 +373,15 @@ export class UIManager {
       </div>
       <div class="work-row-money work-row-plan">
         <span class="work-row-label">План</span>
-        <span>${formatMoneyRub(item.planned_amount)}</span>
+        <span>${plannedFormatted}</span>
       </div>
       <div class="work-row-money work-row-fact">
         <span class="work-row-label">Факт</span>
-        <span>${formatMoneyRub(item.fact_amount)}</span>
+        <span>${factFormatted}</span>
       </div>
       <div class="work-row-delta ${deltaClass}">
         <span class="work-row-label">Отклонение</span>
-        <span class="work-row-delta-value">${arrow} ${formatMoneyRub(delta)}</span>
+        <span class="work-row-delta-value">${deltaFormatted}</span>
       </div>
     `;
     const nameWrapper = row.querySelector(".work-row-name");
