@@ -52,6 +52,91 @@
       border: 0;
     }
 
+    .skeleton {
+      position: relative;
+      overflow: hidden;
+      background: linear-gradient(
+        90deg,
+        var(--bg-muted) 25%,
+        var(--bg-card) 50%,
+        var(--bg-muted) 75%
+      );
+      background-size: 200% 100%;
+      animation: loading 1.5s infinite;
+      border-radius: var(--radius-sm);
+    }
+
+    .skeleton-line {
+      height: 12px;
+      width: 100%;
+      margin-bottom: 10px;
+    }
+
+    .skeleton-line-sm {
+      width: 60%;
+    }
+
+    .skeleton-line-lg {
+      height: 20px;
+    }
+
+    .skeleton-line-xs {
+      width: 40%;
+      margin-bottom: 0;
+    }
+
+    .summary-card-skeleton,
+    .category-card-skeleton,
+    .work-row-skeleton {
+      background: var(--bg-card);
+      border: 1px solid rgba(209, 214, 229, 0.8);
+      border-radius: var(--radius-lg);
+      padding: 12px 16px;
+      box-shadow: var(--shadow-card);
+    }
+
+    .category-card-skeleton {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      border-radius: 20px;
+    }
+
+    .work-row-skeleton {
+      display: grid;
+      grid-template-columns: minmax(0, 3.4fr) repeat(3, minmax(0, 0.9fr));
+      gap: 10px;
+      margin-bottom: 10px;
+    }
+
+    .work-row-skeleton .skeleton-line {
+      height: 16px;
+      margin-bottom: 0;
+    }
+
+    .work-list-skeleton,
+    .skeleton-grid,
+    .skeleton-category {
+      display: none;
+    }
+
+    @keyframes loading {
+      0% { background-position: 200% 0; }
+      100% { background-position: -200% 0; }
+    }
+
+    @media (max-width: 767px) {
+      .work-row-skeleton {
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+      }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      .skeleton {
+        animation: none;
+      }
+    }
+
     .toast {
       position: fixed;
       bottom: 24px;
@@ -886,12 +971,56 @@
         <div class="summary-sub">Факт − План</div>
       </div>
     </section>
+    <section class="summary-grid skeleton-grid" id="summary-skeleton" aria-hidden="true">
+      <div class="summary-card summary-card-skeleton">
+        <div class="skeleton skeleton-line skeleton-line-sm"></div>
+        <div class="skeleton skeleton-line skeleton-line-lg"></div>
+        <div class="skeleton skeleton-line skeleton-line-xs"></div>
+      </div>
+      <div class="summary-card summary-card-skeleton">
+        <div class="skeleton skeleton-line skeleton-line-sm"></div>
+        <div class="skeleton skeleton-line skeleton-line-lg"></div>
+        <div class="skeleton skeleton-line skeleton-line-xs"></div>
+      </div>
+      <div class="summary-card summary-card-skeleton">
+        <div class="skeleton skeleton-line skeleton-line-sm"></div>
+        <div class="skeleton skeleton-line skeleton-line-lg"></div>
+        <div class="skeleton skeleton-line skeleton-line-xs"></div>
+      </div>
+      <div class="summary-card summary-card-skeleton">
+        <div class="skeleton skeleton-line skeleton-line-sm"></div>
+        <div class="skeleton skeleton-line skeleton-line-lg"></div>
+        <div class="skeleton skeleton-line skeleton-line-xs"></div>
+      </div>
+    </section>
 
     <!-- Сводка по сметам -->
     <section class="panel">
       <div class="panel-header">
         <div>
           <div class="panel-title">Работы в разрезе Смет</div>
+        </div>
+      </div>
+      <div class="category-grid skeleton-category" id="category-skeleton" aria-hidden="true">
+        <div class="category-card-skeleton">
+          <div class="skeleton skeleton-line skeleton-line-sm"></div>
+          <div class="skeleton skeleton-line skeleton-line-lg"></div>
+          <div class="skeleton skeleton-line"></div>
+        </div>
+        <div class="category-card-skeleton">
+          <div class="skeleton skeleton-line skeleton-line-sm"></div>
+          <div class="skeleton skeleton-line skeleton-line-lg"></div>
+          <div class="skeleton skeleton-line"></div>
+        </div>
+        <div class="category-card-skeleton">
+          <div class="skeleton skeleton-line skeleton-line-sm"></div>
+          <div class="skeleton skeleton-line skeleton-line-lg"></div>
+          <div class="skeleton skeleton-line"></div>
+        </div>
+        <div class="category-card-skeleton">
+          <div class="skeleton skeleton-line skeleton-line-sm"></div>
+          <div class="skeleton skeleton-line skeleton-line-lg"></div>
+          <div class="skeleton skeleton-line"></div>
         </div>
       </div>
       <div class="category-grid" id="category-grid"></div>
@@ -909,6 +1038,32 @@
             <path d="m15.5 15.5 3.5 3.5" fill="none" stroke-linecap="round" stroke-linejoin="round"></path>
           </svg>
           <input type="text" id="search" placeholder="Найти работу в смете..." />
+        </div>
+      </div>
+      <div class="work-list work-list-skeleton" id="work-skeleton" aria-hidden="true">
+        <div class="work-row-skeleton">
+          <div class="skeleton skeleton-line"></div>
+          <div class="skeleton skeleton-line"></div>
+          <div class="skeleton skeleton-line"></div>
+          <div class="skeleton skeleton-line"></div>
+        </div>
+        <div class="work-row-skeleton">
+          <div class="skeleton skeleton-line"></div>
+          <div class="skeleton skeleton-line"></div>
+          <div class="skeleton skeleton-line"></div>
+          <div class="skeleton skeleton-line"></div>
+        </div>
+        <div class="work-row-skeleton">
+          <div class="skeleton skeleton-line"></div>
+          <div class="skeleton skeleton-line"></div>
+          <div class="skeleton skeleton-line"></div>
+          <div class="skeleton skeleton-line"></div>
+        </div>
+        <div class="work-row-skeleton">
+          <div class="skeleton skeleton-line"></div>
+          <div class="skeleton skeleton-line"></div>
+          <div class="skeleton skeleton-line"></div>
+          <div class="skeleton skeleton-line"></div>
         </div>
       </div>
       <div class="empty-state" id="work-empty-state">
@@ -986,8 +1141,12 @@
       sumFact: document.getElementById("sum-fact"),
       sumComplete: document.getElementById("sum-complete"),
       sumDelta: document.getElementById("sum-delta"),
+      summaryGrid: document.getElementById("summary-grid"),
+      summarySkeleton: document.getElementById("summary-skeleton"),
       categoryGrid: document.getElementById("category-grid"),
+      categorySkeleton: document.getElementById("category-skeleton"),
       workList: document.getElementById("work-list"),
+      workSkeleton: document.getElementById("work-skeleton"),
       workEmptyState: document.getElementById("work-empty-state"),
       searchInput: document.getElementById("search"),
       activeCategoryTitle: document.getElementById("active-category-title"),
@@ -1214,6 +1373,27 @@
         this.initMonthSelect();
       }
 
+      toggleSkeletons(isLoading) {
+        if (this.elements.summarySkeleton) {
+          this.elements.summarySkeleton.style.display = isLoading ? "grid" : "none";
+        }
+        if (this.elements.categorySkeleton) {
+          this.elements.categorySkeleton.style.display = isLoading ? "grid" : "none";
+        }
+        if (this.elements.workSkeleton) {
+          this.elements.workSkeleton.style.display = isLoading ? "block" : "none";
+        }
+        if (this.elements.summaryGrid) {
+          this.elements.summaryGrid.hidden = isLoading;
+        }
+        if (this.elements.categoryGrid) {
+          this.elements.categoryGrid.style.display = isLoading ? "none" : "";
+        }
+        if (this.elements.workList) {
+          this.elements.workList.style.display = isLoading ? "none" : "";
+        }
+      }
+
       prepareWorkList() {
         this.workHeaderEl = document.createElement("div");
         this.workHeaderEl.className = "work-row work-row-header";
@@ -1316,15 +1496,15 @@
       showLoadingState() {
         this.groupedCategories = [];
         this.activeCategoryKey = null;
-        this.elements.categoryGrid.innerHTML = '<div class="empty-state">Загружаем данные…</div>';
+        this.toggleSkeletons(true);
+        this.elements.categoryGrid.innerHTML = "";
         this.elements.lastUpdatedText.textContent = "Загрузка данных…";
         this.elements.sumPlanned.textContent = "…";
         this.elements.sumFact.textContent = "…";
         this.elements.sumComplete.textContent = "…";
         this.elements.sumDelta.textContent = "…";
         this.elements.activeCategoryTitle.textContent = "Загрузка...";
-        this.elements.workEmptyState.style.display = "block";
-        this.elements.workEmptyState.textContent = "Загрузка данных...";
+        this.elements.workEmptyState.style.display = "none";
         this.elements.workList.classList.remove("has-data");
         this.workHeaderEl.hidden = true;
         this.elements.workListScroller.style.display = "none";
@@ -1334,9 +1514,15 @@
       }
 
       handleLoadError() {
+        this.toggleSkeletons(false);
         this.elements.workEmptyState.style.display = "block";
         this.elements.workEmptyState.textContent = "Ошибка загрузки данных";
         this.elements.lastUpdatedText.textContent = "Ошибка загрузки данных";
+        this.elements.sumPlanned.textContent = "–";
+        this.elements.sumFact.textContent = "–";
+        this.elements.sumComplete.textContent = "–";
+        this.elements.sumDelta.textContent = "–";
+        this.elements.sumDelta.classList.remove("positive", "negative");
         this.elements.activeCategoryTitle.textContent = "Смета не выбрана";
         this.elements.searchInput.disabled = true;
         this.elements.workList.classList.remove("has-data");
@@ -1349,6 +1535,7 @@
 
       applyData(data) {
         this.dataManager.setCurrentData(data);
+        this.toggleSkeletons(false);
         const items = Array.isArray(data.items) ? data.items : [];
         this.groupedCategories = this.dataManager.buildCategories(items);
         this.ensureActiveCategory();
