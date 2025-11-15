@@ -1,7 +1,8 @@
 from __future__ import annotations
 
 from datetime import date, datetime
-from decimal import Decimal
+from decimal import Decimal, InvalidOperation
+import math
 from typing import Any
 
 from psycopg2.extras import RealDictCursor
@@ -70,14 +71,24 @@ SUMMARY_SQL = """
 
 
 def _to_float(value: Any) -> float | None:
+    """Преобразует значения из БД в float, убирая NaN/Inf."""
+
     if value is None:
         return None
+
+    numeric: float
     if isinstance(value, (int, float, Decimal)):
-        return float(value)
-    try:
-        return float(value)
-    except (TypeError, ValueError):
+        numeric = float(value)
+    else:
+        try:
+            numeric = float(value)
+        except (TypeError, ValueError, InvalidOperation):
+            return None
+
+    if not math.isfinite(numeric):
         return None
+
+    return numeric
 
 
 def fetch_plan_vs_fact_for_month(
