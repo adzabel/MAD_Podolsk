@@ -210,6 +210,9 @@ def _resolve_category_name(
 def _group_items(items: Sequence[DashboardItem]) -> list[CategoryGroup]:
     groups: dict[str, CategoryGroup] = {}
     for item in items:
+        if item.planned_amount is None and item.fact_amount is None:
+            # В отчет не должны попадать строки без данных по плану и факту
+            continue
         key, title = _resolve_category_name(
             item.category or item.smeta,
             item.smeta or item.category,
