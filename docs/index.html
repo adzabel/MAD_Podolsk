@@ -815,7 +815,16 @@
         if (!isNaN(fact)) group.fact += fact;
         if (!isNaN(delta)) group.delta += delta;
       });
-      return Array.from(map.values());
+      return Array.from(map.values()).sort((a, b) => {
+        const planA = !isNaN(a.planned) ? a.planned : 0;
+        const planB = !isNaN(b.planned) ? b.planned : 0;
+        if (planA === planB) {
+          const titleA = (a.title || "").toLowerCase();
+          const titleB = (b.title || "").toLowerCase();
+          return titleA.localeCompare(titleB, "ru");
+        }
+        return planB - planA;
+      });
     }
 
     function summarizeItems(items) {
