@@ -58,14 +58,6 @@ def _to_float(value: Any) -> float | None:
         return None
 
 
-def _calc_delta(plan: float | None, fact: float | None) -> float | None:
-    if plan is None and fact is None:
-        return None
-    plan_value = plan or 0.0
-    fact_value = fact or 0.0
-    return fact_value - plan_value
-
-
 def _extract_strings(row: dict[str, Any]) -> tuple[str | None, str | None, str | None, str]:
     description = row.get("description") or ""
     category = row.get("category_code") or row.get("smeta")
@@ -77,51 +69,6 @@ def _extract_strings(row: dict[str, Any]) -> tuple[str | None, str | None, str |
     )
     work_name = row.get("work_name") or row.get("work_title") or description
     return category, smeta, work_name, description
-
-
-def _aggregate_items(rows: list[dict[str, Any]]) -> list[DashboardItem]:
-    """Агрегирует строки в DashboardItem. Принимает список для обратной совместимости."""
-    items_map: dict[tuple[str | None, str | None, str | None, str], dict[str, Any]] = {}
-
-    for row in rows:
-        category, smeta, work_name, description = _extract_strings(row)
-        key = (category, smeta, work_name, description)
-
-        item = items_map.get(key)
-        if item is None:
-            item = {
-                "category": category,
-                "smeta": smeta,
-                "work_name": work_name,
-                "description": description,
-                "planned_amount": None,
-                "fact_amount": None,
-            }
-            items_map[key] = item
-
-        planned_value = _to_float(row.get("planned_amount"))
-        if planned_value is not None:
-            item["planned_amount"] = (item["planned_amount"] or 0.0) + planned_value
-
-        fact_value = _to_float(row.get("fact_amount_done"))
-        if fact_value is not None:
-            item["fact_amount"] = (item["fact_amount"] or 0.0) + fact_value
-
-    aggregated_items = []
-    for item in items_map.values():
-        aggregated_items.append(
-            DashboardItem(
-                category=item["category"],
-                smeta=item["smeta"],
-                work_name=item["work_name"],
-                description=item["description"],
-                planned_amount=item["planned_amount"],
-                fact_amount=item["fact_amount"],
-                delta_amount=_calc_delta(item["planned_amount"], item["fact_amount"]),
-            )
-        )
-
-    return aggregated_items
 
 
 def _aggregate_items_streaming(cursor) -> list[DashboardItem]:
@@ -166,7 +113,7 @@ def _aggregate_items_streaming(cursor) -> list[DashboardItem]:
                 description=item["description"],
                 planned_amount=item["planned_amount"],
                 fact_amount=item["fact_amount"],
-                delta_amount=_calc_delta(item["planned_amount"], item["fact_amount"]),
+                # delta_amount будет вычислено через field_validator в DashboardItem
             )
         )
 
