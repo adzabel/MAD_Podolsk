@@ -247,9 +247,9 @@
 
     .summary-grid {
       display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-      gap: 14px;
-      margin-bottom: 20px;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 10px;
+      margin-bottom: 16px;
     }
 
     @media (min-width: 768px) {
@@ -263,30 +263,56 @@
     .summary-card {
       background: var(--bg-card);
       border-radius: var(--radius-lg);
-      padding: 14px 18px;
+      padding: 12px 14px;
       box-shadow: var(--shadow-card);
       border: 1px solid rgba(209, 214, 229, 0.8);
       display: flex;
       flex-direction: column;
-      gap: 6px;
-      min-height: 110px;
+      gap: 4px;
+      min-height: 96px;
+    }
+
+    @media (min-width: 768px) {
+      .summary-card {
+        padding: 14px 18px;
+        gap: 6px;
+        min-height: 110px;
+      }
     }
 
     .summary-label {
-      font-size: 0.78rem;
+      font-size: 0.72rem;
       color: var(--text-muted);
       text-transform: uppercase;
       letter-spacing: 0.08em;
     }
 
+    @media (min-width: 768px) {
+      .summary-label {
+        font-size: 0.78rem;
+      }
+    }
+
     .summary-value {
-      font-size: 1.2rem;
+      font-size: 1.05rem;
       font-weight: 600;
     }
 
+    @media (min-width: 768px) {
+      .summary-value {
+        font-size: 1.2rem;
+      }
+    }
+
     .summary-sub {
-      font-size: 0.78rem;
+      font-size: 0.72rem;
       color: var(--text-muted);
+    }
+
+    @media (min-width: 768px) {
+      .summary-sub {
+        font-size: 0.78rem;
+      }
     }
 
     .summary-value.positive {
@@ -295,6 +321,22 @@
 
     .summary-value.negative {
       color: var(--danger);
+    }
+
+    .page-actions {
+      margin-top: 24px;
+      display: flex;
+      justify-content: flex-end;
+    }
+
+    @media (max-width: 767px) {
+      .page-actions {
+        justify-content: center;
+      }
+      .page-actions .btn {
+        width: 100%;
+        justify-content: center;
+      }
     }
 
     /* Таблица / список работ */
@@ -693,13 +735,6 @@
             </div>
           </div>
         </div>
-        <button class="btn-outline btn" type="button" id="download-pdf" aria-live="polite">
-          <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false" stroke="currentColor">
-            <path d="M6 3h8l4 4v14H6z" fill="none"></path>
-            <path d="M14 3v4h4M9 12h6m-6 4h6M8 8h1m2-5h3" fill="none" stroke-linecap="round" stroke-linejoin="round"></path>
-          </svg>
-          <span>Отчёт в PDF</span>
-        </button>
       </div>
     </header>
 
@@ -761,6 +796,16 @@
         <div id="status-counts">Категорий: 0 · Работ: 0</div>
       </div>
     </section>
+
+    <div class="page-actions">
+      <button class="btn-outline btn" type="button" id="download-pdf" aria-live="polite">
+        <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false" stroke="currentColor">
+          <path d="M6 3h8l4 4v14H6z" fill="none"></path>
+          <path d="M14 3v4h4M9 12h6m-6 4h6M8 8h1m2-5h3" fill="none" stroke-linecap="round" stroke-linejoin="round"></path>
+        </svg>
+        <span>Отчёт в PDF</span>
+      </button>
+    </div>
   </div>
 
   <div class="print-report" id="print-report" aria-hidden="true">
