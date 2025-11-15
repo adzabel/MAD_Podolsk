@@ -3,11 +3,13 @@ from __future__ import annotations
 import logging
 import os
 from dataclasses import dataclass, field
-from datetime import date, datetime
+from datetime import date, datetime, timezone
 from io import BytesIO
 from pathlib import Path
 from typing import Iterable, Sequence
 from xml.sax.saxutils import escape
+
+from zoneinfo import ZoneInfo
 
 from reportlab.lib import colors
 from reportlab.lib.pagesizes import A4
@@ -47,6 +49,7 @@ FONT_FALLBACKS: dict[str, str] = {
     BODY_FONT_BOLD: DEFAULT_FONT_BOLD,
 }
 
+MOSCOW_TZ = ZoneInfo("Europe/Moscow")
 
 def _font_search_roots() -> list[Path]:
     env_paths = [
@@ -218,7 +221,11 @@ def _format_month(month: date) -> str:
 def _format_last_updated(value: datetime | None) -> str:
     if not value:
         return "нет данных"
-    return value.strftime("%d.%m.%Y %H:%M")
+    dt = value
+    if dt.tzinfo is None:
+        dt = dt.replace(tzinfo=timezone.utc)
+    dt = dt.astimezone(MOSCOW_TZ)
+    return dt.strftime("%d.%m.%Y %H:%M МСК")
 
 
 def _build_summary_table(summary: DashboardSummary | None, width: float) -> Table:
@@ -386,7 +393,7 @@ def build_dashboard_pdf(
         spaceAfter=1,
     )
     story: list = []
-    story.append(Paragraph("Сводный отчёт по работам", title_style))
+    story.append(Paragraph("Сводный отчёт по работам Подольск", title_style))
     story.append(Paragraph(f"Месяц: <b>{_format_month(month)}</b>", meta_style))
     story.append(Paragraph(f"Данные обновлены: {_format_last_updated(last_updated)}", meta_style))
     story.append(Paragraph("Факт содержит только заявки в статусе «Рассмотрено».", meta_style))
