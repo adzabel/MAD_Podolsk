@@ -191,7 +191,7 @@ class CategoryGroup:
 def _format_money(value: float | None) -> str:
     if value is None:
         return "—"
-    return f"{value:,.0f}".replace(",", " ") + " ₽"
+    return f"{value:,.0f}".replace(",", " ")
 
 
 def _format_percent(value: float | None) -> str:
@@ -315,6 +315,24 @@ def _build_items_table(groups: Iterable[CategoryGroup], width: float) -> Table:
     category_rows: list[int] = []
     item_rows: list[int] = []
     item_row_backgrounds: list[tuple[int, colors.Color]] = []
+    value_font_size = 8.6
+    eight_digit_sample = "99999999"
+    padding = 8  # left + right padding per column
+    value_width = pdfmetrics.stringWidth(
+        eight_digit_sample,
+        BODY_FONT_NAME,
+        value_font_size,
+    )
+    header_width = max(
+        pdfmetrics.stringWidth(text, BODY_FONT_BOLD_NAME, value_font_size)
+        for text in header[1:]
+    )
+    value_column_width = max(value_width, header_width) + padding
+    total_value_width = value_column_width * 3
+    if total_value_width >= width:
+        value_column_width = width / 4
+        total_value_width = value_column_width * 3
+    description_width = width - total_value_width
     row_idx = 1
     for group in groups:
         data.append(
@@ -350,10 +368,10 @@ def _build_items_table(groups: Iterable[CategoryGroup], width: float) -> Table:
         data,
         repeatRows=1,
         colWidths=[
-            width * 0.43,
-            width * 0.19,
-            width * 0.19,
-            width * 0.19,
+            description_width,
+            value_column_width,
+            value_column_width,
+            value_column_width,
         ],
     )
     style_commands: list[tuple] = [
