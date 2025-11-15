@@ -589,7 +589,7 @@
 
     .category-values {
       display: grid;
-      grid-template-columns: repeat(3, minmax(0, 1fr));
+      grid-template-columns: minmax(0, 0.9fr) minmax(0, 0.9fr) minmax(0, 1.3fr);
       gap: 6px;
       font-size: 0.78rem;
     }
@@ -624,11 +624,10 @@
       font-size: clamp(0.7rem, 1.3vw, 0.82rem);
       display: inline-flex;
       align-items: baseline;
+      justify-content: flex-end;
       gap: 3px;
       flex-wrap: nowrap;
       max-width: 100%;
-      overflow: hidden;
-      text-overflow: ellipsis;
       white-space: nowrap;
       line-height: 1.15;
       letter-spacing: -0.01em;
