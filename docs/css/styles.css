@@ -563,7 +563,7 @@
       border: 1px solid var(--border-soft);
       border-radius: 18px;
       padding: var(--card-padding);
-      padding-bottom: calc((var(--card-padding) - 12px) / 2);
+      padding-bottom: clamp(10px, 1.2vw, 16px);
       background: var(--bg-card);
       display: flex;
       flex-direction: column;
@@ -688,11 +688,11 @@
     }
 
     .category-progress {
-      margin-top: 4px;
+      margin-top: auto;
       display: flex;
       flex-direction: column;
       gap: 3px;
-      padding-top: 2px;
+      padding-top: 6px;
     }
 
     .category-progress-labels {
