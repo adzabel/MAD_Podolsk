@@ -54,7 +54,17 @@ export class DataManager {
     }
     const url = new URL(this.apiUrl, window.location.origin);
     url.searchParams.set("month", monthIso);
-    const response = await fetch(url.toString());
+    // Добавляем технический параметр, чтобы обойти агрессивные HTTP-кэши
+    // (например, на стороне браузера или CDN) и гарантировать получение
+    // свежих данных сразу после обновления в источнике.
+    url.searchParams.set("_", Date.now().toString());
+    const response = await fetch(url.toString(), {
+      cache: "no-store",
+      headers: {
+        "Cache-Control": "no-cache",
+        Pragma: "no-cache",
+      },
+    });
     if (!response.ok) {
       throw new Error("HTTP " + response.status);
     }
