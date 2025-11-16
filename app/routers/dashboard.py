@@ -48,3 +48,10 @@ def get_dashboard_pdf(month: MonthQuery) -> Response:
     file_name = f"mad-podolsk-otchet-{month.strftime('%Y-%m')}.pdf"
     headers = {"Content-Disposition": f'attachment; filename="{file_name}"'}
     return Response(content=pdf_bytes, media_type="application/pdf", headers=headers)
+
+
+@router.post("/dashboard/cache/invalidate", status_code=204)
+def invalidate_dashboard_cache() -> None:
+    """Инвалидирует LRU-кэш дашборда после загрузки новых данных."""
+
+    _cached_fetch_dashboard_data.cache_clear()
