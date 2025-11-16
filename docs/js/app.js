@@ -23,6 +23,7 @@ document.addEventListener("DOMContentLoaded", () => {
     workSkeleton: "#work-skeleton",
     workEmptyState: "#work-empty-state",
     searchInput: "#search",
+    workSortSelect: "#work-sort-select",
     activeCategoryTitle: "#active-category-title",
     printMonth: "#print-month",
     printUpdated: "#print-updated",
@@ -40,6 +41,9 @@ document.addEventListener("DOMContentLoaded", () => {
   }
   if (DOM.searchInput) {
     DOM.searchInput.disabled = true;
+  }
+  if (DOM.workSortSelect) {
+    DOM.workSortSelect.disabled = true;
   }
 
   const dataManager = new DataManager(API_URL, { monthsUrl: API_MONTHS_URL });

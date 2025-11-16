@@ -117,9 +117,19 @@
 
     <!-- Список работ выбранной сметы -->
     <section class="panel">
-      <div class="panel-header">
-        <div>
+      <div class="panel-header work-panel-header">
+        <div class="panel-title-group">
           <div class="panel-title" id="active-category-title">Смета не выбрана</div>
+        </div>
+        <div class="work-sort-select">
+          <label for="work-sort-select" class="work-sort-select-label">Сортировка</label>
+          <div class="work-sort-select-control">
+            <select id="work-sort-select">
+              <option value="planned" selected>План</option>
+              <option value="fact">Факт</option>
+              <option value="delta">Отклонение</option>
+            </select>
+          </div>
         </div>
         <div class="search">
           <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false" stroke="currentColor">
