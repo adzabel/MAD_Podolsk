@@ -16,6 +16,8 @@
       --radius-sm: 8px;
       --shadow-soft: 0 16px 40px rgba(15, 23, 42, 0.08);
       --shadow-card: 0 6px 16px rgba(15, 23, 42, 0.05);
+      --font-main: 'Roboto', system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      --font-mono: 'Roboto Mono', 'Roboto', 'IBM Plex Mono', 'PT Mono', 'SFMono-Regular', Menlo, Consolas, monospace;
     }
 
     * {
@@ -24,7 +26,7 @@
 
     body {
       margin: 0;
-      font-family: 'Roboto', system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      font-family: var(--font-main);
       background: linear-gradient(180deg, #f6f8fd 0%, #eef2fb 60%, #edf1fb 100%);
       color: var(--text-main);
       -webkit-font-smoothing: antialiased;
@@ -421,6 +423,16 @@
       font-weight: 600;
     }
 
+    .summary-value,
+    .category-values strong,
+    .work-row-money,
+    .work-row-delta-value {
+      font-family: var(--font-mono);
+      font-variant-numeric: tabular-nums;
+      font-feature-settings: "tnum" 1;
+      letter-spacing: 0.01em;
+    }
+
     @media (min-width: 768px) {
       .summary-value {
         font-size: 1.2rem;
@@ -704,7 +716,6 @@
       align-items: center;
       font-size: 0.88rem;
       background: #fff;
-      font-variant-numeric: tabular-nums;
       contain: layout style paint;
     }
 
