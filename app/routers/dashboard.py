@@ -9,7 +9,7 @@ from fastapi.responses import Response
 
 from ..models import DashboardResponse
 from ..pdf import build_dashboard_pdf
-from ..queries import fetch_plan_vs_fact_for_month
+from ..queries import fetch_available_months, fetch_plan_vs_fact_for_month
 
 router = APIRouter()
 
@@ -55,3 +55,11 @@ def invalidate_dashboard_cache() -> None:
     """Инвалидирует LRU-кэш дашборда после загрузки новых данных."""
 
     _cached_fetch_dashboard_data.cache_clear()
+
+
+@router.get("/dashboard/months")
+def get_available_months(limit: Annotated[int | None, Query(gt=0, le=24)] = 12) -> dict[str, list[date]]:
+    """Возвращает список месяцев, для которых есть данные."""
+
+    months = fetch_available_months(limit=limit or 12)
+    return {"months": months}

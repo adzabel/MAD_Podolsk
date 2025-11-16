@@ -34,6 +34,7 @@ export class UIManager {
       this.renderWorkList();
     }, 300);
     this.handleResize = debounce(() => this.updateWorkNameCollapsers(), 150);
+    this.monthOptionsLoaded = false;
   }
 
   init() {
@@ -112,40 +113,72 @@ export class UIManager {
     this.elements.pdfButton.addEventListener("click", (event) => this.downloadPdfReport(event));
   }
 
-  initMonthSelect() {
-    const now = new Date();
-    const months = [];
-    const formatMonthIso = (d) => {
-      const year = d.getFullYear();
-      const month = String(d.getMonth() + 1).padStart(2, "0");
-      return `${year}-${month}-01`;
-    };
-
-    for (let i = 0; i < 6; i++) {
-      const d = new Date(now.getFullYear(), now.getMonth() - i, 1);
-      months.push({
-        iso: formatMonthIso(d),
-        label: d.toLocaleDateString("ru-RU", { month: "long", year: "numeric" }),
-      });
+  async initMonthSelect() {
+    if (!this.elements.monthSelect) {
+      return;
     }
 
-    months.forEach((monthInfo, index) => {
-      const option = document.createElement("option");
-      option.value = monthInfo.iso;
-      option.textContent = monthInfo.label;
-      if (index === 0) {
-        option.selected = true;
+    const selectEl = this.elements.monthSelect;
+    selectEl.innerHTML = "";
+    selectEl.disabled = true;
+
+    try {
+      const availableMonths = await this.dataManager.fetchAvailableMonths();
+      const months = (availableMonths || [])
+        .map((iso) => {
+          if (!iso) return null;
+          const date = new Date(iso);
+          if (Number.isNaN(date.getTime())) return null;
+          return {
+            iso,
+            label: date.toLocaleDateString("ru-RU", { month: "long", year: "numeric" }),
+          };
+        })
+        .filter(Boolean);
+
+      if (!months.length) {
+        this.setMonthSelectPlaceholder("Нет данных");
+        this.handleLoadError();
+        return;
       }
-      this.elements.monthSelect.appendChild(option);
-    });
 
-    this.elements.monthSelect.addEventListener("change", () => {
-      this.loadMonthData(this.elements.monthSelect.value);
-    });
+      months.forEach((monthInfo, index) => {
+        const option = document.createElement("option");
+        option.value = monthInfo.iso;
+        option.textContent = monthInfo.label;
+        if (index === 0) {
+          option.selected = true;
+        }
+        selectEl.appendChild(option);
+      });
 
-    if (months.length) {
+      if (!this.monthOptionsLoaded) {
+        selectEl.addEventListener("change", () => {
+          this.loadMonthData(selectEl.value);
+        });
+        this.monthOptionsLoaded = true;
+      }
+
+      selectEl.disabled = false;
       this.loadMonthData(months[0].iso);
+    } catch (error) {
+      console.error("Не удалось загрузить список месяцев", error);
+      this.setMonthSelectPlaceholder("Ошибка загрузки");
+      this.handleLoadError();
     }
+  }
+
+  setMonthSelectPlaceholder(message) {
+    if (!this.elements.monthSelect) {
+      return;
+    }
+    const option = document.createElement("option");
+    option.value = "";
+    option.textContent = message;
+    option.disabled = true;
+    option.selected = true;
+    this.elements.monthSelect.appendChild(option);
+    this.elements.monthSelect.disabled = true;
   }
 
   async loadMonthData(monthIso) {

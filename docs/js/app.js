@@ -3,7 +3,9 @@ import { DataManager } from "./api.js";
 import { UIManager } from "./components.js";
 
 const API_URL = "https://mad-podolsk-karinausadba.amvera.io/api/dashboard";
-const API_PDF_URL = `${API_URL.replace(/\/$/, "")}/pdf`;
+const API_BASE = API_URL.replace(/\/$/, "");
+const API_PDF_URL = `${API_BASE}/pdf`;
+const API_MONTHS_URL = `${API_BASE}/months`;
 
 document.addEventListener("DOMContentLoaded", () => {
   const DOM = cacheDomElements({
@@ -40,7 +42,7 @@ document.addEventListener("DOMContentLoaded", () => {
     DOM.searchInput.disabled = true;
   }
 
-  const dataManager = new DataManager(API_URL);
+  const dataManager = new DataManager(API_URL, { monthsUrl: API_MONTHS_URL });
   const uiManager = new UIManager({
     dataManager,
     elements: DOM,

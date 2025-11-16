@@ -38,8 +38,9 @@ function resolveCategoryMeta(rawKey, smetaValue) {
 }
 
 export class DataManager {
-  constructor(apiUrl) {
+  constructor(apiUrl, { monthsUrl } = {}) {
     this.apiUrl = apiUrl;
+    this.monthsUrl = monthsUrl || `${apiUrl.replace(/\/$/, "")}/months`;
     this.cache = new Map();
     this.currentData = null;
   }
@@ -71,6 +72,15 @@ export class DataManager {
     const data = await response.json();
     this.cache.set(monthIso, data);
     return { data, fromCache: false };
+  }
+
+  async fetchAvailableMonths() {
+    const response = await fetch(this.monthsUrl, { cache: "no-store" });
+    if (!response.ok) {
+      throw new Error("HTTP " + response.status);
+    }
+    const payload = await response.json();
+    return Array.isArray(payload?.months) ? payload.months : [];
   }
 
   setCurrentData(data) {
