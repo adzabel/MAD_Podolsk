@@ -773,7 +773,7 @@
       width: 28px;
       height: 28px;
       border-radius: 999px;
-      color: var(--accent);
+      color: inherit;
       cursor: pointer;
       position: absolute;
       top: 0;
