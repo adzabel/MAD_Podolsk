@@ -301,6 +301,16 @@
       display: flex;
       flex-direction: column;
       line-height: 1.15;
+      width: 100%;
+      align-items: center;
+      text-align: center;
+    }
+
+    .pill-label,
+    .pill-value {
+      display: block;
+      width: 100%;
+      text-align: center;
     }
 
     .pill-label {
