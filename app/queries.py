@@ -21,6 +21,14 @@ ITEMS_SQL = """
     ORDER BY ABS(COALESCE(pvf.delta_amount_done, 0)) DESC, pvf.description;
 """
 
+AVAILABLE_MONTHS_SQL = """
+    SELECT DISTINCT month_start
+    FROM skpdi_plan_vs_fact_monthly
+    WHERE planned_amount IS NOT NULL OR fact_amount_done IS NOT NULL
+    ORDER BY month_start DESC
+    LIMIT %s;
+"""
+
 LAST_UPDATED_SQL = """
     SELECT COALESCE(MAX(loaded_at), 'epoch'::timestamptz) AS last_updated
     FROM (
@@ -157,3 +165,12 @@ def fetch_plan_vs_fact_for_month(
                 )
 
     return items, summary, last_updated
+
+
+def fetch_available_months(limit: int = 12) -> list[date]:
+    """Возвращает список месяцев, за которые есть данные."""
+
+    with get_connection() as conn, conn.cursor() as cur:
+        cur.execute(AVAILABLE_MONTHS_SQL, (limit,))
+        rows = cur.fetchall() or []
+    return [row[0] for row in rows if row and row[0] is not None]
