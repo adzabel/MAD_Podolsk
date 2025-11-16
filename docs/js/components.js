@@ -29,6 +29,9 @@ export class UIManager {
     this.liveRegion = null;
     this.currentSearchTerm = "";
     this.workSort = { column: "planned" };
+    if (this.elements.workSortSelect) {
+      this.elements.workSortSelect.value = this.workSort.column;
+    }
     this.debouncedSearch = debounce((value) => {
       this.currentSearchTerm = (value || "").toLowerCase().trim();
       this.renderWorkList();
@@ -137,6 +140,12 @@ export class UIManager {
     this.elements.searchInput.addEventListener("input", (event) => {
       this.debouncedSearch(event.target.value || "");
     });
+    if (this.elements.workSortSelect) {
+      this.elements.workSortSelect.addEventListener("change", (event) => {
+        const column = event.target.value;
+        this.handleWorkSortChange(column);
+      });
+    }
     this.elements.pdfButton.addEventListener("click", (event) => this.downloadPdfReport(event));
   }
 
@@ -385,6 +394,9 @@ export class UIManager {
     const activeCategory = this.groupedCategories.find((cat) => cat.key === this.activeCategoryKey) || null;
     const filter = this.currentSearchTerm ?? "";
     this.elements.searchInput.disabled = !activeCategory;
+    if (this.elements.workSortSelect) {
+      this.elements.workSortSelect.disabled = !activeCategory;
+    }
 
     if (!activeCategory) {
       this.elements.workEmptyState.style.display = "block";
@@ -439,14 +451,16 @@ export class UIManager {
   }
 
   updateWorkSortButtons() {
-    if (!this.workSortButtons) {
-      return;
+    if (this.workSortButtons) {
+      this.workSortButtons.forEach((button) => {
+        const isActive = button.dataset.sort === this.workSort.column;
+        button.classList.toggle("active", isActive);
+        button.setAttribute("aria-pressed", String(isActive));
+      });
     }
-    this.workSortButtons.forEach((button) => {
-      const isActive = button.dataset.sort === this.workSort.column;
-      button.classList.toggle("active", isActive);
-      button.setAttribute("aria-pressed", String(isActive));
-    });
+    if (this.elements.workSortSelect && this.elements.workSortSelect.value !== this.workSort.column) {
+      this.elements.workSortSelect.value = this.workSort.column;
+    }
   }
 
   getSortValueForWork(item) {

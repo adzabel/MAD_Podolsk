@@ -516,14 +516,72 @@
       flex-wrap: wrap;
     }
 
+    .work-panel-header {
+      align-items: stretch;
+    }
+
     .panel-title {
       font-size: 1.05rem;
       font-weight: 600;
     }
 
+    .panel-title-group {
+      flex: 1;
+      min-width: 260px;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+    }
+
     .panel-subtitle {
       font-size: 0.82rem;
       color: var(--text-muted);
+    }
+
+    .work-sort-select {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+      padding: 6.8px 12px;
+      border-radius: var(--radius-md);
+      border: 1px solid var(--border-soft);
+      background: var(--bg-card);
+      min-width: 126px;
+      box-shadow: var(--shadow-card);
+    }
+
+    .work-sort-select-label {
+      font-size: 0.64rem;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--text-muted);
+    }
+
+    .work-sort-select-control {
+      position: relative;
+      width: 100%;
+    }
+
+    .work-sort-select-control select {
+      width: 100%;
+      font-size: 0.95rem;
+      font-weight: 600;
+      appearance: none;
+      padding-right: 24px;
+    }
+
+    .work-sort-select-control::after {
+      content: "";
+      position: absolute;
+      top: 50%;
+      right: 6px;
+      width: 8px;
+      height: 8px;
+      border-right: 2px solid var(--text-muted);
+      border-bottom: 2px solid var(--text-muted);
+      transform: translateY(-50%) rotate(45deg);
+      pointer-events: none;
+      opacity: 0.6;
     }
 
     .search {
@@ -990,6 +1048,39 @@
 
 
     @media (max-width: 767px) {
+      .work-panel-header {
+        display: grid;
+        grid-template-columns: minmax(0, 1fr) minmax(128px, min(45vw, 200px));
+        grid-template-areas:
+          "title sort"
+          "search search";
+        gap: clamp(12px, 4vw, 20px);
+        align-items: start;
+      }
+      .work-panel-header .panel-title-group {
+        grid-area: title;
+        min-height: 64px;
+      }
+      .work-panel-header .panel-title {
+        font-size: 1rem;
+        line-height: 1.3;
+        display: -webkit-box;
+        -webkit-line-clamp: 2;
+        -webkit-box-orient: vertical;
+        overflow: hidden;
+        text-overflow: ellipsis;
+      }
+      .work-panel-header .search {
+        grid-area: search;
+        width: 100%;
+      }
+      .work-panel-header .work-sort-select {
+        grid-area: sort;
+        justify-self: end;
+      }
+      .work-sort-select {
+        min-width: 0;
+      }
       .work-row-header {
         display: none;
       }
