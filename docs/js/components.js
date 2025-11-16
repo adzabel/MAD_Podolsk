@@ -274,45 +274,15 @@ export class UIManager {
       card.style.setProperty("--accent", palette.accent);
       card.style.setProperty("--accent-soft", palette.soft);
       const deltaClass = category.delta > 0 ? "delta-positive" : category.delta < 0 ? "delta-negative" : "";
-      const plannedValue = typeof category.planned === "number" ? category.planned : 0;
-      const factValue = typeof category.fact === "number" ? category.fact : 0;
-      const completionValue = plannedValue > 0 ? factValue / plannedValue : null;
-      const completionLabel = Number.isFinite(completionValue) ? formatPercent(completionValue) : "–";
-      const clampedProgress = Number.isFinite(completionValue)
-        ? Math.min(Math.max(completionValue, 0), 1.4) * 100
-        : 0;
       card.innerHTML = `
-        <div class="category-card__header">
-          <div class="category-chip">
-            <span class="category-chip__label">Смета</span>
-            <span class="category-card__title">${category.title}</span>
-          </div>
+        <div class="category-title">
+          <span>${category.title}</span>
           <span class="category-pill">${category.works.length} работ</span>
         </div>
         <div class="category-values">
-          <span class="category-stat">
-            <span class="label">План</span>
-            <strong>${formatMoney(category.planned)}</strong>
-          </span>
-          <span class="category-stat">
-            <span class="label">Факт</span>
-            <strong>${formatMoney(category.fact)}</strong>
-          </span>
-          <span class="category-stat">
-            <span class="label">Отклонение</span>
-            <strong class="category-delta ${deltaClass}">${formatMoney(category.delta)}</strong>
-          </span>
-        </div>
-        <div class="category-progress" role="img" aria-label="Исполнение ${completionLabel}">
-          <div class="category-progress__label">
-            <span class="label">Исполнение</span>
-            <strong>${completionLabel}</strong>
-          </div>
-          <div class="category-progress__bar">
-            <span class="progress-track">
-              <span class="progress-fill" style="--progress:${clampedProgress}%"></span>
-            </span>
-          </div>
+          <span><span class="label">План</span><strong>${formatMoney(category.planned)}</strong></span>
+          <span><span class="label">Факт</span><strong>${formatMoney(category.fact)}</strong></span>
+          <span><span class="label">Отклонение</span><strong class="category-delta ${deltaClass}">${formatMoney(category.delta)}</strong></span>
         </div>
       `;
       card.setAttribute("aria-pressed", category.key === this.activeCategoryKey ? "true" : "false");
@@ -605,7 +575,7 @@ export class UIManager {
   enhanceAccessibility() {
     const cards = this.elements.categoryGrid.querySelectorAll(".category-card");
     cards.forEach((card, index) => {
-      const title = card.querySelector(".category-card__title")?.textContent?.trim() || `Смета ${index + 1}`;
+      const title = card.querySelector(".category-title span")?.textContent?.trim() || `Смета ${index + 1}`;
       card.setAttribute("role", "button");
       card.setAttribute("tabindex", "0");
       card.setAttribute("aria-label", `Смета ${title}`);
