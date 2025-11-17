@@ -60,6 +60,7 @@ DAILY_FACT_SQL = """
         SUM(total_amount) AS fact_total
     FROM skpdi_fact_with_money
     WHERE month_start = %s
+        AND status = 'Рассмотрено'
     GROUP BY work_date
     HAVING SUM(total_amount) IS NOT NULL
     ORDER BY work_date;
