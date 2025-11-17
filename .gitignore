@@ -24,6 +24,9 @@ env/
 .DS_Store
 *.log
 
+# Build artifacts
+docs-build/
+
 # Fonts
 # Исходники шрифтов хранятся в текстовом виде (см. app/font_storage.py),
 # а бинарные файлы автоматически разворачиваются в app/fonts/ при запуске.

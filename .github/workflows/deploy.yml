@@ -24,11 +24,17 @@ jobs:
           mkdir -p ~/.ssh
           printf "Host *\n\tStrictHostKeyChecking no\n\tUserKnownHostsFile=/dev/null\n" > ~/.ssh/config
 
+      - name: Build frontend with cache-busting filenames
+        env:
+          CACHE_BUSTER: ${{ github.sha }}
+        run: |
+          python scripts/cache_bust.py
+
       - name: Deploy docs folder to server via rsync
         run: |
           rsync -avzr --delete \
             --exclude=".git" \
             --exclude=".github" \
             -e "ssh -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null" \
-            ./docs/ \
+            ./docs-build/ \
             u3330235@37.140.192.181:/var/www/u3330235/data/www/podolsk.mad.moclean.ru/
