@@ -32,6 +32,7 @@ export class UIManager {
     this.dailyRevenue = [];
     this.currentSearchTerm = "";
     this.workSort = { column: "planned" };
+    this.initialMonth = new URLSearchParams(window.location.search).get("month");
     if (this.elements.workSortSelect) {
       this.elements.workSortSelect.value = this.workSort.column;
     }
@@ -201,16 +202,22 @@ export class UIManager {
         .filter(Boolean);
 
       if (!months.length) {
+        const fallbackMonth = this.initialMonth || this.getCurrentMonthIso();
         this.setMonthSelectPlaceholder("Нет данных");
-        this.handleLoadError();
+        if (fallbackMonth) {
+          await this.loadMonthData(fallbackMonth);
+        } else {
+          this.handleLoadError();
+        }
         return;
       }
 
+      const hasInitialMonth = this.initialMonth && months.some((item) => item.iso === this.initialMonth);
       months.forEach((monthInfo, index) => {
         const option = document.createElement("option");
         option.value = monthInfo.iso;
         option.textContent = monthInfo.label;
-        if (index === 0) {
+        if ((hasInitialMonth && monthInfo.iso === this.initialMonth) || (!hasInitialMonth && index === 0)) {
           option.selected = true;
         }
         selectEl.appendChild(option);
@@ -224,12 +231,19 @@ export class UIManager {
       }
 
       selectEl.disabled = false;
-      this.loadMonthData(months[0].iso);
+      this.loadMonthData(selectEl.value || months[0].iso);
     } catch (error) {
       console.error("Не удалось загрузить список месяцев", error);
       this.setMonthSelectPlaceholder("Ошибка загрузки");
       this.handleLoadError();
     }
+  }
+
+  getCurrentMonthIso() {
+    const today = new Date();
+    const year = today.getFullYear();
+    const month = String(today.getMonth() + 1).padStart(2, "0");
+    return `${year}-${month}-01`;
   }
 
   setMonthSelectPlaceholder(message) {
