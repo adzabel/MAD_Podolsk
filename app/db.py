@@ -5,7 +5,7 @@ import logging
 from threading import Lock
 from typing import Iterator, Protocol
 
-from psycopg2 import connect
+from psycopg2 import OperationalError, connect
 from psycopg2.extensions import connection as PGConnection
 from psycopg2.pool import ThreadedConnectionPool
 
@@ -28,12 +28,36 @@ class _ThreadSafeConnectionPool:
     def __init__(self, conninfo: str, *, min_size: int = 1, max_size: int = 10) -> None:
         self._pool = ThreadedConnectionPool(minconn=min_size, maxconn=max_size, dsn=conninfo)
 
-    @contextmanager
-    def connection(self) -> Iterator[PGConnection]:
+    def _get_valid_connection(self) -> PGConnection:
         conn = self._pool.getconn()
         try:
+            self._ensure_connection_alive(conn)
+        except Exception:
+            self._pool.putconn(conn, close=True)
+            raise
+        return conn
+
+    @staticmethod
+    def _ensure_connection_alive(conn: PGConnection) -> None:
+        if conn.closed:
+            msg = "Соединение с базой данных закрыто"
+            raise OperationalError(msg)
+
+        if not conn.autocommit:
+            conn.rollback()
+
+        with conn.cursor() as cur:
+            cur.execute("SELECT 1")
+
+    @contextmanager
+    def connection(self) -> Iterator[PGConnection]:
+        conn = self._get_valid_connection()
+        try:
             yield conn
-        finally:
+        except Exception:
+            self._pool.putconn(conn, close=True)
+            raise
+        else:
             self._pool.putconn(conn)
 
     def close(self) -> None:
