@@ -162,10 +162,13 @@ def _fetch_daily_fact_totals(conn, month_start: date) -> list[DailyRevenue]:
 def _calculate_daily_average(daily_rows: list[DailyRevenue]) -> float | None:
     if not daily_rows:
         return None
-    positive_rows = [row.amount for row in daily_rows if row.amount is not None]
-    if not positive_rows:
+    today = date.today()
+    amounts_without_today = [
+        row.amount for row in daily_rows if row.amount is not None and row.date != today
+    ]
+    if not amounts_without_today:
         return None
-    return sum(positive_rows) / len(positive_rows)
+    return sum(amounts_without_today) / len(amounts_without_today)
 
 
 def fetch_plan_vs_fact_for_month(
