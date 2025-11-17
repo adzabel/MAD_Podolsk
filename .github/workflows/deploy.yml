@@ -3,8 +3,8 @@ name: Deploy to podolsk.mad.moclean.ru
 on:
   push:
     branches:
-      - main          # если у тебя другая ветка — поменяй здесь
-  workflow_dispatch:  # позволяем запускать руками из GitHub → Actions
+      - main
+  workflow_dispatch:
 
 jobs:
   deploy:
@@ -19,16 +19,16 @@ jobs:
         with:
           ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY_MAD }}
 
-      - name: Add server to known_hosts
+      - name: Disable host key check
         run: |
           mkdir -p ~/.ssh
-          ssh-keyscan -H 37.140.192.181 >> ~/.ssh/known_hosts
+          printf "Host *\n\tStrictHostKeyChecking no\n\tUserKnownHostsFile=/dev/null\n" > ~/.ssh/config
 
-      - name: Deploy docs/ to server
+      - name: Deploy docs folder to server via rsync
         run: |
-          rsync -az --delete \
+          rsync -avzr --delete \
             --exclude=".git" \
             --exclude=".github" \
+            -e "ssh -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null" \
             ./docs/ \
             u3330235@37.140.192.181:/var/www/u3330235/data/www/podolsk.mad.moclean.ru/
-
