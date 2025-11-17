@@ -35,6 +35,8 @@ document.addEventListener("DOMContentLoaded", () => {
     printTotalDelta: "#print-total-delta",
     printSubtitle: "#print-subtitle",
     pdfButton: "#download-pdf",
+    pdfButtonContainerDesktop: ".pdf-action-desktop",
+    pdfButtonContainerMobile: ".pdf-action-mobile",
   });
 
   const pdfButtonDefaultLabel = DOM.pdfButton ? DOM.pdfButton.innerHTML : "Скачать PDF";
@@ -47,6 +49,21 @@ document.addEventListener("DOMContentLoaded", () => {
   if (DOM.workSortSelect) {
     DOM.workSortSelect.disabled = true;
   }
+
+  const pdfMobileMediaQuery = window.matchMedia("(max-width: 767px)");
+  const movePdfButton = (isMobile) => {
+    if (!DOM.pdfButton || !DOM.pdfButtonContainerDesktop || !DOM.pdfButtonContainerMobile) {
+      return;
+    }
+
+    const target = isMobile ? DOM.pdfButtonContainerMobile : DOM.pdfButtonContainerDesktop;
+    if (DOM.pdfButton.parentElement !== target) {
+      target.appendChild(DOM.pdfButton);
+    }
+  };
+
+  movePdfButton(pdfMobileMediaQuery.matches);
+  pdfMobileMediaQuery.addEventListener("change", (event) => movePdfButton(event.matches));
 
   const dataManager = new DataManager(API_URL, { monthsUrl: API_MONTHS_URL });
   const uiManager = new UIManager({
