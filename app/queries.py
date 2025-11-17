@@ -153,6 +153,7 @@ def _fetch_daily_fact_totals(conn, month_start: date) -> list[DailyRevenue]:
         except Exception:
             # Если таблицы или поля отсутствуют, просто возвращаем пустой список,
             # чтобы не ломать основной сценарий.
+            conn.rollback()
             return []
 
     return daily_rows
