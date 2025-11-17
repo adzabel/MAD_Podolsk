@@ -43,13 +43,6 @@ def get_dashboard_pdf(month: MonthQuery) -> Response:
     return Response(content=pdf_bytes, media_type="application/pdf", headers=headers)
 
 
-@router.post("/dashboard/cache/invalidate", status_code=204)
-def invalidate_dashboard_cache() -> None:
-    """Совместимость: кэш отключён, эндпоинт оставлен пустым."""
-
-    return None
-
-
 @router.get("/dashboard/months")
 def get_available_months(limit: Annotated[int | None, Query(gt=0, le=24)] = 12) -> dict[str, list[date]]:
     """Возвращает список месяцев, для которых есть данные."""

@@ -1,5 +1,4 @@
 from __future__ import annotations
-from __future__ import annotations
 
 from pathlib import Path
 
@@ -21,16 +20,6 @@ NO_CACHE_HEADERS = {
 
 def _apply_no_cache(response):
     response.headers.update(NO_CACHE_HEADERS)
-
-
-class NoCacheStaticFiles(StaticFiles):
-    """StaticFiles, принуждающий браузер всегда запрашивать свежие ассеты."""
-
-    async def get_response(self, path, scope):  # noqa: WPS110 - переопределение API Starlette
-        response = await super().get_response(path, scope)
-        if response.status_code < 400:
-            _apply_no_cache(response)
-        return response
 
 
 def create_app() -> FastAPI:
@@ -68,7 +57,7 @@ def create_app() -> FastAPI:
     static_root = Path(__file__).resolve().parent.parent / "docs"
     app.mount(
         "/",
-        NoCacheStaticFiles(directory=str(static_root), html=True),
+        StaticFiles(directory=str(static_root), html=True),
         name="frontend",
     )
 
