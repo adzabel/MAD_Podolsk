@@ -1547,21 +1547,6 @@
         max-height: none;
         padding-right: 6px;
       }
-
-      /* Визуальный индикатор прокрутки для мобильных, чтобы подсказать пользователю, что контент скроллится */
-      .modal-body::after {
-        content: "";
-        position: absolute;
-        top: 12px;
-        bottom: 12px;
-        right: 2px;
-        width: 4px;
-        border-radius: 999px;
-        background: linear-gradient(180deg, rgba(47, 111, 237, 0.55), rgba(30, 79, 216, 0.5));
-        box-shadow: 0 0 0 1px rgba(47, 111, 237, 0.1);
-        opacity: 0.8;
-        pointer-events: none;
-      }
     }
 
     .modal-empty {
