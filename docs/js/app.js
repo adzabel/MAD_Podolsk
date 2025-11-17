@@ -2,7 +2,9 @@ import { cacheDomElements } from "./utils.js";
 import { DataManager } from "./api.js";
 import { UIManager } from "./components.js";
 
-const API_URL = "https://mad-podolsk-karinausadba.amvera.io/api/dashboard";
+// Используем относительный путь, чтобы фронтенд всегда ходил на свой бекенд,
+// даже если домен меняется (например, в тестовой среде или локально).
+const API_URL = "/api/dashboard";
 const API_BASE = API_URL.replace(/\/$/, "");
 const API_PDF_URL = `${API_BASE}/pdf`;
 const API_MONTHS_URL = `${API_BASE}/months`;

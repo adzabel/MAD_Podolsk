@@ -50,6 +50,9 @@ export class DataManager {
   }
 
   async fetchData(monthIso, { force = false } = {}) {
+    if (!monthIso) {
+      throw new Error("Не указан месяц для загрузки данных дашборда");
+    }
     if (!force && this.cache.has(monthIso)) {
       return { data: this.cache.get(monthIso), fromCache: true };
     }
