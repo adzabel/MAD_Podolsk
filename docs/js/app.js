@@ -2,9 +2,14 @@ import { cacheDomElements } from "./utils.js";
 import { DataManager } from "./api.js";
 import { UIManager } from "./components.js";
 
-// Используем относительный путь, чтобы фронтенд всегда ходил на свой бекенд,
-// даже если домен меняется (например, в тестовой среде или локально).
-const API_URL = "/api/dashboard";
+// Разрешаем переопределять адрес API через meta-тег `mad-api-url` или
+// глобальную переменную `MAD_API_URL`, чтобы фронтенд можно было разворачивать
+// на статическом хостинге с бекендом на другом домене.
+const API_URL = (() => {
+  const metaApiUrl = document.querySelector('meta[name="mad-api-url"]');
+  const explicitUrl = (metaApiUrl?.content || window.MAD_API_URL || "").trim();
+  return explicitUrl || "/api/dashboard"; // значение по умолчанию — тот же домен
+})();
 const API_BASE = API_URL.replace(/\/$/, "");
 const API_PDF_URL = `${API_BASE}/pdf`;
 const API_MONTHS_URL = `${API_BASE}/months`;
