@@ -32,7 +32,12 @@ class _ThreadSafeConnectionPool:
         conn = self._pool.getconn()
         try:
             self._ensure_connection_alive(conn)
-        except Exception:
+        except Exception as exc:
+            logger.error(
+                "Ошибка при проверке соединения с БД, закрываю и возвращаю в пул: %s",
+                exc,
+                exc_info=True,
+            )
             self._pool.putconn(conn, close=True)
             raise
         return conn
@@ -54,7 +59,12 @@ class _ThreadSafeConnectionPool:
         conn = self._get_valid_connection()
         try:
             yield conn
-        except Exception:
+        except Exception as exc:
+            logger.warning(
+                "Ошибка при использовании соединения из пула, закрываю соединение: %s",
+                exc,
+                exc_info=False,
+            )
             self._pool.putconn(conn, close=True)
             raise
         else:
@@ -89,9 +99,11 @@ _pool_lock = Lock()
 def _create_pool(dsn: str) -> _ConnectionProvider:
     try:
         return _ThreadSafeConnectionPool(conninfo=dsn)
-    except Exception:  # pragma: no cover - защита от неожиданных ошибок
-        logger.exception(
-            "Не удалось создать ThreadedConnectionPool. Использую последовательные подключения.",
+    except Exception as exc:  # pragma: no cover - защита от неожиданных ошибок
+        logger.error(
+            "Не удалось создать ThreadedConnectionPool: %s. Переключаюсь на последовательные подключения.",
+            exc,
+            exc_info=True,
         )
         return _DirectConnectionProvider(conninfo=dsn)
 
