@@ -204,6 +204,21 @@ export class DataManager {
     return { planned, fact, completion, delta, dailyRevenue, averageDailyRevenue };
   }
 
+  calculateContractMetrics(data) {
+    if (!data || !data.summary) {
+      return null;
+    }
+    const summary = data.summary;
+    const contractAmount = normalizeAmount(summary.contract_amount);
+    const executed = normalizeAmount(summary.contract_executed);
+    const completion = summary.contract_completion_pct ?? (contractAmount ? (executed ?? 0) / contractAmount : null);
+    return {
+      contractAmount,
+      executed,
+      completion,
+    };
+  }
+
   buildCategories(items = []) {
     const map = new Map();
     items.forEach((item) => {

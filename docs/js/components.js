@@ -300,6 +300,7 @@ export class UIManager {
     this.clearWorkRows();
     this.elements.searchInput.disabled = true;
     this.elements.pdfButton.disabled = true;
+    this.updateContractCard(null);
   }
 
   handleLoadError() {
@@ -313,6 +314,7 @@ export class UIManager {
     this.elements.sumDelta.classList.remove("positive", "negative");
     this.updateSummaryProgress(null, "–");
     this.updateDailyAverage(null, 0);
+    this.updateContractCard(null);
     this.setActiveCategoryTitle("Смета не выбрана");
     this.elements.searchInput.disabled = true;
     this.elements.workList.classList.remove("has-data");
@@ -348,7 +350,12 @@ export class UIManager {
   }
 
   renderSummary() {
-    const metrics = this.dataManager.calculateMetrics(this.dataManager.getCurrentData());
+    const currentData = this.dataManager.getCurrentData();
+    const metrics = currentData && currentData.has_data
+      ? this.dataManager.calculateMetrics(currentData)
+      : null;
+    const contractMetrics = this.dataManager.calculateContractMetrics(currentData || {});
+    this.updateContractCard(contractMetrics);
     this.metrics = metrics;
     if (!metrics) {
       this.elements.sumPlanned.textContent = "–";
@@ -393,6 +400,54 @@ export class UIManager {
     }
     if (this.elements.sumFactProgressLabel) {
       this.elements.sumFactProgressLabel.textContent = label;
+    }
+  }
+
+  updateContractCard(contractMetrics) {
+    if (!this.elements.contractCard) {
+      return;
+    }
+
+    const hasData = contractMetrics && contractMetrics.contractAmount !== null && contractMetrics.executed !== null;
+    const completion = hasData ? contractMetrics.completion : null;
+    const percentLabel = completion !== null && completion !== undefined && !Number.isNaN(completion)
+      ? formatPercent(completion)
+      : "–";
+
+    if (this.elements.contractAmount) {
+      this.elements.contractAmount.textContent = hasData
+        ? formatMoney(contractMetrics.contractAmount)
+        : "–";
+    }
+    if (this.elements.contractExecuted) {
+      this.elements.contractExecuted.textContent = hasData
+        ? formatMoney(contractMetrics.executed)
+        : "–";
+    }
+    if (this.elements.contractPercent) {
+      this.elements.contractPercent.textContent = percentLabel;
+    }
+
+    this.updateContractProgress(completion);
+  }
+
+  updateContractProgress(completion) {
+    if (!this.elements.contractProgress) {
+      return;
+    }
+    const percent = completion !== null && completion !== undefined && !Number.isNaN(completion)
+      ? Math.max(0, completion * 100)
+      : 0;
+    const progressWidth = Math.min(115, percent);
+    const progressOverflow = percent > 100;
+    const progressColor = progressOverflow ? "#16a34a" : "var(--accent)";
+
+    this.elements.contractProgress.style.width = `${progressWidth}%`;
+    this.elements.contractProgress.style.setProperty("--progress-color", progressColor);
+    this.elements.contractProgress.style.background = progressColor;
+    this.elements.contractProgress.classList.toggle("overflow", progressOverflow);
+    if (this.elements.contractProgress.parentElement) {
+      this.elements.contractProgress.parentElement.setAttribute("aria-valuenow", Math.min(120, percent).toFixed(1));
     }
   }
 

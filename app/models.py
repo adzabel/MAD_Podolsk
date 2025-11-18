@@ -44,6 +44,9 @@ class DashboardSummary(BaseModel):
     fact_amount: float
     completion_pct: float | None = None
     delta_amount: float
+    contract_amount: float | None = None
+    contract_executed: float | None = None
+    contract_completion_pct: float | None = None
     average_daily_revenue: float | None = None
     daily_revenue: list[DailyRevenue] | None = None
 
