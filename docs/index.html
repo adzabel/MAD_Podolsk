@@ -42,6 +42,36 @@
       </div>
     </header>
 
+    <section class="contract-card" id="contract-card">
+      <div class="contract-card-header">
+        <div class="contract-card-title">Выполнение контракта</div>
+        <div class="contract-card-values">
+          <div>
+            <span class="label">Сумма контракта</span>
+            <strong id="contract-amount">–</strong>
+          </div>
+          <div>
+            <span class="label">Выполнено</span>
+            <strong id="contract-executed">–</strong>
+          </div>
+          <div>
+            <span class="label">Исполнение</span>
+            <strong id="contract-percent">–</strong>
+          </div>
+        </div>
+      </div>
+      <div
+        class="contract-progress-bar"
+        role="progressbar"
+        aria-valuemin="0"
+        aria-valuemax="120"
+        aria-valuenow="0"
+        aria-label="Исполнение контракта"
+      >
+        <div class="contract-progress-fill" id="contract-progress"></div>
+      </div>
+    </section>
+
     <!-- Сводка -->
     <section class="summary-grid" id="summary-grid">
       <div class="summary-card">

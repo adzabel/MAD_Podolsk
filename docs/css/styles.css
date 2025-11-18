@@ -244,6 +244,82 @@
       justify-content: flex-start;
     }
 
+    .contract-card {
+      background: var(--bg-card);
+      border-radius: var(--radius-lg);
+      border: 1px solid var(--border-soft);
+      box-shadow: var(--shadow-card);
+      padding: clamp(14px, 2vw, 18px);
+      display: grid;
+      gap: 12px;
+      margin-bottom: var(--grid-gap);
+      min-height: 54px;
+    }
+
+    .contract-card-header {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .contract-card-title {
+      font-weight: 700;
+      font-size: 1rem;
+    }
+
+    .contract-card-values {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 10px;
+      font-size: 0.9rem;
+    }
+
+    .contract-card-values .label {
+      font-size: 0.75rem;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      color: var(--text-muted);
+      display: block;
+      margin-bottom: 2px;
+    }
+
+    .contract-progress-bar {
+      width: 100%;
+      height: 18px;
+      background: var(--bg-muted);
+      border: 1px solid var(--border-soft);
+      border-radius: 999px;
+      overflow: hidden;
+      box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.5);
+      position: relative;
+    }
+
+    .contract-progress-fill {
+      height: 100%;
+      width: 0;
+      background: var(--accent);
+      transition: width 0.35s ease, background-color 0.2s ease;
+      border-radius: 999px;
+      box-shadow: var(--shadow-card);
+    }
+
+    .contract-progress-fill.overflow {
+      background: var(--success);
+    }
+
+    @media (min-width: 768px) {
+      .contract-card-header {
+        flex-direction: row;
+        align-items: center;
+        justify-content: space-between;
+      }
+
+      .contract-card-values {
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        gap: clamp(12px, 2vw, 18px);
+      }
+    }
+
     .pdf-action {
       display: flex;
       align-items: center;

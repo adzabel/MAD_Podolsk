@@ -53,6 +53,23 @@ LAST_UPDATED_SQL = """
     ) AS loads;
 """
 
+CONTRACT_TOTAL_SQL = """
+    SELECT COALESCE(SUM(contract_amount), 0) AS contract_total
+    FROM podolsk_mad_2025_contract_amount;
+"""
+
+CONTRACT_EXECUTED_SQL = """
+    SELECT COALESCE(SUM(monthly_amount), 0) AS executed_total
+    FROM podolsk_mad_2025_fact_turnover;
+"""
+
+CURRENT_MONTH_FACT_SQL = """
+    SELECT COALESCE(SUM(total_amount), 0) AS current_month_fact
+    FROM skpdi_fact_with_money
+    WHERE month_start = %s
+        AND status = 'Рассмотрено';
+"""
+
 SUMMARY_SQL = """
     WITH agg AS (
         SELECT
@@ -298,6 +315,37 @@ def _fetch_daily_fact_totals(conn, month_start: date) -> list[DailyRevenue]:
     return daily_rows
 
 
+def _fetch_contract_progress(conn, month_start: date) -> dict[str, float] | None:
+    """Возвращает агрегаты по контракту и выполнению, логирует и возвращает None при ошибке."""
+
+    try:
+        with conn.cursor(cursor_factory=RealDictCursor) as cur:
+            cur.execute(CONTRACT_TOTAL_SQL)
+            contract_row = cur.fetchone() or {}
+            contract_total = _to_float(contract_row.get("contract_total")) or 0.0
+
+        with conn.cursor(cursor_factory=RealDictCursor) as cur:
+            cur.execute(CONTRACT_EXECUTED_SQL)
+            executed_row = cur.fetchone() or {}
+            executed_total = _to_float(executed_row.get("executed_total")) or 0.0
+
+        with conn.cursor(cursor_factory=RealDictCursor) as cur:
+            cur.execute(CURRENT_MONTH_FACT_SQL, (month_start,))
+            month_row = cur.fetchone() or {}
+            current_month_fact = _to_float(month_row.get("current_month_fact")) or 0.0
+
+        return {
+            "contract_total": contract_total,
+            "executed_total": executed_total + current_month_fact,
+        }
+    except Exception as exc:  # noqa: BLE001
+        logger.warning(
+            "Не удалось загрузить агрегаты по контракту за %s: %s", month_start, exc, exc_info=True
+        )
+        conn.rollback()
+        return None
+
+
 def _calculate_daily_average(daily_rows: list[DailyRevenue]) -> float | None:
     if not daily_rows:
         return None
@@ -337,6 +385,8 @@ def fetch_plan_vs_fact_for_month(
             daily_revenue = _fetch_daily_fact_totals(conn, month_start)
             average_daily_revenue = _calculate_daily_average(daily_revenue)
 
+            contract_progress = _fetch_contract_progress(conn, month_start)
+
             with conn.cursor() as cur:
                 cur.execute(LAST_UPDATED_SQL)
                 res = cur.fetchone()
@@ -360,6 +410,25 @@ def fetch_plan_vs_fact_for_month(
                         average_daily_revenue=average_daily_revenue,
                         daily_revenue=daily_revenue,
                     )
+
+            if summary is None and contract_progress is not None:
+                summary = DashboardSummary(
+                    planned_amount=0.0,
+                    fact_amount=0.0,
+                    completion_pct=None,
+                    delta_amount=0.0,
+                    contract_amount=contract_progress.get("contract_total"),
+                    contract_executed=contract_progress.get("executed_total"),
+                    contract_completion_pct=None,
+                    average_daily_revenue=average_daily_revenue,
+                    daily_revenue=daily_revenue,
+                )
+
+            if summary and contract_progress is not None:
+                summary.contract_amount = contract_progress.get("contract_total")
+                summary.contract_executed = contract_progress.get("executed_total")
+                if summary.contract_amount:
+                    summary.contract_completion_pct = summary.contract_executed / summary.contract_amount
 
             summary = _update_summary_with_vnr_plan(
                 summary=summary,

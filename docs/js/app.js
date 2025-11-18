@@ -55,6 +55,11 @@ document.addEventListener("DOMContentLoaded", () => {
     pdfButton: "#download-pdf",
     pdfButtonContainerDesktop: ".pdf-action-desktop",
     pdfButtonContainerMobile: ".pdf-action-mobile",
+    contractCard: "#contract-card",
+    contractAmount: "#contract-amount",
+    contractExecuted: "#contract-executed",
+    contractPercent: "#contract-percent",
+    contractProgress: "#contract-progress",
   });
 
   const pdfButtonDefaultLabel = DOM.pdfButton ? DOM.pdfButton.innerHTML : "Скачать PDF";
