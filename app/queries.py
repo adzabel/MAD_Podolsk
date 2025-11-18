@@ -13,14 +13,20 @@ from .models import DashboardItem, DashboardSummary, DailyRevenue
 logger = logging.getLogger(__name__)
 
 
+_PLAN_BASE_CATEGORIES = {"лето", "зима"}
+_VNR_CATEGORY_CODES = {"внерегл_ч_1", "внерегл_ч_2"}
+_VNR_PLAN_SHARE = Decimal("0.43")
+
+
 ITEMS_SQL = """
     SELECT
-        pvf.*, 
+        pvf.*,
         rates.smeta_code AS category_code
     FROM skpdi_plan_vs_fact_monthly AS pvf
     LEFT JOIN skpdi_rates AS rates
         ON TRIM(LOWER(rates.work_name)) = TRIM(LOWER(pvf.description))
     WHERE pvf.month_start = %s
+        AND COALESCE(TRIM(LOWER(pvf.smeta_code)), '') NOT IN ('внерегл_ч_1', 'внерегл_ч_2')
     ORDER BY ABS(COALESCE(pvf.delta_amount_done, 0)) DESC, pvf.description;
 """
 
@@ -48,6 +54,7 @@ SUMMARY_SQL = """
             SUM(fact_amount_done) AS fact_total
         FROM skpdi_plan_vs_fact_monthly
         WHERE month_start = %s
+            AND COALESCE(TRIM(LOWER(smeta_code)), '') NOT IN ('внерегл_ч_1', 'внерегл_ч_2')
     )
     SELECT
         planned_total,
@@ -94,6 +101,92 @@ def _extract_strings(row: dict[str, Any]) -> tuple[str | None, str | None, str |
     return category, smeta, work_name, description
 
 
+def _calculate_vnr_plan(items: list["DashboardItem"]) -> float:
+    """Вычисляет план для внерегламента как 43% от планов по сметам лето и зима."""
+
+    base_total = Decimal(0)
+    for item in items:
+        if item.planned_amount is None:
+            continue
+        category = (item.category or "").strip().lower()
+        if category in _PLAN_BASE_CATEGORIES:
+            base_total += Decimal(str(item.planned_amount))
+
+    if base_total <= 0:
+        return 0.0
+
+    return float(base_total * _VNR_PLAN_SHARE)
+
+
+def _is_vnr_row(row: dict[str, Any]) -> bool:
+    smeta_code = (row.get("smeta_code") or row.get("category_code") or "").strip().lower()
+    return smeta_code in _VNR_CATEGORY_CODES
+
+
+def _build_vnr_plan_item(plan_value: float, items: list["DashboardItem"]) -> "DashboardItem | None":
+    if plan_value <= 0:
+        return None
+
+    category = None
+    smeta = None
+    description = "внерегламент"
+
+    for item in items:
+        category_code = (item.category or "").strip().lower()
+        if category_code in _VNR_CATEGORY_CODES:
+            category = category or item.category or item.smeta
+            smeta = smeta or item.smeta or item.category
+            description = item.smeta or item.description or description
+            if category and smeta:
+                break
+
+    fallback = smeta or category or description
+    return DashboardItem(
+        category=category or fallback,
+        smeta=fallback,
+        work_name=None,
+        description=description or fallback,
+        planned_amount=plan_value,
+        fact_amount=None,
+        category_plan_only=True,
+    )
+
+
+def _update_summary_with_vnr_plan(
+    summary: "DashboardSummary | None",
+    plan_adjustment: float,
+    items: list["DashboardItem"],
+    average_daily_revenue: float | None,
+    daily_revenue: list[DailyRevenue] | None,
+) -> "DashboardSummary | None":
+    if plan_adjustment <= 0:
+        return summary
+
+    if summary:
+        planned_total = (summary.planned_amount or 0.0) + plan_adjustment
+        fact_total = summary.fact_amount or 0.0
+        summary.planned_amount = planned_total
+        summary.fact_amount = fact_total
+        summary.delta_amount = fact_total - planned_total
+        summary.completion_pct = fact_total / planned_total if planned_total else None
+        return summary
+
+    fact_total = 0.0
+    for item in items:
+        if item.fact_amount is not None:
+            fact_total += item.fact_amount
+
+    planned_total = plan_adjustment
+    return DashboardSummary(
+        planned_amount=planned_total,
+        fact_amount=fact_total,
+        completion_pct=fact_total / planned_total if planned_total else None,
+        delta_amount=fact_total - planned_total,
+        average_daily_revenue=average_daily_revenue,
+        daily_revenue=daily_revenue,
+    )
+
+
 def _aggregate_items_streaming(cursor) -> list[DashboardItem]:
     """
     Агрегирует строки запроса используя курсор напрямую (потоковая обработка).
@@ -103,6 +196,8 @@ def _aggregate_items_streaming(cursor) -> list[DashboardItem]:
     items_map: dict[tuple[str | None, str | None, str | None, str], dict[str, Any]] = {}
     
     for row in cursor:
+        if _is_vnr_row(row):
+            continue
         category, smeta, work_name, description = _extract_strings(row)
         key = (category, smeta, work_name, description)
 
@@ -200,6 +295,11 @@ def fetch_plan_vs_fact_for_month(
             cur.execute(ITEMS_SQL, (month_start,))
             items = _aggregate_items_streaming(cur)
 
+        vnr_plan_amount = _calculate_vnr_plan(items)
+        vnr_plan_item = _build_vnr_plan_item(vnr_plan_amount, items)
+        if vnr_plan_item:
+            items.append(vnr_plan_item)
+
         daily_revenue = _fetch_daily_fact_totals(conn, month_start)
         average_daily_revenue = _calculate_daily_average(daily_revenue)
 
@@ -226,6 +326,14 @@ def fetch_plan_vs_fact_for_month(
                     average_daily_revenue=average_daily_revenue,
                     daily_revenue=daily_revenue,
                 )
+
+        summary = _update_summary_with_vnr_plan(
+            summary=summary,
+            plan_adjustment=vnr_plan_amount,
+            items=items,
+            average_daily_revenue=average_daily_revenue,
+            daily_revenue=daily_revenue,
+        )
 
     return items, summary, last_updated
 

@@ -174,7 +174,10 @@ export class DataManager {
       if (!group.title && title) {
         group.title = title;
       }
-      group.works.push(item);
+      const isPlanOnly = item.category_plan_only === true;
+      if (!isPlanOnly) {
+        group.works.push(item);
+      }
       const planned = item.planned_amount ?? 0;
       const fact = item.fact_amount ?? 0;
       const delta = calculateDelta(item);

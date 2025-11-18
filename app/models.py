@@ -10,6 +10,7 @@ class DashboardItem(BaseModel):
     smeta: str | None = None
     work_name: str | None = None
     description: str
+    category_plan_only: bool = False
 
     planned_amount: float | None = None
     fact_amount: float | None = None
