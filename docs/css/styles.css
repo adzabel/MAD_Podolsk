@@ -556,13 +556,26 @@
       font-weight: 600;
     }
 
-    /* Make sure value inside interactive card has identical numeric rendering */
+    /* Make sure value inside interactive card has identical numeric rendering
+       and follows the same responsive sizes as non-interactive cards */
     .summary-card-interactive .summary-value {
       font-size: 1.05rem;
       font-weight: 600;
       line-height: 1.15;
       font-variant-numeric: tabular-nums;
       font-feature-settings: "tnum" 1;
+    }
+
+    @media (min-width: 768px) {
+      .summary-card-interactive .summary-value {
+        font-size: 1.2rem;
+      }
+    }
+
+    @media (max-width: 640px) {
+      .summary-card-interactive .summary-value {
+        font-size: 0.95rem;
+      }
     }
 
     @media (min-width: 768px) {
