@@ -229,6 +229,7 @@ def _group_items(items: Sequence[DashboardItem]) -> list[CategoryGroup]:
         if item.planned_amount is None and item.fact_amount is None:
             # В отчет не должны попадать строки без данных по плану и факту
             continue
+        is_plan_only = getattr(item, "category_plan_only", False)
         key, title = _resolve_category_name(
             item.category or item.smeta,
             item.smeta or item.category,
@@ -237,7 +238,8 @@ def _group_items(items: Sequence[DashboardItem]) -> list[CategoryGroup]:
         if group is None:
             group = CategoryGroup(key=key, title=title)
             groups[key] = group
-        group.items.append(item)
+        if not is_plan_only:
+            group.items.append(item)
         if item.planned_amount is not None:
             group.planned_total += item.planned_amount
         if item.fact_amount is not None:
