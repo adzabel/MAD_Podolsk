@@ -315,8 +315,14 @@ def _fetch_daily_fact_totals(conn, month_start: date) -> list[DailyRevenue]:
     return daily_rows
 
 
-def _fetch_contract_progress(conn, month_start: date) -> dict[str, float] | None:
+def _fetch_contract_progress(conn, _selected_month: date) -> dict[str, float] | None:
     """Возвращает агрегаты по контракту и выполнению, логирует и возвращает None при ошибке."""
+
+    # Для карточки «Выполнение контракта» факты текущего месяца должны
+    # рассчитываться относительно реального текущего календарного месяца,
+    # а не выбранного пользователем периода. Поэтому месяц получения данных
+    # вычисляем от сегодняшней даты.
+    current_month_start = date.today().replace(day=1)
 
     try:
         with conn.cursor(cursor_factory=RealDictCursor) as cur:
@@ -330,7 +336,7 @@ def _fetch_contract_progress(conn, month_start: date) -> dict[str, float] | None
             executed_total = _to_float(executed_row.get("executed_total")) or 0.0
 
         with conn.cursor(cursor_factory=RealDictCursor) as cur:
-            cur.execute(CURRENT_MONTH_FACT_SQL, (month_start,))
+            cur.execute(CURRENT_MONTH_FACT_SQL, (current_month_start,))
             month_row = cur.fetchone() or {}
             current_month_fact = _to_float(month_row.get("current_month_fact")) or 0.0
 
@@ -340,7 +346,10 @@ def _fetch_contract_progress(conn, month_start: date) -> dict[str, float] | None
         }
     except Exception as exc:  # noqa: BLE001
         logger.warning(
-            "Не удалось загрузить агрегаты по контракту за %s: %s", month_start, exc, exc_info=True
+            "Не удалось загрузить агрегаты по контракту за %s: %s",
+            current_month_start,
+            exc,
+            exc_info=True,
         )
         conn.rollback()
         return None
