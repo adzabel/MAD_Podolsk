@@ -287,6 +287,7 @@ export class UIManager {
     this.toggleSkeletons(true);
     this.elements.categoryGrid.innerHTML = "";
     this.elements.lastUpdatedText.textContent = "Загрузка данных…";
+    this.updateContractTitleDate("Загрузка данных…");
     this.elements.sumPlanned.textContent = "…";
     this.elements.sumFact.textContent = "…";
     this.elements.sumDelta.textContent = "…";
@@ -308,6 +309,7 @@ export class UIManager {
     this.elements.workEmptyState.style.display = "block";
     this.elements.workEmptyState.textContent = "Ошибка загрузки данных";
     this.elements.lastUpdatedText.textContent = "Ошибка загрузки данных";
+    this.updateContractTitleDate("Ошибка загрузки данных");
     this.elements.sumPlanned.textContent = "–";
     this.elements.sumFact.textContent = "–";
     this.elements.sumDelta.textContent = "–";
@@ -331,9 +333,11 @@ export class UIManager {
     const items = Array.isArray(data.items) ? data.items : [];
     this.groupedCategories = this.dataManager.buildCategories(items);
     this.ensureActiveCategory();
-    this.elements.lastUpdatedText.textContent = data.has_data
+    const lastUpdatedLabel = data.has_data
       ? formatDateTime(data.last_updated)
       : "Нет данных";
+    this.elements.lastUpdatedText.textContent = lastUpdatedLabel;
+    this.updateContractTitleDate(lastUpdatedLabel);
     const hasAnyData = data.has_data && items.length > 0;
     this.elements.pdfButton.disabled = !hasAnyData;
     this.renderSummary();
@@ -401,6 +405,13 @@ export class UIManager {
     if (this.elements.sumFactProgressLabel) {
       this.elements.sumFactProgressLabel.textContent = label;
     }
+  }
+
+  updateContractTitleDate(label) {
+    if (!this.elements.contractTitleDate) {
+      return;
+    }
+    this.elements.contractTitleDate.textContent = label ? `на ${label}` : "";
   }
 
   updateContractCard(contractMetrics) {

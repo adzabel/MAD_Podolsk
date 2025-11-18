@@ -60,6 +60,7 @@ document.addEventListener("DOMContentLoaded", () => {
     contractExecuted: "#contract-executed",
     contractPercent: "#contract-percent",
     contractProgress: "#contract-progress",
+    contractTitleDate: "#contract-title-date",
   });
 
   const pdfButtonDefaultLabel = DOM.pdfButton ? DOM.pdfButton.innerHTML : "Скачать PDF";

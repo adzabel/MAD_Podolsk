@@ -267,6 +267,14 @@
       font-size: 1rem;
     }
 
+    .contract-card-title-date {
+      display: block;
+      font-weight: 500;
+      font-size: 0.875rem;
+      color: var(--text-muted);
+      margin-top: 2px;
+    }
+
     .contract-card-values {
       display: flex;
       gap: 10px;
