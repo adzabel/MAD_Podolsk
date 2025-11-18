@@ -4,6 +4,7 @@ import logging
 from typing import Any, Iterable
 
 from fastapi import Request
+from pydantic import BaseModel, Field, field_validator
 from psycopg2 import IntegrityError
 
 from .db import get_connection
@@ -24,6 +25,30 @@ INSERT_VISIT_SQL = """
     )
     VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s);
 """
+
+
+class VisitLogRequest(BaseModel):
+    """Данные, которые фронтенд должен передать для фиксирования визита."""
+
+    endpoint: str = Field(default="/dashboard", description="Страница, которую открыл пользователь")
+    user_id: str | None = Field(
+        default=None,
+        description="Анонимный идентификатор пользователя из localStorage/cookie",
+    )
+    session_id: str | None = Field(
+        default=None,
+        description="Идентификатор сессии без персональных данных (UUID v4)",
+    )
+    session_duration_sec: int | None = Field(
+        default=None,
+        ge=0,
+        description="Длительность сессии на клиенте в секундах",
+    )
+
+    @field_validator("endpoint")
+    @classmethod
+    def ensure_starts_with_slash(cls, value: str) -> str:
+        return value if value.startswith("/") else f"/{value}"
 
 
 def _get_client_ip(request: Request) -> str | None:
@@ -118,7 +143,14 @@ def _parse_user_agent(user_agent: str | None) -> tuple[str | None, str | None, s
     return device_type, browser, os
 
 
-def log_dashboard_visit(*, request: Request, endpoint: str) -> None:
+def log_dashboard_visit(
+    *,
+    request: Request,
+    endpoint: str,
+    user_id: str | None = None,
+    session_id: str | None = None,
+    session_duration_sec: int | None = None,
+) -> None:
     """Фиксирует посещение дашборда в базе данных.
     
     Асинхронные ошибки БД игнорируются чтобы не повлиять на основной запрос.
@@ -126,9 +158,13 @@ def log_dashboard_visit(*, request: Request, endpoint: str) -> None:
 
     client_ip = _get_client_ip(request)
     user_agent = request.headers.get("user-agent")
-    user_id = _get_user_id(request)
-    session_id = _get_session_id(request)
-    session_duration = _get_session_duration(request)
+    user_id = user_id or _get_user_id(request)
+    session_id = session_id or _get_session_id(request)
+    session_duration = (
+        session_duration_sec
+        if session_duration_sec is not None
+        else _get_session_duration(request)
+    )
     device_type, browser, os = _parse_user_agent(user_agent)
 
     values: Iterable[Any] = (
