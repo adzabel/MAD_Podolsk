@@ -337,7 +337,7 @@ export class UIManager {
       ? formatDateTime(data.last_updated)
       : "Нет данных";
     const lastUpdatedDateLabel = data.has_data
-      ? formatDate(data.last_updated, { day: "2-digit", month: "long", year: "numeric" })
+      ? formatDate(data.last_updated, { day: "2-digit", month: "2-digit", year: "numeric" })
       : "Нет данных";
     this.elements.lastUpdatedText.textContent = lastUpdatedLabel;
     this.updateContractTitleDate(lastUpdatedDateLabel);

@@ -273,9 +273,9 @@
 
     .contract-card-title-date {
       display: inline;
-      font-weight: 500;
-      font-size: 0.875rem;
-      color: var(--text-muted);
+      font-weight: inherit;
+      font-size: inherit;
+      color: inherit;
     }
 
     .contract-card-values {
