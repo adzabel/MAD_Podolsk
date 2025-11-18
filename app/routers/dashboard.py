@@ -25,6 +25,8 @@ def get_dashboard(month: MonthQuery, request: Request) -> DashboardResponse:
 
     items, summary, last_updated = fetch_plan_vs_fact_for_month(month)
 
+    log_dashboard_visit(request=request, endpoint=str(request.url.path))
+
     return DashboardResponse(
         month=month,
         last_updated=last_updated,
@@ -39,6 +41,7 @@ def get_dashboard_pdf(month: MonthQuery, request: Request) -> Response:
     """Отдаёт тот же отчёт, но сразу в формате PDF."""
 
     items, summary, last_updated = fetch_plan_vs_fact_for_month(month)
+    log_dashboard_visit(request=request, endpoint=str(request.url.path))
     pdf_bytes = build_dashboard_pdf(month, last_updated, items, summary)
     file_name = f"mad-podolsk-otchet-{month.strftime('%Y-%m')}.pdf"
     headers = {"Content-Disposition": f'attachment; filename="{file_name}"'}
