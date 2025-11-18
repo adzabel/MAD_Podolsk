@@ -10,6 +10,7 @@ from fastapi.staticfiles import StaticFiles
 from .config import settings
 from .db import close_pool
 from .routers import dashboard
+from .visit_logger import log_dashboard_visit
 
 
 NO_CACHE_HEADERS = {
@@ -56,6 +57,22 @@ def create_app() -> FastAPI:
         if content_type.startswith("text/html") and "cache-control" not in response.headers:
             _apply_no_cache(response)
 
+        return response
+
+    @app.middleware("http")
+    async def log_dashboard_visits(request: Request, call_next):
+        """Логирует посещения дашборда для аналитики и мониторинга."""
+        response = await call_next(request)
+        
+        # Логируем только успешные запросы к дашборду
+        if response.status_code < 300 and request.url.path.startswith("/api/dashboard"):
+            try:
+                endpoint = request.url.path.replace("/api", "")
+                log_dashboard_visit(request=request, endpoint=endpoint)
+            except Exception:
+                # Ошибки логирования не влияют на ответ
+                pass
+        
         return response
 
     app.include_router(dashboard.router, prefix="/api")

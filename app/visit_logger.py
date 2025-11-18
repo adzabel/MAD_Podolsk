@@ -4,6 +4,7 @@ import logging
 from typing import Any, Iterable
 
 from fastapi import Request
+from psycopg2 import IntegrityError
 
 from .db import get_connection
 
@@ -118,7 +119,10 @@ def _parse_user_agent(user_agent: str | None) -> tuple[str | None, str | None, s
 
 
 def log_dashboard_visit(*, request: Request, endpoint: str) -> None:
-    """Фиксирует посещение дашборда в базе данных."""
+    """Фиксирует посещение дашборда в базе данных.
+    
+    Асинхронные ошибки БД игнорируются чтобы не повлиять на основной запрос.
+    """
 
     client_ip = _get_client_ip(request)
     user_agent = request.headers.get("user-agent")
@@ -143,6 +147,19 @@ def log_dashboard_visit(*, request: Request, endpoint: str) -> None:
         with get_connection() as conn, conn.cursor() as cur:
             cur.execute(INSERT_VISIT_SQL, values)
             conn.commit()
+    except IntegrityError as exc:
+        # Может быть duplicate constraint если есть уникальный индекс на (session_id, endpoint)
+        logger.debug(
+            "Duplicate visit record для %s (session_id=%s): %s. Это нормально.",
+            endpoint,
+            session_id,
+            exc,
+        )
+        # Откатываем транзакцию чтобы очистить состояние соединения
+        try:
+            conn.rollback()
+        except Exception:
+            pass
     except Exception as exc:  # pragma: no cover - запись не должна падать приложение
         logger.warning(
             "Не удалось записать посещение дашборда: %s", exc, exc_info=True
