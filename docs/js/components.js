@@ -553,6 +553,7 @@ export class UIManager {
     ) {
       return;
     }
+    this.dailyModalMode = "average";
     this.renderDailyModalList();
     this.elements.dailyModal.classList.add("visible");
     this.elements.dailyModal.setAttribute("aria-hidden", "false");
@@ -588,6 +589,7 @@ export class UIManager {
       const items = Array.isArray(payload) ? payload : (payload?.daily || []);
 
       // Преобразуем в формат для отрисовки с единицей измерения
+      this.dailyModalMode = "work";
       this.dailyRevenue = (items || []).map((it) => {
         const date = it.date || it.work_date || it.day;
         const raw = it.amount ?? it.total_volume ?? it.value;
@@ -633,14 +635,25 @@ export class UIManager {
     this.elements.dailyModalEmpty.style.display = "none";
     this.elements.dailyModalList.style.display = "grid";
 
+    // Определяем режим отображения: по-умолчанию — если у элементов есть unit или total_amount,
+    // показываем колонки "Объем" + "Сумма" (работы). Иначе — показываем только "Сумма" (среднедневная выручка).
+    const isWorkMode = this.dailyModalMode === "work" || sorted.some((it) => it.unit || (it.total_amount !== null && it.total_amount !== undefined));
+
     // Добавляем заголовки
     const header = document.createElement("div");
     header.className = "modal-row modal-row-header";
-    header.innerHTML = `
-      <div>Дата</div>
-      <div class="modal-row-value"><span class="modal-value-number">Объем</span></div>
-      <div class="modal-row-sum">Сумма,₽</div>
-    `;
+    if (isWorkMode) {
+      header.innerHTML = `
+        <div>Дата</div>
+        <div class="modal-row-value"><span class="modal-value-number">Объем</span></div>
+        <div class="modal-row-sum">Сумма,₽</div>
+      `;
+    } else {
+      header.innerHTML = `
+        <div>Дата</div>
+        <div class="modal-row-sum">Сумма, ₽</div>
+      `;
+    }
     this.elements.dailyModalList.appendChild(header);
 
     const fragment = document.createDocumentFragment();
@@ -648,21 +661,33 @@ export class UIManager {
       const row = document.createElement("div");
       row.className = "modal-row";
       const dateLabel = formatDate(item.date);
-      const amount = Number(item.amount);
-      const formattedAmount = Number.isFinite(amount) ? amount.toFixed(1) : "–";
-      const unit = item.unit || "";
-      const valueText = unit ? `${formattedAmount} (${unit})` : formattedAmount;
-      const totalAmount = Number(item.total_amount);
-      const formattedTotal = Number.isFinite(totalAmount) ? totalAmount.toLocaleString("ru-RU", {minimumFractionDigits: 0, maximumFractionDigits: 0}) : "–";
-      // Разделяем числовую часть и единицу в отдельные span, чтобы можно было точно выравнивать цифры
-      row.innerHTML = `
-        <div class="modal-row-date">${dateLabel}</div>
-        <div class="modal-row-value">
-          <span class="modal-value-number">${Number.isFinite(amount) ? formattedAmount : formattedAmount}</span>
-          ${unit ? `<span class="modal-value-unit">(${unit})</span>` : ""}
-        </div>
-        <div class="modal-row-sum">${formattedTotal}</div>
-      `;
+      if (isWorkMode) {
+        const amount = Number(item.amount);
+        const formattedAmount = Number.isFinite(amount) ? amount.toFixed(1) : "–";
+        const unit = item.unit || "";
+        const totalAmount = Number(item.total_amount);
+        const formattedTotal = Number.isFinite(totalAmount)
+          ? totalAmount.toLocaleString("ru-RU", { minimumFractionDigits: 0, maximumFractionDigits: 0 })
+          : "–";
+        row.innerHTML = `
+          <div class="modal-row-date">${dateLabel}</div>
+          <div class="modal-row-value">
+            <span class="modal-value-number">${Number.isFinite(amount) ? formattedAmount : formattedAmount}</span>
+            ${unit ? `<span class="modal-value-unit">(${unit})</span>` : ""}
+          </div>
+          <div class="modal-row-sum">${formattedTotal}</div>
+        `;
+      } else {
+        // Режим среднедневной выручки: item.amount — это денежная величина
+        const sumAmount = Number(item.amount);
+        const formattedSum = Number.isFinite(sumAmount)
+          ? sumAmount.toLocaleString("ru-RU", { minimumFractionDigits: 0, maximumFractionDigits: 0 })
+          : "–";
+        row.innerHTML = `
+          <div class="modal-row-date">${dateLabel}</div>
+          <div class="modal-row-sum">${formattedSum}</div>
+        `;
+      }
       fragment.appendChild(row);
     });
 
