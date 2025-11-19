@@ -600,7 +600,6 @@
 
     .summary-card-interactive.is-disabled {
       cursor: default;
-      opacity: 0.7;
     }
 
     .summary-card-hint {
