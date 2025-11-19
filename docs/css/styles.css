@@ -1822,22 +1822,36 @@
         box-sizing: border-box;
       }
 
-      /* Заголовок остаётся в три колонки и выравнивается соответственно */
+      /* Заголовок использует точно ту же сетку, что и строки, чтобы разделители совпадали по вертикали */
       .modal-row.modal-row-header {
-        grid-template-columns: minmax(0, 1fr) minmax(72px, 110px) minmax(90px, 120px);
-        padding-bottom: 6px;
+        grid-template-columns: 56px minmax(120px, 180px) minmax(72px, 120px);
+        column-gap: 6px;
+        padding: 2px 6px;
         border-bottom: 1px solid var(--border-soft);
       }
 
+      .modal-row.modal-row-header > div:nth-child(1) {
+        text-align: center;
+        font-weight: 700;
+        font-size: 0.86rem;
+        padding: 4px 6px;
+        box-sizing: border-box;
+        border-right: 1px solid var(--border-soft);
+      }
+
       .modal-row.modal-row-header > div:nth-child(2) {
-        padding-left: 6px;
         font-weight: 700;
         text-align: left;
+        padding: 4px 8px;
+        box-sizing: border-box;
+        border-right: 1px solid var(--border-soft);
       }
 
       .modal-row.modal-row-header > div:nth-child(3) {
         font-weight: 700;
         text-align: right;
+        padding: 4px 6px;
+        box-sizing: border-box;
       }
 
       .pdf-action {
