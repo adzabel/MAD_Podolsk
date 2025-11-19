@@ -1673,6 +1673,10 @@
     .modal-row-date {
       font-weight: 600;
       color: var(--text-main);
+      padding: 4px 8px;
+      box-sizing: border-box;
+      /* единая правая граница для столбца даты */
+      border-right: 1px solid var(--border-soft);
     }
 
     .modal-row-value {
@@ -1685,9 +1689,8 @@
       /* padding уменьшён ~30% */
       padding: 4px 8px;
       box-sizing: border-box;
-      /* Оставляем только правую границу у колонки Объём, а левую границу задаём у предыдущей колонки (даты),
-         чтобы между колонками была ровная одна линия (не двойная). */
-      border-right: 1px solid rgba(15, 23, 42, 0.06);
+      /* единая правая граница для столбца Объём */
+      border-right: 1px solid var(--border-soft);
     }
 
     .modal-value-number {
