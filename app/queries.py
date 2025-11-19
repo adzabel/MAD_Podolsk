@@ -11,7 +11,7 @@ from psycopg2 import InterfaceError, OperationalError
 from psycopg2.extras import RealDictCursor
 
 from .db import get_connection
-from .models import DashboardItem, DashboardSummary, DailyRevenue
+from .models import DashboardItem, DashboardSummary, DailyRevenue, DailyWorkVolume
 
 logger = logging.getLogger(__name__)
 
@@ -317,7 +317,8 @@ def _fetch_daily_fact_totals(conn, month_start: date) -> list[DailyRevenue]:
 WORK_BREAKDOWN_SQL = """
     SELECT
         date_done::date AS work_date,
-        SUM(COALESCE(total_volume, 0)) AS total_volume
+        SUM(COALESCE(total_volume, 0)) AS total_volume,
+        MAX(COALESCE(unit::text, '')) AS unit
     FROM skpdi_fact_agg
     WHERE DATE_TRUNC('month', date_done::timestamp)::date = %s
         AND status = 'Рассмотрено'
@@ -327,19 +328,19 @@ WORK_BREAKDOWN_SQL = """
 """
 
 
-def fetch_work_daily_breakdown(month_start: date, work_identifier: str) -> list[DailyRevenue]:
+def fetch_work_daily_breakdown(month_start: date, work_identifier: str) -> list[DailyWorkVolume]:
     """Возвращает список по-дневных объёмов (total_volume) для указанной строки работ за месяц.
 
-    В результате возвращается список объектов с полями `date` и `amount`.
-    Поиск выполняется по полю `work_name` и по `description` с приведением к нижнему регистру.
+    В результате возвращается список объектов с полями `date`, `amount` и `unit`.
+    Поиск выполняется по полю `description` с приведением к нижнему регистру (ILIKE).
     """
 
-    results: list[DailyRevenue] = []
+    results: list[DailyWorkVolume] = []
     if not work_identifier:
         return results
 
-    def _load() -> list[DailyRevenue]:
-        rows: list[DailyRevenue] = []
+    def _load() -> list[DailyWorkVolume]:
+        rows: list[DailyWorkVolume] = []
         with get_connection() as conn:
             try:
                 with conn.cursor(cursor_factory=RealDictCursor) as cur:
@@ -350,9 +351,10 @@ def fetch_work_daily_breakdown(month_start: date, work_identifier: str) -> list[
                     for row in fetched:
                         work_date = row.get("work_date")
                         vol = _to_float(row.get("total_volume"))
+                        unit = (row.get("unit") or "").strip()
                         if work_date is None or vol is None:
                             continue
-                        rows.append(DailyRevenue(date=work_date, amount=vol))
+                        rows.append(DailyWorkVolume(date=work_date, amount=vol, unit=unit))
             except Exception as exc:  # noqa: BLE001
                 logger.warning(
                     "Не удалось загрузить подневную расшифровку для '%s' за %s: %s",

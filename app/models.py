@@ -39,6 +39,12 @@ class DailyRevenue(BaseModel):
     amount: float
 
 
+class DailyWorkVolume(BaseModel):
+    date: date
+    amount: float
+    unit: str = ""
+
+
 class DashboardSummary(BaseModel):
     planned_amount: float
     fact_amount: float

@@ -79,11 +79,9 @@ def log_dashboard_visit_endpoint(payload: VisitLogRequest, request: Request) -> 
 def get_work_breakdown(month: MonthQuery, work: Annotated[str, Query(..., description="Название вида работы")]) -> list[dict]:
     """Возвращает подневную расшифровку объёмов (`total_volume`) по указанной работе за месяц.
 
-    Возвращает массив объектов с полями `date` и `amount`.
+    Возвращает массив объектов с полями `date`, `amount` и `unit`.
     """
     rows = fetch_work_daily_breakdown(month, work)
-    # pydantic-объекты DailyRevenue будут сериализованы как dict автоматически,
-    # но здесь приводим к простому списку словарей для фронтенда.
     return [
-        {"date": r.date.isoformat(), "amount": r.amount} for r in rows
+        {"date": r.date.isoformat(), "amount": r.amount, "unit": r.unit} for r in rows
     ]

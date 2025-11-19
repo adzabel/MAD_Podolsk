@@ -587,12 +587,14 @@ export class UIManager {
       const payload = await response.json();
       const items = Array.isArray(payload) ? payload : (payload?.daily || []);
 
+      // Преобразуем в формат для отрисовки с единицей измерения
       this.dailyRevenue = (items || []).map((it) => {
         const date = it.date || it.work_date || it.day;
         const raw = it.amount ?? it.total_volume ?? it.value;
         const amount = raw === null || raw === undefined ? null : Number(raw);
+        const unit = it.unit || "";
         if (!date || amount === null || !Number.isFinite(amount)) return null;
-        return { date, amount };
+        return { date, amount, unit };
       }).filter(Boolean);
 
       this.renderDailyModalList();
@@ -635,9 +637,14 @@ export class UIManager {
       const row = document.createElement("div");
       row.className = "modal-row";
       const dateLabel = formatDate(item.date);
+      // Форматируем объём с одним знаком после запятой и единицей измерения в скобках
+      const amount = Number(item.amount);
+      const formattedAmount = Number.isFinite(amount) ? amount.toFixed(1) : "–";
+      const unit = item.unit || "";
+      const valueText = unit ? `${formattedAmount} (${unit})` : formattedAmount;
       row.innerHTML = `
         <div class="modal-row-date">${dateLabel}</div>
-        <div class="modal-row-value">${formatMoneyRub(item.amount)}</div>
+        <div class="modal-row-value">${valueText}</div>
       `;
       fragment.appendChild(row);
     });
