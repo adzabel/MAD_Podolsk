@@ -314,7 +314,21 @@ def _fetch_daily_fact_totals(conn, month_start: date) -> list[DailyRevenue]:
     return daily_rows
 
 
-WORK_BREAKDOWN_SQL = WORK_BREAKDOWN_SQL if 'WORK_BREAKDOWN_SQL' in globals() else WORK_BREAKDOWN_SQL
+WORK_BREAKDOWN_SQL = """
+    SELECT
+        date_done::date AS work_date,
+        SUM(COALESCE(total_volume, 0)) AS total_volume
+    FROM skpdi_fact_agg
+    WHERE month_start = %s
+        AND status = 'Рассмотрено'
+        AND (
+            TRIM(LOWER(COALESCE(work_name::text, ''))) = TRIM(LOWER(%s))
+            OR TRIM(LOWER(COALESCE(description::text, ''))) = TRIM(LOWER(%s))
+        )
+    GROUP BY work_date
+    ORDER BY work_date;
+"""
+
 
 def fetch_work_daily_breakdown(month_start: date, work_identifier: str) -> list[DailyRevenue]:
     """Возвращает список по-дневных объёмов (total_volume) для указанной строки работ за месяц.
