@@ -248,11 +248,37 @@ export class UIManager {
     return `${year}-${month}-01`;
   }
 
-  isCurrentMonth(monthIso) {
+  getMonthKey(monthIso) {
     if (!monthIso) {
+      return null;
+    }
+
+    const parsedDate = new Date(monthIso);
+    if (!Number.isNaN(parsedDate.getTime())) {
+      return `${parsedDate.getFullYear()}-${parsedDate.getMonth()}`;
+    }
+
+    const match = /^\s*(\d{4})-(\d{1,2})/.exec(monthIso);
+    if (match) {
+      const year = Number(match[1]);
+      const monthIndex = Number(match[2]) - 1;
+      if (!Number.isNaN(year) && monthIndex >= 0 && monthIndex < 12) {
+        return `${year}-${monthIndex}`;
+      }
+    }
+
+    return null;
+  }
+
+  isCurrentMonth(monthIso) {
+    const targetKey = this.getMonthKey(monthIso);
+    if (!targetKey) {
       return false;
     }
-    return monthIso === this.getCurrentMonthIso();
+
+    const today = new Date();
+    const currentKey = `${today.getFullYear()}-${today.getMonth()}`;
+    return targetKey === currentKey;
   }
 
   updateDailyAverageNoteVisibility(monthIso = this.selectedMonthIso) {
