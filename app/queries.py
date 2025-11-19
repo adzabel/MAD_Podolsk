@@ -72,15 +72,18 @@ CURRENT_MONTH_FACT_SQL = """
 """
 
 SUMMARY_SQL = """
-    WITH agg AS (
+    WITH plan AS (
         SELECT
             SUM(CASE
                     WHEN COALESCE(TRIM(LOWER(smeta_code)), '') IN ('внерегл_ч_1', 'внерегл_ч_2')
                         THEN 0
                     ELSE planned_amount
-                END) AS planned_total,
-            SUM(fact_amount_done) AS fact_total
+                END) AS planned_total
         FROM skpdi_plan_vs_fact_monthly
+        WHERE month_start = %s
+    ), fact AS (
+        SELECT SUM(total_amount) AS fact_total
+        FROM skpdi_fact_monthly_cat_mv
         WHERE month_start = %s
     )
     SELECT
@@ -88,7 +91,8 @@ SUMMARY_SQL = """
         fact_total,
         CASE WHEN planned_total <> 0 THEN fact_total / planned_total END AS completion_pct,
         fact_total - planned_total AS delta_amount
-    FROM agg;
+    FROM plan
+    CROSS JOIN fact;
 """
 
 
@@ -434,7 +438,7 @@ def fetch_plan_vs_fact_for_month(
                     last_updated = res[0]
 
             with conn.cursor(cursor_factory=RealDictCursor) as cur:
-                cur.execute(SUMMARY_SQL, (month_start,))
+                cur.execute(SUMMARY_SQL, (month_start, month_start))
                 summary_row = cur.fetchone() or {}
                 has_financial_data = (
                     summary_row.get("planned_total") is not None
