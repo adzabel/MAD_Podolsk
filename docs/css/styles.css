@@ -392,6 +392,42 @@
       min-height: 54px;
     }
 
+    /* Зелёный индикатор обновления данных с "эхом" (светлый ореол) */
+    .pill-dot {
+      width: 14px;
+      height: 14px;
+      border-radius: 50%;
+      background: var(--success);
+      position: relative;
+      flex: 0 0 auto;
+      box-shadow: 0 2px 6px rgba(15,157,88,0.18);
+    }
+
+    .pill-dot::after {
+      content: "";
+      position: absolute;
+      left: 50%;
+      top: 50%;
+      transform: translate(-50%, -50%);
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      background: rgba(15,157,88,0.08);
+      filter: blur(6px);
+      pointer-events: none;
+      z-index: -1;
+    }
+
+    /* Маленький вариант для печатной меты (вставляется inline перед текстом) */
+    .pill-dot-print {
+      width: 10px;
+      height: 10px;
+      display: inline-block;
+      vertical-align: middle;
+      margin-right: 8px;
+      box-shadow: none;
+    }
+
     .pill-info {
       display: flex;
       flex-direction: column;
