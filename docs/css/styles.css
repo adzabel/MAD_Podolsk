@@ -1688,6 +1688,24 @@
       border-right: 1px solid rgba(15, 23, 42, 0.06);
     }
 
+    .modal-value-number {
+      /* Табличные цифры для точного выравнивания по оси */
+      font-variant-numeric: tabular-nums;
+      font-feature-settings: "tnum" 1;
+      text-align: left;
+      white-space: nowrap;
+      min-width: 0;
+      display: inline-block;
+    }
+
+    .modal-value-unit {
+      color: var(--text-muted);
+      font-weight: 400;
+      margin-left: 8px;
+      white-space: nowrap;
+      font-size: 0.95em;
+    }
+
     .modal-row-sum {
       font-weight: 700;
       color: var(--text-main);

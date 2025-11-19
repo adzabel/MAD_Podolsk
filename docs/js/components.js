@@ -638,7 +638,7 @@ export class UIManager {
     header.className = "modal-row modal-row-header";
     header.innerHTML = `
       <div>Дата</div>
-      <div class="modal-row-value">Объем</div>
+      <div class="modal-row-value"><span class="modal-value-number">Объем</span></div>
       <div class="modal-row-sum">Сумма,₽</div>
     `;
     this.elements.dailyModalList.appendChild(header);
@@ -654,9 +654,13 @@ export class UIManager {
       const valueText = unit ? `${formattedAmount} (${unit})` : formattedAmount;
       const totalAmount = Number(item.total_amount);
       const formattedTotal = Number.isFinite(totalAmount) ? totalAmount.toLocaleString("ru-RU", {minimumFractionDigits: 0, maximumFractionDigits: 0}) : "–";
+      // Разделяем числовую часть и единицу в отдельные span, чтобы можно было точно выравнивать цифры
       row.innerHTML = `
         <div class="modal-row-date">${dateLabel}</div>
-        <div class="modal-row-value">${valueText}</div>
+        <div class="modal-row-value">
+          <span class="modal-value-number">${Number.isFinite(amount) ? formattedAmount : formattedAmount}</span>
+          ${unit ? `<span class="modal-value-unit">(${unit})</span>` : ""}
+        </div>
         <div class="modal-row-sum">${formattedTotal}</div>
       `;
       fragment.appendChild(row);
