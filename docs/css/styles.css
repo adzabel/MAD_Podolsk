@@ -1763,13 +1763,14 @@
         }
     
         .modal-row {
-          /* увеличили максимальную ширину второй колонки (единицы измерения),
-             чтобы длинные единицы не обрезались и дата оставалась видимой */
-          grid-template-columns: minmax(0, 1fr) minmax(56px, 140px) minmax(72px, 120px);
+          /* Фиксированная ширина столбца даты и чёткие вертикальные границы,
+             выглядим как таблица: Date | Volume | Sum. Дата — ровно 56px (DD.MM). */
+          grid-template-columns: 56px minmax(72px, 140px) minmax(72px, 120px);
           column-gap: 6px;
           padding: 2px 6px;
           font-size: 0.92rem;
           line-height: 1.06;
+          box-sizing: border-box;
         }
 
       .modal-row > div {
@@ -1779,20 +1780,25 @@
       }
 
       .modal-row-date {
-        text-align: left;
+        text-align: center;
         font-weight: 400; /* теперь не жирный */
-        padding-right: 6px;
+        padding: 4px 6px;
         font-size: 0.86rem; /* чуть меньше шрифт для даты */
+        box-sizing: border-box;
+        /* правая граница — левая граница колонки Объем, единая для заголовка и строк */
+        border-right: 1px solid var(--border-soft);
       }
 
       .modal-row-value {
-        /* Объем — выравниваем по левой границе колонки и не даём переносов */
+        /* Объем — левая/правая границы колонки, значения помещаются в одну строку */
         text-align: left;
         display: flex;
         align-items: center;
         justify-content: flex-start;
-        padding: 0 6px;
+        padding: 4px 8px;
         font-weight: 400; /* убираем жирность для значений */
+        box-sizing: border-box;
+        border-right: 1px solid var(--border-soft);
       }
 
       .modal-value-number {
@@ -1810,8 +1816,9 @@
 
       .modal-row-sum {
         text-align: right;
-        padding-left: 6px;
+        padding: 4px 6px;
         font-weight: 400; /* убираем жирность для суммы */
+        box-sizing: border-box;
       }
 
       /* Заголовок остаётся в три колонки и выравнивается соответственно */

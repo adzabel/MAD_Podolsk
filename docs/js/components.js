@@ -640,20 +640,20 @@ export class UIManager {
     const isWorkMode = this.dailyModalMode === "work" || sorted.some((it) => it.unit || (it.total_amount !== null && it.total_amount !== undefined));
 
     // Добавляем заголовки
-    const header = document.createElement("div");
-    header.className = "modal-row modal-row-header";
-    if (isWorkMode) {
-      header.innerHTML = `
-        <div>Дата</div>
-        <div class="modal-row-value"><span class="modal-value-number">Объем</span></div>
-        <div class="modal-row-sum">Сумма,₽</div>
-      `;
-    } else {
-      header.innerHTML = `
-        <div>Дата</div>
-        <div class="modal-row-sum">Сумма, ₽</div>
-      `;
-    }
+      const header = document.createElement("div");
+      header.className = "modal-row modal-row-header";
+      if (isWorkMode) {
+        header.innerHTML = `
+          <div class="modal-row-date">Дата</div>
+          <div class="modal-row-value"><span class="modal-value-number">Объем</span></div>
+          <div class="modal-row-sum">Сумма,₽</div>
+        `;
+      } else {
+        header.innerHTML = `
+          <div class="modal-row-date">Дата</div>
+          <div class="modal-row-sum">Сумма, ₽</div>
+        `;
+      }
     this.elements.dailyModalList.appendChild(header);
 
     const fragment = document.createDocumentFragment();
