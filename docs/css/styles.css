@@ -1657,12 +1657,15 @@
     .modal-row {
       display: grid;
       /* фиксированная в пределах диапазона вторая колонка — чтобы границы по строкам совпадали */
-      grid-template-columns: 1fr minmax(110px, 150px) minmax(90px, 130px);
+      grid-template-columns: 1fr minmax(100px, 140px) minmax(80px, 120px);
       align-items: center;
-      column-gap: 24px;
-      padding: 6px 0;
+      column-gap: 18px;
+      /* уменьшили вертикальные отступы на ~30% (6px -> 4px) для компактного вида */
+      padding: 4px 0;
       border-bottom: 1px solid var(--border-soft);
       box-sizing: border-box;
+      font-size: 0.95rem; /* слегка меньше шрифт в строке */
+      line-height: 1.15;
     }
 
     .modal-row:last-child {
@@ -1681,7 +1684,8 @@
       display: flex;
       align-items: center;
       justify-content: flex-start;
-      padding: 6px 12px; /* вертикальные отступы + небольшой внутренний отступ слева */
+      /* padding уменьшён ~30% */
+      padding: 4px 8px;
       box-sizing: border-box;
       /* вертикальные границы, которые будут располагаться по одной оси, так как колонка фиксирована */
       border-left: 1px solid rgba(15, 23, 42, 0.06);
@@ -1719,10 +1723,11 @@
       justify-content: flex-start;
       text-align: left;
       font-weight: 700;
-      padding: 6px 12px;
+      padding: 4px 8px;
       box-sizing: border-box;
       border-left: 1px solid rgba(15, 23, 42, 0.06);
       border-right: 1px solid rgba(15, 23, 42, 0.06);
+      font-size: 0.95rem;
     }
 
     .modal-row.modal-row-header > div:nth-child(3) {
