@@ -256,10 +256,13 @@ export class UIManager {
   }
 
   updateDailyAverageNoteVisibility(monthIso = this.selectedMonthIso) {
-    if (!this.elements.dailyAverageNote) {
-      return;
+    const isCurrentMonth = this.isCurrentMonth(monthIso);
+    if (this.elements.dailyAverageNote) {
+      this.elements.dailyAverageNote.hidden = !isCurrentMonth;
     }
-    this.elements.dailyAverageNote.hidden = !this.isCurrentMonth(monthIso);
+    if (this.elements.dailyAverageHint) {
+      this.elements.dailyAverageHint.hidden = !isCurrentMonth;
+    }
   }
 
   setMonthSelectPlaceholder(message) {
