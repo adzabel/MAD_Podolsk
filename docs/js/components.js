@@ -31,17 +31,12 @@ export class UIManager {
     this.liveRegion = null;
     this.metrics = null;
     this.dailyRevenue = [];
-    this.currentSearchTerm = "";
     this.workSort = { column: "planned" };
     this.selectedMonthIso = null;
     this.initialMonth = new URLSearchParams(window.location.search).get("month");
     if (this.elements.workSortSelect) {
       this.elements.workSortSelect.value = this.workSort.column;
     }
-    this.debouncedSearch = debounce((value) => {
-      this.currentSearchTerm = (value || "").toLowerCase().trim();
-      this.renderWorkList();
-    }, 300);
     this.handleResize = debounce(() => this.updateWorkNameCollapsers(), 150);
     this.monthOptionsLoaded = false;
   }
@@ -155,9 +150,6 @@ export class UIManager {
   }
 
   bindEvents() {
-    this.elements.searchInput.addEventListener("input", (event) => {
-      this.debouncedSearch(event.target.value || "");
-    });
     if (this.elements.workSortSelect) {
       this.elements.workSortSelect.addEventListener("change", (event) => {
         const column = event.target.value;
@@ -343,7 +335,6 @@ export class UIManager {
     this.workHeaderEl.hidden = true;
     this.elements.workListScroller.style.display = "none";
     this.clearWorkRows();
-    this.elements.searchInput.disabled = true;
     this.elements.pdfButton.disabled = true;
     this.updateContractCard(null);
   }
@@ -363,7 +354,6 @@ export class UIManager {
     this.updateDailyAverage(null, 0);
     this.updateContractCard(null);
     this.setActiveCategoryTitle("Смета не выбрана");
-    this.elements.searchInput.disabled = true;
     this.elements.workList.classList.remove("has-data");
     this.workHeaderEl.hidden = true;
     this.elements.workListScroller.style.display = "none";
@@ -765,8 +755,6 @@ export class UIManager {
   renderWorkList() {
     const currentData = this.dataManager.getCurrentData();
     const activeCategory = this.groupedCategories.find((cat) => cat.key === this.activeCategoryKey) || null;
-    const filter = this.currentSearchTerm ?? "";
-    this.elements.searchInput.disabled = !activeCategory;
     if (this.elements.workSortSelect) {
       this.elements.workSortSelect.disabled = !activeCategory;
     }
@@ -784,12 +772,7 @@ export class UIManager {
       return;
     }
 
-    const works = filter
-      ? activeCategory.works.filter((item) => {
-          const name = (item.work_name || item.description || "").toLowerCase();
-          return name.includes(filter);
-        })
-      : [...activeCategory.works];
+    const works = [...activeCategory.works];
 
     this.sortWorks(works);
 
@@ -800,9 +783,7 @@ export class UIManager {
 
     if (!works.length) {
       this.elements.workEmptyState.style.display = "block";
-      this.elements.workEmptyState.textContent = filter
-        ? "Нет работ, подходящих под фильтр"
-        : "В этой смете нет строк для отображения";
+      this.elements.workEmptyState.textContent = "В этой смете нет строк для отображения";
       this.elements.workList.classList.remove("has-data");
       this.workHeaderEl.hidden = true;
       this.elements.workListScroller.style.display = "none";

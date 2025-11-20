@@ -42,7 +42,6 @@ document.addEventListener("DOMContentLoaded", () => {
     workList: "#work-list",
     workSkeleton: "#work-skeleton",
     workEmptyState: "#work-empty-state",
-    searchInput: "#search",
     workSortSelect: "#work-sort-select",
     activeCategoryTitle: "#active-category-title",
     activeCategoryTitleDesktop: "#active-category-title-desktop",
@@ -69,7 +68,6 @@ document.addEventListener("DOMContentLoaded", () => {
   const pdfButtonDefaultLabel = DOM.pdfButton ? DOM.pdfButton.innerHTML : "Скачать PDF";
   setElementsDisabled({
     pdfButton: DOM.pdfButton,
-    searchInput: DOM.searchInput,
     workSortSelect: DOM.workSortSelect,
   }, true);
 

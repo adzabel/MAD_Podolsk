@@ -183,14 +183,17 @@
     <!-- Список работ выбранной сметы -->
     <section class="panel">
       <div class="panel-header work-panel-header">
-        <div class="panel-title-group">
-          <div class="panel-title" id="active-category-title">
-            <span class="panel-title-text panel-title-text-desktop" id="active-category-title-desktop">Смета не выбрана</span>
-            <span class="panel-title-mobile" id="active-category-title-mobile">
-              <span class="panel-title-mobile-label">Работы по смете</span>
-              <span class="panel-title-mobile-value" id="active-category-title-mobile-value">Смета не выбрана</span>
-            </span>
+        <div class="work-panel-title-area">
+          <div class="panel-title-group">
+            <div class="panel-title" id="active-category-title">
+              <span class="panel-title-text panel-title-text-desktop" id="active-category-title-desktop">Смета не выбрана</span>
+              <span class="panel-title-mobile" id="active-category-title-mobile">
+                <span class="panel-title-mobile-label">Работы по смете</span>
+                <span class="panel-title-mobile-value" id="active-category-title-mobile-value">Смета не выбрана</span>
+              </span>
+            </div>
           </div>
+          <p class="panel-subtitle work-detail-hint" id="work-detail-hint">Для ежедневных данных нажмите на название вида работ</p>
         </div>
         <div class="work-sort-select">
           <label for="work-sort-select" class="work-sort-select-label">Сортировка</label>
@@ -201,13 +204,6 @@
               <option value="delta">Отклонение</option>
             </select>
           </div>
-        </div>
-        <div class="search">
-          <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false" stroke="currentColor">
-            <circle cx="11" cy="11" r="6" fill="none" stroke-linecap="round" stroke-linejoin="round"></circle>
-            <path d="m15.5 15.5 3.5 3.5" fill="none" stroke-linecap="round" stroke-linejoin="round"></path>
-          </svg>
-          <input type="text" id="search" placeholder="Найти работу в смете..." />
         </div>
       </div>
       <div class="work-list work-list-skeleton" id="work-skeleton" aria-hidden="true">
