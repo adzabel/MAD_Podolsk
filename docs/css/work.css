@@ -66,6 +66,12 @@
   color: var(--text-muted);
   line-height: 1.4;
   margin: 0;
+  width: 100%;
+  flex-basis: 100%;
+}
+
+.work-detail-hint-line-break {
+  display: none;
 }
 
 .work-list {
@@ -352,6 +358,11 @@
     grid-area: hint;
     font-size: 0.8rem;
     margin: 6px 0 0;
+    width: 100%;
+  }
+
+  .work-detail-hint-line-break {
+    display: inline;
   }
 
   .work-panel-header .work-sort-select {
