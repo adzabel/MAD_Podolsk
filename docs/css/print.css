@@ -2,7 +2,7 @@
 
 .print-report {
   display: none;
-  font-family: 'Roboto', 'Roboto Mono', 'IBM Plex Mono', 'PT Mono', system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  font-family: var(--font-sans);
   padding: 18px;
   color: #111827;
   width: 210mm;
