@@ -30,6 +30,7 @@ export class UIManager {
     this.workHeaderEl = null;
     this.liveRegion = null;
     this.metrics = null;
+    this.summaryDailyRevenue = [];
     this.dailyRevenue = [];
     this.workSort = { column: "planned" };
     this.selectedMonthIso = null;
@@ -319,6 +320,7 @@ export class UIManager {
   showLoadingState() {
     this.groupedCategories = [];
     this.activeCategoryKey = null;
+    this.summaryDailyRevenue = [];
     this.dailyRevenue = [];
     this.toggleSkeletons(true);
     this.elements.categoryGrid.innerHTML = "";
@@ -349,6 +351,7 @@ export class UIManager {
     this.elements.sumFact.textContent = "–";
     this.elements.sumDelta.textContent = "–";
     this.elements.sumDelta.classList.remove("positive", "negative");
+    this.summaryDailyRevenue = [];
     this.dailyRevenue = [];
     this.updateSummaryProgress(null, "–");
     this.updateDailyAverage(null, 0);
@@ -405,13 +408,15 @@ export class UIManager {
       this.elements.sumFact.textContent = "–";
       this.elements.sumDelta.textContent = "–";
       this.elements.sumDelta.classList.remove("positive", "negative");
+      this.summaryDailyRevenue = [];
       this.dailyRevenue = [];
       this.updateSummaryProgress(null, "–");
       this.updateDailyAverage(null, 0);
       return;
     }
 
-    this.dailyRevenue = Array.isArray(metrics.dailyRevenue) ? metrics.dailyRevenue : [];
+    this.summaryDailyRevenue = Array.isArray(metrics.dailyRevenue) ? metrics.dailyRevenue : [];
+    this.dailyRevenue = [...this.summaryDailyRevenue];
     this.elements.sumPlanned.textContent = formatMoney(metrics.planned);
     this.elements.sumFact.textContent = formatMoney(metrics.fact);
     this.elements.sumDelta.textContent = formatMoney(metrics.delta);
@@ -423,7 +428,7 @@ export class UIManager {
       ? formatPercent(metrics.completion)
       : "–";
     this.updateSummaryProgress(metrics.completion, completionLabel);
-    this.updateDailyAverage(metrics.averageDailyRevenue, this.dailyRevenue.length);
+    this.updateDailyAverage(metrics.averageDailyRevenue, this.summaryDailyRevenue.length);
   }
 
   updateSummaryProgress(completion, label) {
@@ -527,12 +532,13 @@ export class UIManager {
 
   openDailyModal() {
     if (
-      !this.dailyRevenue.length
+      !this.summaryDailyRevenue.length
       || !this.elements.dailyModal
       || !this.isCurrentMonth(this.selectedMonthIso)
     ) {
       return;
     }
+    this.dailyRevenue = [...this.summaryDailyRevenue];
     this.dailyModalMode = "average";
     this.renderDailyModalList();
     this.elements.dailyModal.classList.add("visible");
