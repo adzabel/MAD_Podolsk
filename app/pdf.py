@@ -191,13 +191,15 @@ class CategoryGroup:
 
 def _format_money(value: float | None) -> str:
     if value is None:
-        return "—"
+        # Единый символ для отсутствующих значений (en dash)
+        return "–"
     return f"{value:,.0f}".replace(",", " ")
 
 
 def _format_percent(value: float | None) -> str:
     if value is None:
-        return "—"
+        return "–"
+    # Пробел перед знаком процента, 1 десятичный знак
     return f"{value * 100:.1f} %"
 
 
