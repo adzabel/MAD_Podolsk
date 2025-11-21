@@ -292,9 +292,9 @@ header {
 
 .day-select {
   display: flex;
-  flex-direction: column;
-  gap: 4px;
-  padding: 8px 12px;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 14px;
   border-radius: var(--radius-md);
   border: 1px solid var(--border-soft);
   background: var(--bg-card);
@@ -303,8 +303,15 @@ header {
   min-height: 54px;
 }
 
+.day-select label {
+  font-size: 0.8rem;
+  color: var(--text-muted);
+}
+
 .day-select-control {
   position: relative;
+  flex: 1;
+  min-width: 146px;
 }
 
 .day-select-control select {
@@ -312,21 +319,21 @@ header {
   font-size: 0.95rem;
   font-weight: 600;
   appearance: none;
-  padding-right: 24px;
+  padding-right: 26px;
 }
 
 .day-select-control::after {
   content: "";
   position: absolute;
   top: 50%;
-  right: 6px;
+  right: 8px;
   width: 8px;
   height: 8px;
-  border-right: 2px solid var(--text-muted);
-  border-bottom: 2px solid var(--text-muted);
+  border-right: 2px solid var(--chevron-color);
+  border-bottom: 2px solid var(--chevron-color);
   transform: translateY(-50%) rotate(45deg);
   pointer-events: none;
-  opacity: 0.6;
+  opacity: 1;
 }
 
 .contract-card {
@@ -901,6 +908,9 @@ select {
   .day-select {
     width: 100%;
     height: 100%;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 4px;
   }
 
   .month-select {
@@ -919,6 +929,22 @@ select {
   }
 
   .month-select-control select {
+    width: 100%;
+    cursor: pointer;
+    text-align: left;
+    text-align-last: left;
+  }
+
+  .day-select label {
+    width: 100%;
+    text-align: left;
+  }
+
+  .day-select-control {
+    width: 100%;
+  }
+
+  .day-select-control select {
     width: 100%;
     cursor: pointer;
     text-align: left;
