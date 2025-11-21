@@ -27,10 +27,6 @@ env/
 # Build artifacts
 docs-build/
 
-# Frontend (Vite)
-frontend/node_modules/
-frontend/dist/
-
 # Fonts
 # Исходники шрифтов хранятся в текстовом виде (см. app/font_storage.py),
 # а бинарные файлы автоматически разворачиваются в app/fonts/ при запуске.
