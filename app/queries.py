@@ -1,7 +1,6 @@
 from __future__ import annotations
 
 import logging
-import time  # оставлен для совместимости, может быть удалён если не нужен
 import calendar
 from datetime import date, datetime, timedelta
 from decimal import Decimal
