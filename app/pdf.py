@@ -22,6 +22,7 @@ from reportlab.platypus import Paragraph, SimpleDocTemplate, Spacer, Table, Tabl
 
 from .font_storage import ensure_embedded_fonts
 from .models import DashboardItem, DashboardSummary
+from .utils import format_money, format_percent, normalize_string
 
 LOGGER = logging.getLogger(__name__)
 
@@ -189,18 +190,8 @@ class CategoryGroup:
         return (self.fact_total or 0.0) - (self.planned_total or 0.0)
 
 
-def _format_money(value: float | None) -> str:
-    if value is None:
-        # Единый символ для отсутствующих значений (en dash)
-        return "–"
-    return f"{value:,.0f}".replace(",", " ")
-
-
-def _format_percent(value: float | None) -> str:
-    if value is None:
-        return "–"
-    # Пробел перед знаком процента, 1 десятичный знак
-    return f"{value * 100:.1f} %"
+# Функции _format_money и _format_percent перенесены в utils.py
+# Используются: format_money, format_percent
 
 
 class NumberedCanvas(canvas.Canvas):
@@ -243,8 +234,8 @@ def _resolve_category_name(
     raw_key: str | None,
     title_hint: str | None = None,
 ) -> tuple[str, str]:
-    candidate = (raw_key or "").strip()
-    hint = (title_hint or "").strip()
+    candidate = normalize_string(raw_key)
+    hint = normalize_string(title_hint)
     fallback = candidate or hint or "Прочее"
     override = MERGED_CATEGORY_OVERRIDES.get(fallback.lower())
     if override:
@@ -328,10 +319,10 @@ def _build_summary_table(summary: DashboardSummary | None, width: float) -> Tabl
     completion = summary.completion_pct if summary else None
     delta = summary.delta_amount if summary else None
     data = [
-        ["План", _format_money(planned)],
-        ["Факт", _format_money(fact)],
-        ["Выполнение", _format_percent(completion)],
-        ["Отклонение", _format_money(delta)],
+        ["План", format_money(planned)],
+        ["Факт", format_money(fact)],
+        ["Выполнение", format_percent(completion)],
+        ["Отклонение", format_money(delta)],
     ]
     table = Table(data, colWidths=[width * 0.35, width * 0.65])
     table.setStyle(
@@ -380,9 +371,9 @@ def _build_items_table(groups: Iterable[CategoryGroup], width: float) -> Table:
         data.append(
             [
                 _paragraph(group.title),
-                _format_money(group.planned_total),
-                _format_money(group.fact_total),
-                _format_money(group.delta_total),
+                format_money(group.planned_total),
+                format_money(group.fact_total),
+                format_money(group.delta_total),
             ]
         )
         category_rows.append(row_idx)
@@ -394,9 +385,9 @@ def _build_items_table(groups: Iterable[CategoryGroup], width: float) -> Table:
                 data.append(
                     [
                         _paragraph(work_name, NESTED_TABLE_TEXT_STYLE),
-                        _format_money(item.planned_amount),
-                        _format_money(item.fact_amount),
-                        _format_money(delta),
+                        format_money(item.planned_amount),
+                        format_money(item.fact_amount),
+                        format_money(delta),
                     ]
                 )
                 item_rows.append(row_idx)
@@ -418,9 +409,9 @@ def _build_items_table(groups: Iterable[CategoryGroup], width: float) -> Table:
                         "TotalRow", parent=TABLE_TEXT_STYLE, fontName=BODY_FONT_BOLD_NAME
                     ),
                 ),
-                _format_money(total_planned),
-                _format_money(total_fact),
-                _format_money(total_delta),
+                format_money(total_planned),
+                format_money(total_fact),
+                format_money(total_delta),
             ]
         )
         total_row_idx = row_idx

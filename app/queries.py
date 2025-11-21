@@ -20,6 +20,14 @@ from .models import (
     DailyWorkVolume,
 )
 from .query_builder import FactQueryBuilder
+from .utils import (
+    to_float,
+    normalize_string,
+    safe_get_from_dict,
+    get_month_start,
+    get_next_month_start,
+    extract_dict_strings,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -132,32 +140,8 @@ WHERE date_trunc('month', date_done) = date_trunc('month', CURRENT_DATE)
 ORDER BY work_date DESC;"""
 
 
-def _to_float(value: Any) -> float | None:
-    if value is None:
-        return None
-    if isinstance(value, (int, float, Decimal)):
-        return float(value)
-    try:
-        return float(value)
-    except (TypeError, ValueError):
-        return None
-
-
-def _safe_get_from_row(row: dict[str, Any], *keys: str, default: Any = None) -> Any:
-    """Безопасно получить значение из словаря, пытаясь несколько ключей по порядку."""
-    for key in keys:
-        value = row.get(key)
-        if value:
-            return value
-    return default
-
-
-def _extract_strings(row: dict[str, Any]) -> tuple[str | None, str | None, str | None, str]:
-    description = _safe_get_from_row(row, "description", default="")
-    category = _safe_get_from_row(row, "category_code", "smeta")
-    smeta = _safe_get_from_row(row, "smeta", "smeta_name", "smeta_title", "section")
-    work_name = _safe_get_from_row(row, "work_name", "work_title", default=description)
-    return category, smeta, work_name, description
+# Функции _to_float, _safe_get_from_row и _extract_strings перенесены в utils.py
+# Используются: to_float, safe_get_from_dict, extract_dict_strings
 
 
 def _calculate_vnr_plan(items: list["DashboardItem"]) -> float:
@@ -178,7 +162,9 @@ def _calculate_vnr_plan(items: list["DashboardItem"]) -> float:
 
 
 def _is_vnr_row(row: dict[str, Any]) -> bool:
-    smeta_code = (_safe_get_from_row(row, "smeta_code", "category_code", default="")).strip().lower()
+    smeta_code = normalize_string(
+        safe_get_from_dict(row, "smeta_code", "category_code", default="")
+    ).lower()
     return smeta_code in _VNR_CATEGORY_CODES
 
 
@@ -255,7 +241,7 @@ def _aggregate_items_streaming(cursor) -> list[DashboardItem]:
     items_map: dict[tuple[str | None, str | None, str | None, str], dict[str, Any]] = {}
     
     for row in cursor:
-        category, smeta, work_name, description = _extract_strings(row)
+        category, smeta, work_name, description = extract_dict_strings(row)
         key = (category, smeta, work_name, description)
 
         item = items_map.get(key)
@@ -270,11 +256,11 @@ def _aggregate_items_streaming(cursor) -> list[DashboardItem]:
             }
             items_map[key] = item
 
-        planned_value = None if _is_vnr_row(row) else _to_float(row.get("planned_amount"))
+        planned_value = None if _is_vnr_row(row) else to_float(row.get("planned_amount"))
         if planned_value is not None:
             item["planned_amount"] = (item["planned_amount"] or 0.0) + planned_value
 
-        fact_value = _to_float(row.get("fact_amount_done"))
+        fact_value = to_float(row.get("fact_amount_done"))
         if fact_value is not None:
             item["fact_amount"] = (item["fact_amount"] or 0.0) + fact_value
 
@@ -316,7 +302,7 @@ def _fetch_daily_fact_totals(conn, month_start: date) -> list[DailyRevenue]:
             cur.execute(sql, params)
             rows = cur.fetchall() or []
             for row in rows:
-                amount = _to_float(row.get("fact_total"))
+                amount = to_float(row.get("fact_total"))
                 work_date = row.get("work_date")
                 if amount is None or work_date is None:
                     continue
@@ -369,10 +355,10 @@ def fetch_work_daily_breakdown(month_start: date, work_identifier: str) -> list[
 
     # На фронтенд может прийти любая дата внутри месяца, поэтому нормализуем
     # значение к первому дню месяца, чтобы захватывать весь период.
-    month_start = month_start.replace(day=1)
+    month_start = get_month_start(month_start)
 
     rows: list[DailyWorkVolume] = []
-    next_month_start = (month_start.replace(day=28) + timedelta(days=4)).replace(day=1)
+    next_month_start = get_next_month_start(month_start)
     with get_connection() as conn:
         try:
             with conn.cursor(cursor_factory=RealDictCursor) as cur:
@@ -396,9 +382,9 @@ def fetch_work_daily_breakdown(month_start: date, work_identifier: str) -> list[
                 fetched = cur.fetchall() or []
                 for row in fetched:
                     work_date = row.get("work_date")
-                    vol = _to_float(row.get("total_volume"))
-                    unit = (row.get("unit") or "").strip()
-                    total_amount = _to_float(row.get("total_amount"))
+                    vol = to_float(row.get("total_volume"))
+                    unit = normalize_string(row.get("unit"))
+                    total_amount = to_float(row.get("total_amount"))
                     if work_date is None or vol is None:
                         continue
                     rows.append(
@@ -433,12 +419,12 @@ def _fetch_contract_progress(conn, _selected_month: date) -> dict[str, float] | 
         with conn.cursor(cursor_factory=RealDictCursor) as cur:
             cur.execute(CONTRACT_TOTAL_SQL)
             contract_row = cur.fetchone() or {}
-            contract_total = _to_float(contract_row.get("contract_total")) or 0.0
+            contract_total = to_float(contract_row.get("contract_total")) or 0.0
 
         with conn.cursor(cursor_factory=RealDictCursor) as cur:
             cur.execute(CONTRACT_EXECUTED_SQL)
             executed_row = cur.fetchone() or {}
-            executed_total = _to_float(executed_row.get("executed_total")) or 0.0
+            executed_total = to_float(executed_row.get("executed_total")) or 0.0
 
         return {
             "contract_total": contract_total,
@@ -545,10 +531,10 @@ def fetch_plan_vs_fact_for_month(
             )
             if has_financial_data:
                 summary = DashboardSummary(
-                    planned_amount=_to_float(summary_row.get("planned_total")) or 0.0,
-                    fact_amount=_to_float(summary_row.get("fact_total")) or 0.0,
-                    completion_pct=_to_float(summary_row.get("completion_pct")),
-                    delta_amount=_to_float(summary_row.get("delta_amount")) or 0.0,
+                    planned_amount=to_float(summary_row.get("planned_total")) or 0.0,
+                    fact_amount=to_float(summary_row.get("fact_total")) or 0.0,
+                    completion_pct=to_float(summary_row.get("completion_pct")),
+                    delta_amount=to_float(summary_row.get("delta_amount")) or 0.0,
                     average_daily_revenue=average_daily_revenue,
                     daily_revenue=daily_revenue,
                 )
@@ -665,12 +651,12 @@ def fetch_daily_report(target_date: date) -> DailyReportResponse:
     for row in rows:
         items.append(
             DailyReportItem(
-                smeta=(row.get("smeta_code") or "").strip() or None,
-                work_type=(row.get("smeta_section") or "").strip() or None,
-                description=(row.get("description") or "").strip() or "Без названия",
-                unit=(row.get("unit") or "").strip() or None,
-                total_volume=_to_float(row.get("total_volume")),
-                total_amount=_to_float(row.get("total_amount")),
+                smeta=normalize_string(row.get("smeta_code")) or None,
+                work_type=normalize_string(row.get("smeta_section")) or None,
+                description=normalize_string(row.get("description"), default="Без названия"),
+                unit=normalize_string(row.get("unit")) or None,
+                total_volume=to_float(row.get("total_volume")),
+                total_amount=to_float(row.get("total_amount")),
             )
         )
 
