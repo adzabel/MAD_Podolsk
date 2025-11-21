@@ -13,6 +13,33 @@ logger = logging.getLogger(__name__)
 
 _unique_index_created = False
 
+# Упрощённые словарные/табличные паттерны для определения браузера, ОС и типа устройства.
+# Порядок имеет значение: более специфичные/уязвимые к пересечению паттерны выше.
+_BROWSER_PATTERNS: list[tuple[str, tuple[str, ...], tuple[str, ...]]] = [
+    ("edge", ("edg",), ()),  # Edge содержит 'Edg'
+    ("opera", ("opr", "opera"), ()),  # Opera до Chrome чтобы не перехватил Chrome
+    (
+        "chrome",
+        ("chrome",),
+        ("edg", "chromium", "opr", "opera"),  # Исключаем Edge/Chromium/Opera
+    ),
+    ("safari", ("safari",), ("chrome",)),  # Safari без Chrome
+    ("firefox", ("firefox",), ()),
+    ("ie", ("trident", "msie"), ()),
+]
+
+_OS_PATTERNS: list[tuple[str, tuple[str, ...]]] = [
+    ("windows", ("windows",)),
+    ("android", ("android",)),
+    ("ios", ("iphone", "ipad", "ios")),
+    ("macos", ("mac os x", "macintosh")),
+    ("linux", ("linux",)),
+]
+
+_DEVICE_PATTERNS: list[tuple[str, tuple[str, ...]]] = [
+    ("mobile", ("mobi", "android", "iphone")),
+]
+
 CREATE_UNIQUE_SESSION_INDEX_SQL = """
     CREATE UNIQUE INDEX IF NOT EXISTS dashboard_visits_user_session_uidx
         ON dashboard_visits (user_id, session_id);
@@ -123,44 +150,36 @@ def _get_session_duration(request: Request) -> int | None:
 
 
 def _parse_user_agent(user_agent: str | None) -> tuple[str | None, str | None, str | None]:
-    """Грубый парсер User-Agent для определения устройства, браузера и ОС."""
+    """Парсер User-Agent через словарные/табличные паттерны.
+
+    Возвращает (device_type, browser, os). Все значения могут быть None при отсутствии определения.
+    Логика: для каждой категории перебираются упорядоченные паттерны; первый подходящий побеждает.
+    """
 
     if not user_agent:
         return None, None, None
 
     ua_lower = user_agent.lower()
 
-    device_type: str | None
-    if "mobi" in ua_lower or "android" in ua_lower or "iphone" in ua_lower:
-        device_type = "mobile"
-    else:
-        device_type = "desktop"
+    # device_type
+    device_type = next(
+        (label for label, inc in _DEVICE_PATTERNS if any(p in ua_lower for p in inc)),
+        "desktop",  # значение по умолчанию
+    )
 
+    # browser
     browser: str | None = None
-    if "edg" in ua_lower:
-        browser = "edge"
-    elif "chrome" in ua_lower and "edg" not in ua_lower and "chromium" not in ua_lower:
-        browser = "chrome"
-    elif "safari" in ua_lower and "chrome" not in ua_lower:
-        browser = "safari"
-    elif "firefox" in ua_lower:
-        browser = "firefox"
-    elif "opr" in ua_lower or "opera" in ua_lower:
-        browser = "opera"
-    elif "trident" in ua_lower or "msie" in ua_lower:
-        browser = "ie"
+    for label, inc, exc in _BROWSER_PATTERNS:
+        if any(p in ua_lower for p in inc) and not any(p in ua_lower for p in exc):
+            browser = label
+            break
 
+    # os
     os: str | None = None
-    if "windows" in ua_lower:
-        os = "windows"
-    elif "android" in ua_lower:
-        os = "android"
-    elif "iphone" in ua_lower or "ipad" in ua_lower or "ios" in ua_lower:
-        os = "ios"
-    elif "mac os x" in ua_lower or "macintosh" in ua_lower:
-        os = "macos"
-    elif "linux" in ua_lower:
-        os = "linux"
+    for label, inc in _OS_PATTERNS:
+        if any(p in ua_lower for p in inc):
+            os = label
+            break
 
     return device_type, browser, os
 
