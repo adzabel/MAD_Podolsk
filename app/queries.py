@@ -20,6 +20,7 @@ from .models import (
     DailyRevenue,
     DailyWorkVolume,
 )
+from .query_builder import FactQueryBuilder
 
 logger = logging.getLogger(__name__)
 
@@ -101,40 +102,35 @@ SUMMARY_SQL = """
 """
 
 
-DAILY_FACT_SQL = """
-    SELECT
-        date_done::date AS work_date,
-        SUM(total_amount) AS fact_total
-    FROM skpdi_fact_with_money
-    WHERE month_start = %s
-        AND status = 'Рассмотрено'
-    GROUP BY work_date
-    HAVING SUM(total_amount) IS NOT NULL
-    ORDER BY work_date;
-"""
+DAILY_FACT_SQL = """-- legacy reference (используется билдер FactQueryBuilder)
+SELECT
+    date_done::date AS work_date,
+    SUM(total_amount) AS fact_total
+FROM skpdi_fact_with_money
+WHERE month_start = %s AND status = 'Рассмотрено'
+GROUP BY work_date
+HAVING SUM(total_amount) IS NOT NULL
+ORDER BY work_date;"""
 
-DAILY_REPORT_SQL = """
-    SELECT
-        COALESCE(smeta_code, '') AS smeta_code,
-        COALESCE(smeta_section, '') AS smeta_section,
-        COALESCE(description, '') AS description,
-        unit,
-        SUM(total_volume) AS total_volume,
-        SUM(total_amount) AS total_amount
-    FROM skpdi_fact_with_money
-    WHERE date_done::date = %s
-        AND status = 'Рассмотрено'
-    GROUP BY smeta_code, smeta_section, description, unit
-    ORDER BY total_amount DESC NULLS LAST, description;
-"""
+DAILY_REPORT_SQL = """-- legacy reference (используется билдер FactQueryBuilder)
+SELECT
+    COALESCE(smeta_code, '') AS smeta_code,
+    COALESCE(smeta_section, '') AS smeta_section,
+    COALESCE(description, '') AS description,
+    unit,
+    SUM(total_volume) AS total_volume,
+    SUM(total_amount) AS total_amount
+FROM skpdi_fact_with_money
+WHERE date_done::date = %s AND status = 'Рассмотрено'
+GROUP BY smeta_code, smeta_section, description, unit
+ORDER BY total_amount DESC NULLS LAST, description;"""
 
-AVAILABLE_DAYS_SQL = """
-    SELECT DISTINCT date_done::date AS work_date
-    FROM skpdi_fact_with_money
-    WHERE date_trunc('month', date_done) = date_trunc('month', CURRENT_DATE)
-        AND status = 'Рассмотрено'
-    ORDER BY work_date DESC;
-"""
+AVAILABLE_DAYS_SQL = """-- legacy reference (используется билдер FactQueryBuilder)
+SELECT DISTINCT date_done::date AS work_date
+FROM skpdi_fact_with_money
+WHERE date_trunc('month', date_done) = date_trunc('month', CURRENT_DATE)
+    AND status = 'Рассмотрено'
+ORDER BY work_date DESC;"""
 
 
 def _to_float(value: Any) -> float | None:
@@ -301,11 +297,24 @@ def _aggregate_items_streaming(cursor) -> list[DashboardItem]:
 
 
 def _fetch_daily_fact_totals(conn, month_start: date) -> list[DailyRevenue]:
-    """Извлекает дневные суммы фактических работ. При ошибке логирует и возвращает пусто."""
+    """Извлекает дневные суммы фактических работ используя билдер."""
     daily_rows: list[DailyRevenue] = []
     with conn.cursor(cursor_factory=RealDictCursor) as cur:
         try:
-            cur.execute(DAILY_FACT_SQL, (month_start,))
+            sql, params = (
+                FactQueryBuilder()
+                .select(
+                    "date_done::date AS work_date",
+                    "SUM(total_amount) AS fact_total",
+                )
+                .month_start(month_start)
+                .status()
+                .group_by("work_date")
+                .having("SUM(total_amount) IS NOT NULL")
+                .order_by("work_date")
+                .build()
+            )
+            cur.execute(sql, params)
             rows = cur.fetchall() or []
             for row in rows:
                 amount = _to_float(row.get("fact_total"))
@@ -313,8 +322,7 @@ def _fetch_daily_fact_totals(conn, month_start: date) -> list[DailyRevenue]:
                 if amount is None or work_date is None:
                     continue
                 daily_rows.append(DailyRevenue(date=work_date, amount=amount))
-        except Exception as exc:
-            # Логируем ошибку для отладки (может быть отсутствие таблицы или полей)
+        except Exception as exc:  # noqa: BLE001
             logger.warning(
                 "Не удалось загрузить дневные суммы за %s: %s. Используется пустой список.",
                 month_start,
@@ -327,20 +335,19 @@ def _fetch_daily_fact_totals(conn, month_start: date) -> list[DailyRevenue]:
     return daily_rows
 
 
-WORK_BREAKDOWN_SQL = """
-    SELECT
-        date_done::date AS work_date,
-        SUM(COALESCE(total_volume, 0)) AS total_volume,
-        MAX(COALESCE(unit::text, '')) AS unit,
-        SUM(COALESCE(total_amount, 0)) AS total_amount
-    FROM skpdi_fact_with_money
-    WHERE date_done::date >= %s
-        AND date_done::date < %s
-        AND status = 'Рассмотрено'
-        AND COALESCE(description::text, '') ILIKE %s
-    GROUP BY work_date
-    ORDER BY work_date;
-"""
+WORK_BREAKDOWN_SQL = """-- legacy reference (используется билдер FactQueryBuilder)
+SELECT
+    date_done::date AS work_date,
+    SUM(COALESCE(total_volume, 0)) AS total_volume,
+    MAX(COALESCE(unit::text, '')) AS unit,
+    SUM(COALESCE(total_amount, 0)) AS total_amount
+FROM skpdi_fact_with_money
+WHERE date_done::date >= %s
+  AND date_done::date < %s
+  AND status = 'Рассмотрено'
+  AND COALESCE(description::text, '') ILIKE %s
+GROUP BY work_date
+ORDER BY work_date;"""
 
 
 @db_retry(
@@ -371,7 +378,22 @@ def fetch_work_daily_breakdown(month_start: date, work_identifier: str) -> list[
         try:
             with conn.cursor(cursor_factory=RealDictCursor) as cur:
                 work_param = f"%{work_identifier.strip()}%"
-                cur.execute(WORK_BREAKDOWN_SQL, (month_start, next_month_start, work_param))
+                sql, params = (
+                    FactQueryBuilder()
+                    .select(
+                        "date_done::date AS work_date",
+                        "SUM(COALESCE(total_volume, 0)) AS total_volume",
+                        "MAX(COALESCE(unit::text, '')) AS unit",
+                        "SUM(COALESCE(total_amount, 0)) AS total_amount",
+                    )
+                    .date_range(month_start, next_month_start)
+                    .status()
+                    .ilike_description(work_param)
+                    .group_by("work_date")
+                    .order_by("work_date")
+                    .build()
+                )
+                cur.execute(sql, params)
                 fetched = cur.fetchall() or []
                 for row in fetched:
                     work_date = row.get("work_date")
@@ -585,9 +607,18 @@ def fetch_available_months(limit: int = 12) -> list[date]:
     label="fetch_available_days",
 )
 def fetch_available_days() -> list[date]:
-    """Возвращает список дат текущего месяца, по которым есть фактические данные."""
+    """Возвращает список дат текущего месяца (через билдер), по которым есть фактические данные."""
     with get_connection() as conn, conn.cursor() as cur:
-        cur.execute(AVAILABLE_DAYS_SQL)
+        sql, params = (
+            FactQueryBuilder()
+            .distinct()
+            .select("date_done::date AS work_date")
+            .current_month()
+            .status()
+            .order_by("work_date DESC")
+            .build()
+        )
+        cur.execute(sql, params)
         rows = cur.fetchall() or []
     return [row[0] for row in rows if row and row[0] is not None]
 
@@ -600,12 +631,28 @@ def fetch_available_days() -> list[date]:
     label="fetch_daily_report",
 )
 def fetch_daily_report(target_date: date) -> DailyReportResponse:
-    """Возвращает детализацию фактических работ за выбранный день."""
+    """Возвращает детализацию фактических работ за выбранный день, используя билдер."""
     target_date = target_date or date.today()
 
     with get_connection() as conn:
         with conn.cursor(cursor_factory=RealDictCursor) as cur:
-            cur.execute(DAILY_REPORT_SQL, (target_date,))
+            sql, params = (
+                FactQueryBuilder()
+                .select(
+                    "COALESCE(smeta_code, '') AS smeta_code",
+                    "COALESCE(smeta_section, '') AS smeta_section",
+                    "COALESCE(description, '') AS description",
+                    "unit",
+                    "SUM(total_volume) AS total_volume",
+                    "SUM(total_amount) AS total_amount",
+                )
+                .date_equals(target_date)
+                .status()
+                .group_by("smeta_code", "smeta_section", "description", "unit")
+                .order_by("total_amount DESC NULLS LAST", "description")
+                .build()
+            )
+            cur.execute(sql, params)
             rows = cur.fetchall() or []
 
         last_updated = None
