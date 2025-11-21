@@ -35,7 +35,7 @@
           <button class="view-tab is-active" role="tab" aria-selected="true" data-view="monthly" id="tab-monthly"><span class="view-tab-line1">По</span><span class="view-tab-line2">месяцам</span></button>
           <button class="view-tab" role="tab" aria-selected="false" data-view="daily" id="tab-daily"><span class="view-tab-line1">По</span><span class="view-tab-line2">дням</span></button>
         </nav>
-        <div class="month-info">
+        <div class="month-info monthly-only" id="month-controls">
           <div class="month-select">
             <label for="month">Месяц</label>
             <div class="month-select-control">
@@ -47,6 +47,21 @@
             <div class="pill-info">
               <span class="pill-label">ДАННЫЕ ОБНОВЛЕНЫ</span>
               <span class="pill-value" id="last-updated-text">Обновление данных…</span>
+            </div>
+          </div>
+        </div>
+        <div class="day-info daily-only" id="day-controls">
+          <div class="day-select">
+            <label for="day">День</label>
+            <div class="day-select-control">
+              <select id="day"><!-- заполним в JS --></select>
+            </div>
+          </div>
+          <div class="pill" id="last-updated-pill-daily">
+            <span class="pill-dot" aria-hidden="true"></span>
+            <div class="pill-info">
+              <span class="pill-label">ДАННЫЕ ОБНОВЛЕНЫ</span>
+              <span class="pill-value" id="last-updated-text-daily">Обновление данных…</span>
             </div>
           </div>
         </div>
@@ -241,6 +256,48 @@
         Здесь появится список работ выбранной сметы.
       </div>
       <div class="work-list" id="work-list"></div>
+    </section>
+
+    <!-- Ежедневные данные -->
+    <section class="panel daily-only" id="daily-panel">
+      <div class="panel-header">
+        <div>
+          <div class="panel-title">Данные за выбранный день</div>
+          <div class="panel-subtitle" id="daily-panel-subtitle">Выберите день, чтобы увидеть данные</div>
+        </div>
+      </div>
+      <div class="work-list work-list-skeleton daily-skeleton" id="daily-skeleton" aria-hidden="true">
+        <div class="work-row-skeleton">
+          <div class="skeleton skeleton-line"></div>
+          <div class="skeleton skeleton-line"></div>
+          <div class="skeleton skeleton-line"></div>
+          <div class="skeleton skeleton-line"></div>
+          <div class="skeleton skeleton-line"></div>
+        </div>
+        <div class="work-row-skeleton">
+          <div class="skeleton skeleton-line"></div>
+          <div class="skeleton skeleton-line"></div>
+          <div class="skeleton skeleton-line"></div>
+          <div class="skeleton skeleton-line"></div>
+          <div class="skeleton skeleton-line"></div>
+        </div>
+        <div class="work-row-skeleton">
+          <div class="skeleton skeleton-line"></div>
+          <div class="skeleton skeleton-line"></div>
+          <div class="skeleton skeleton-line"></div>
+          <div class="skeleton skeleton-line"></div>
+          <div class="skeleton skeleton-line"></div>
+        </div>
+        <div class="work-row-skeleton">
+          <div class="skeleton skeleton-line"></div>
+          <div class="skeleton skeleton-line"></div>
+          <div class="skeleton skeleton-line"></div>
+          <div class="skeleton skeleton-line"></div>
+          <div class="skeleton skeleton-line"></div>
+        </div>
+      </div>
+      <div class="empty-state" id="daily-empty-state">Здесь появятся данные за выбранный день.</div>
+      <div class="work-list daily-table" id="daily-table"></div>
     </section>
 
     <!-- Верхняя мобильная кнопка PDF удалена (дублирует нижнюю). -->
