@@ -767,9 +767,11 @@ export class UIManager {
     }
 
     if (this.elements.dailyPanelSubtitle) {
-      const subtitleText = selectedDayLabel ? "" : "Выберите день, чтобы увидеть данные";
+      const subtitleText = selectedDayLabel 
+        ? "Данные доступны только для текущего месяца" 
+        : "Выберите день, чтобы увидеть данные";
       this.elements.dailyPanelSubtitle.textContent = subtitleText;
-      this.elements.dailyPanelSubtitle.hidden = Boolean(selectedDayLabel);
+      this.elements.dailyPanelSubtitle.hidden = false;
     }
 
     this.lastUpdatedDailyLabel = data?.has_data ? formatDateTime(data.last_updated) : "Нет данных";
