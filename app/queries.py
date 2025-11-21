@@ -109,35 +109,7 @@ SUMMARY_SQL = """
 """
 
 
-DAILY_FACT_SQL = """-- legacy reference (используется билдер FactQueryBuilder)
-SELECT
-    date_done::date AS work_date,
-    SUM(total_amount) AS fact_total
-FROM skpdi_fact_with_money
-WHERE month_start = %s AND status = 'Рассмотрено'
-GROUP BY work_date
-HAVING SUM(total_amount) IS NOT NULL
-ORDER BY work_date;"""
-
-DAILY_REPORT_SQL = """-- legacy reference (используется билдер FactQueryBuilder)
-SELECT
-    COALESCE(smeta_code, '') AS smeta_code,
-    COALESCE(smeta_section, '') AS smeta_section,
-    COALESCE(description, '') AS description,
-    unit,
-    SUM(total_volume) AS total_volume,
-    SUM(total_amount) AS total_amount
-FROM skpdi_fact_with_money
-WHERE date_done::date = %s AND status = 'Рассмотрено'
-GROUP BY smeta_code, smeta_section, description, unit
-ORDER BY total_amount DESC NULLS LAST, description;"""
-
-AVAILABLE_DAYS_SQL = """-- legacy reference (используется билдер FactQueryBuilder)
-SELECT DISTINCT date_done::date AS work_date
-FROM skpdi_fact_with_money
-WHERE date_trunc('month', date_done) = date_trunc('month', CURRENT_DATE)
-    AND status = 'Рассмотрено'
-ORDER BY work_date DESC;"""
+ 
 
 
 # Функции _to_float, _safe_get_from_row и _extract_strings перенесены в utils.py
@@ -320,19 +292,7 @@ def _fetch_daily_fact_totals(conn, month_start: date) -> list[DailyRevenue]:
     return daily_rows
 
 
-WORK_BREAKDOWN_SQL = """-- legacy reference (используется билдер FactQueryBuilder)
-SELECT
-    date_done::date AS work_date,
-    SUM(COALESCE(total_volume, 0)) AS total_volume,
-    MAX(COALESCE(unit::text, '')) AS unit,
-    SUM(COALESCE(total_amount, 0)) AS total_amount
-FROM skpdi_fact_with_money
-WHERE date_done::date >= %s
-  AND date_done::date < %s
-  AND status = 'Рассмотрено'
-  AND COALESCE(description::text, '') ILIKE %s
-GROUP BY work_date
-ORDER BY work_date;"""
+ 
 
 
 @db_retry(
