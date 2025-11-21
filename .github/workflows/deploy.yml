@@ -23,18 +23,26 @@ jobs:
         run: |
           mkdir -p ~/.ssh
           printf "Host *\n\tStrictHostKeyChecking no\n\tUserKnownHostsFile=/dev/null\n" > ~/.ssh/config
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+          cache-dependency-path: frontend/package.json
 
-      - name: Build frontend with cache-busting filenames
-        env:
-          CACHE_BUSTER: ${{ github.sha }}
-        run: |
-          python scripts/cache_bust.py
+      - name: Install frontend dependencies
+        working-directory: frontend
+        run: npm ci
 
-      - name: Deploy docs folder to server via rsync
+      - name: Build frontend (Vite)
+        working-directory: frontend
+        run: npm run build
+
+      - name: Deploy Vite dist to server via rsync
         run: |
           rsync -avzr --delete \
             --exclude=".git" \
             --exclude=".github" \
             -e "ssh -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null" \
-            ./docs-build/ \
+            ./frontend/dist/ \
             u3330235@37.140.192.181:/var/www/u3330235/data/www/podolsk.mad.moclean.ru/
