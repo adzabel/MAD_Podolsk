@@ -34,8 +34,9 @@
           <button class="view-tab" role="tab" aria-selected="false" data-view="daily" id="tab-daily">По дням</button>
         </nav>
       </div>
-      <div class="page-header-right">
-        <div class="header-filters">
+      <div class="controls">
+        <div class="pdf-action pdf-action-desktop"></div>
+        <div class="month-info">
           <div class="month-select">
             <label for="month">Месяц</label>
             <div class="month-select-control">
@@ -50,13 +51,10 @@
             </div>
           </div>
         </div>
-        <div class="header-actions">
-          <div class="pdf-action pdf-action-desktop"></div>
-        </div>
       </div>
     </header>
 
-    <section class="contract-card" id="contract-card">
+    <section class="contract-card monthly-only" id="contract-card">
       <div class="contract-card-header">
         <div class="contract-card-title">
           Исполнение контракта
@@ -90,7 +88,7 @@
     </section>
 
     <!-- Сводка -->
-    <section class="summary-grid" id="summary-grid">
+    <section class="summary-grid monthly-only" id="summary-grid">
       <div class="summary-card">
         <div class="summary-label">План, ₽</div>
         <div class="summary-value" id="sum-planned">–</div>
@@ -132,7 +130,7 @@
         <span class="sr-only">Нажмите, чтобы посмотреть детализацию по дням</span>
       </button>
     </section>
-    <section class="summary-grid skeleton-grid" id="summary-skeleton" aria-hidden="true">
+    <section class="summary-grid skeleton-grid monthly-only" id="summary-skeleton" aria-hidden="true">
       <div class="summary-card summary-card-skeleton">
         <div class="skeleton skeleton-line skeleton-line-sm"></div>
         <div class="skeleton skeleton-line skeleton-line-lg"></div>
@@ -156,7 +154,7 @@
     </section>
 
     <!-- Сводка по сметам -->
-    <section class="panel">
+    <section class="panel monthly-only">
       <div class="panel-header">
         <div>
           <div class="panel-title">Работы в разрезе Смет</div>
@@ -188,7 +186,7 @@
     </section>
 
     <!-- Список работ выбранной сметы -->
-    <section class="panel">
+    <section class="panel monthly-only">
       <div class="panel-header work-panel-header">
         <div class="work-panel-title-area">
           <div class="panel-title-group">
@@ -244,6 +242,15 @@
       </div>
       <div class="work-list" id="work-list"></div>
     </section>
+
+    <div class="pdf-action pdf-action-mobile">
+      <button class="btn btn-airy" type="button" id="download-pdf" aria-live="polite">
+        <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false" stroke="currentColor" stroke-width="1.5" width="18" height="18">
+          <path d="M12 3v11m-4-4l4 4 4-4M4 19h16" fill="none" stroke-linecap="round" stroke-linejoin="round"></path>
+        </svg>
+        <span>Отчёт в PDF</span>
+      </button>
+    </div>
 
   </div>
 
