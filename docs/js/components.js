@@ -99,12 +99,12 @@ export class UIManager {
       this.elements.page.dataset.viewMode = this.viewMode;
     }
     if (this.elements.viewModeMonthly) {
-      this.elements.viewModeMonthly.classList.toggle("active", this.viewMode === "monthly");
-      this.elements.viewModeMonthly.setAttribute("aria-pressed", this.viewMode === "monthly" ? "true" : "false");
+      this.elements.viewModeMonthly.classList.toggle("is-active", this.viewMode === "monthly");
+      this.elements.viewModeMonthly.setAttribute("aria-selected", this.viewMode === "monthly" ? "true" : "false");
     }
     if (this.elements.viewModeDaily) {
-      this.elements.viewModeDaily.classList.toggle("active", this.viewMode === "daily");
-      this.elements.viewModeDaily.setAttribute("aria-pressed", this.viewMode === "daily" ? "true" : "false");
+      this.elements.viewModeDaily.classList.toggle("is-active", this.viewMode === "daily");
+      this.elements.viewModeDaily.setAttribute("aria-selected", this.viewMode === "daily" ? "true" : "false");
     }
 
     const shouldDisablePdf = this.viewMode === "daily";
