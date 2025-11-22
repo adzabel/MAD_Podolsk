@@ -16,6 +16,7 @@ import {
   updateContractCard as updateContractCardExternal,
   updateContractProgress as updateContractProgressExternal,
 } from "@js/views/summary-view.js";
+import { UiStore } from "@js/store/index.js";
 import { renderCategoriesFacade } from "@js/views/categories-view.js";
 import { initWorkListView, renderWorkRowsView } from "@js/ui/workListView.js";
 import {
@@ -59,6 +60,7 @@ function buildProgressColor(percent) {
 
 export class UIManager {
   constructor({ dataManager, elements, apiPdfUrl, pdfButtonDefaultLabel, visitorTracker }) {
+    this.uiStore = new UiStore();
     this.dataManager = dataManager;
     this.elements = elements;
     this.apiPdfUrl = apiPdfUrl;
@@ -75,12 +77,9 @@ export class UIManager {
     this.lastUpdatedDailyDateLabel = null;
     this.summaryDailyRevenue = [];
     this.dailyRevenue = [];
-    this.workSort = { column: "planned" };
-    this.selectedMonthIso = null;
-    this.selectedDayIso = null;
-    this.availableDays = [];
     this.initialMonth = new URLSearchParams(window.location.search).get("month");
-    this.viewMode = "monthly";
+    this.uiStore.setWorkSortColumn("planned");
+    this.uiStore.setViewMode("monthly");
     this.dayOptionsLoaded = false;
     this.currentDailyData = null;
     if (this.elements.workSortSelect) {
@@ -142,19 +141,21 @@ export class UIManager {
   }
 
   updateViewModeLayout() {
+    const viewMode = this.uiStore.viewMode || this.viewMode;
+
     if (this.elements.page) {
-      this.elements.page.dataset.viewMode = this.viewMode;
+      this.elements.page.dataset.viewMode = viewMode;
     }
     if (this.elements.viewModeMonthly) {
-      this.elements.viewModeMonthly.classList.toggle("is-active", this.viewMode === "monthly");
-      this.elements.viewModeMonthly.setAttribute("aria-selected", this.viewMode === "monthly" ? "true" : "false");
+      this.elements.viewModeMonthly.classList.toggle("is-active", viewMode === "monthly");
+      this.elements.viewModeMonthly.setAttribute("aria-selected", viewMode === "monthly" ? "true" : "false");
     }
     if (this.elements.viewModeDaily) {
-      this.elements.viewModeDaily.classList.toggle("is-active", this.viewMode === "daily");
-      this.elements.viewModeDaily.setAttribute("aria-selected", this.viewMode === "daily" ? "true" : "false");
+      this.elements.viewModeDaily.classList.toggle("is-active", viewMode === "daily");
+      this.elements.viewModeDaily.setAttribute("aria-selected", viewMode === "daily" ? "true" : "false");
     }
 
-    const shouldDisablePdf = this.viewMode === "daily";
+    const shouldDisablePdf = viewMode === "daily";
     if (this.elements.pdfButton) {
       this.elements.pdfButton.disabled = shouldDisablePdf || !this.groupedCategories.length;
     }
@@ -315,11 +316,11 @@ export class UIManager {
     inputEl.disabled = true;
     inputEl.min = "";
     inputEl.max = "";
-    this.selectedDayIso = null;
+    this.uiStore.setSelectedDay(null);
 
     try {
       const availableDays = await this.dataManager.fetchAvailableDays();
-      this.availableDays = (availableDays || [])
+      const availableDaysNormalized = (availableDays || [])
         .map((iso) => {
           const date = new Date(iso);
           if (Number.isNaN(date.getTime())) return null;
@@ -331,16 +332,21 @@ export class UIManager {
         .filter(Boolean)
         .sort((a, b) => (a.iso < b.iso ? 1 : -1));
 
-      if (!this.availableDays.length) {
+      this.uiStore.setAvailableDays(availableDaysNormalized);
+
+      if (!availableDaysNormalized.length) {
         const todayIso = this.getCurrentDayIso();
-        this.availableDays = todayIso ? [{ iso: todayIso, label: formatDate(todayIso, { day: "2-digit", month: "long" }) }] : [];
+        const fallbackDays = todayIso ? [{ iso: todayIso, label: formatDate(todayIso, { day: "2-digit", month: "long" }) }] : [];
+        this.uiStore.setAvailableDays(fallbackDays);
       }
 
-      const minDayIso = this.availableDays.reduce(
+      const uiAvailableDays = this.uiStore.availableDays;
+
+      const minDayIso = uiAvailableDays.reduce(
         (min, item) => (!min || item.iso < min ? item.iso : min),
         null,
       );
-      const maxDayIso = this.availableDays.reduce(
+      const maxDayIso = uiAvailableDays.reduce(
         (max, item) => (!max || item.iso > max ? item.iso : max),
         null,
       );
@@ -352,13 +358,14 @@ export class UIManager {
         inputEl.max = maxDayIso;
       }
 
-      const initialDayIso = (this.selectedDayIso && this.availableDays.some((item) => item.iso === this.selectedDayIso))
-        ? this.selectedDayIso
-        : this.availableDays[0]?.iso;
+      const selectedDayFromStore = this.uiStore.selectedDayIso;
+      const initialDayIso = (selectedDayFromStore && uiAvailableDays.some((item) => item.iso === selectedDayFromStore))
+        ? selectedDayFromStore
+        : uiAvailableDays[0]?.iso;
 
       if (initialDayIso) {
         inputEl.value = initialDayIso;
-        this.selectedDayIso = initialDayIso;
+        this.uiStore.setSelectedDay(initialDayIso);
       }
 
       this.dayOptionsLoaded = true;
@@ -419,10 +426,10 @@ export class UIManager {
 
   async switchViewMode(mode) {
     const normalized = mode === "daily" ? "daily" : "monthly";
-    if (this.viewMode === normalized) {
+    if (this.uiStore.viewMode === normalized) {
       return;
     }
-    this.viewMode = normalized;
+    this.uiStore.setViewMode(normalized);
     this.updateViewModeLayout();
 
     if (normalized === "daily") {
@@ -430,8 +437,8 @@ export class UIManager {
         await this.initDaySelect();
       }
       const targetDay = this.elements.daySelect?.value
-        || this.selectedDayIso
-        || (this.availableDays[0] ? this.availableDays[0].iso : null)
+        || this.uiStore.selectedDayIso
+        || (this.uiStore.availableDays[0] ? this.uiStore.availableDays[0].iso : null)
         || this.getCurrentDayIso();
       if (targetDay) {
         this.setDaySelectValue(targetDay);
@@ -446,7 +453,7 @@ export class UIManager {
 
   async loadDailyData(dayIso) {
     if (!dayIso) return;
-    this.selectedDayIso = dayIso;
+    this.uiStore.setSelectedDay(dayIso);
     if (this.elements.dailySkeleton) {
       this.elements.dailySkeleton.style.display = "block";
     }
@@ -478,7 +485,7 @@ export class UIManager {
       elements: this.elements,
       summaryDailyRevenue: this.summaryDailyRevenue,
       selectedMonthLabel: this.getSelectedMonthLabel(),
-      isCurrentMonth: this.isCurrentMonth(this.selectedMonthIso),
+      isCurrentMonth: this.isCurrentMonth(this.uiStore.selectedMonthIso),
     });
   }
 
@@ -500,12 +507,12 @@ export class UIManager {
       if (pdfModule && typeof pdfModule.downloadPdf === "function") {
         await pdfModule.downloadPdf({
           apiPdfUrl: this.apiPdfUrl,
-          selectedMonthIso: this.selectedMonthIso,
+            selectedMonthIso: this.uiStore.selectedMonthIso,
         });
       } else {
         const url = new URL(this.apiPdfUrl, window.location.origin);
-        if (this.selectedMonthIso) {
-          url.searchParams.set("month", this.selectedMonthIso);
+          if (this.uiStore.selectedMonthIso) {
+            url.searchParams.set("month", this.uiStore.selectedMonthIso);
         }
         window.open(url.toString(), "_blank");
       }
@@ -517,7 +524,7 @@ export class UIManager {
     }
   }
 
-  updateDailyAverageVisibility(monthIso = this.selectedMonthIso) {
+  updateDailyAverageVisibility(monthIso = this.uiStore.selectedMonthIso) {
     const isCurrentMonth = this.isCurrentMonth(monthIso);
     if (this.elements.dailyAverageNote) {
       this.elements.dailyAverageNote.hidden = !isCurrentMonth;
@@ -545,7 +552,7 @@ export class UIManager {
   }
 
   async loadMonthData(monthIso) {
-    this.selectedMonthIso = monthIso;
+    this.uiStore.setSelectedMonth(monthIso);
     this.updateDailyAverageVisibility(monthIso);
     const cached = this.dataManager.getCached(monthIso);
     if (cached) {
@@ -685,7 +692,7 @@ export class UIManager {
       this.elements.lastUpdatedTextDaily.textContent = dailyLabel;
     }
 
-    if (this.viewMode === "daily") {
+    if (this.uiStore.viewMode === "daily") {
       this.updateContractTitleDate(dailyDateLabel);
     } else {
       this.updateContractTitleDate(monthlyDateLabel);
@@ -713,7 +720,7 @@ export class UIManager {
   }
 
   updateDailyAverage(averageValue, daysWithData) {
-    const isCurrentMonth = this.isCurrentMonth(this.selectedMonthIso);
+    const isCurrentMonth = this.isCurrentMonth(this.uiStore.selectedMonthIso);
     updateDailyAverageExternal({
       averageValue,
       daysWithData,
@@ -727,7 +734,6 @@ export class UIManager {
       return;
     }
     this.elements.daySelect.value = dayIso;
-    this.selectedDayIso = this.elements.daySelect.value || dayIso;
   }
 
   showDailyLoadingState() {
@@ -938,24 +944,27 @@ export class UIManager {
   }
 
   handleWorkSortChange(column) {
-    if (!column || this.workSort.column === column) {
+    const currentColumn = this.uiStore.workSort.column;
+    if (!column || currentColumn === column) {
       return;
     }
-    this.workSort.column = column;
+    this.uiStore.setWorkSortColumn(column);
     this.updateWorkSortButtons();
     this.renderWorkList();
   }
 
   updateWorkSortButtons() {
     if (this.workSortButtons) {
+      const currentColumn = this.uiStore.workSort.column;
       this.workSortButtons.forEach((button) => {
-        const isActive = button.dataset.sort === this.workSort.column;
+        const isActive = button.dataset.sort === currentColumn;
         button.classList.toggle("active", isActive);
         button.setAttribute("aria-pressed", String(isActive));
       });
     }
-    if (this.elements.workSortSelect && this.elements.workSortSelect.value !== this.workSort.column) {
-      this.elements.workSortSelect.value = this.workSort.column;
+    const currentColumn = this.uiStore.workSort.column;
+    if (this.elements.workSortSelect && this.elements.workSortSelect.value !== currentColumn) {
+      this.elements.workSortSelect.value = currentColumn;
     }
   }
 
@@ -964,7 +973,8 @@ export class UIManager {
       return Number.NEGATIVE_INFINITY;
     }
     let value;
-    switch (this.workSort.column) {
+    const currentColumn = this.uiStore.workSort.column;
+    switch (currentColumn) {
       case "fact":
         value = item.fact_amount;
         break;
@@ -984,7 +994,8 @@ export class UIManager {
     if (!Array.isArray(works)) {
       return works;
     }
-    if (this.workSort.column === "delta") {
+    const currentColumn = this.uiStore.workSort.column;
+    if (currentColumn === "delta") {
       works.sort((a, b) => {
         const deltaA = calculateDelta(a);
         const deltaB = calculateDelta(b);
