@@ -1,0 +1,48 @@
+name: Build and Deploy Vite frontend
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: |
+          npm ci
+
+      - name: Build Vite frontend
+        run: |
+          npm run build
+
+      - name: Start ssh-agent and add key
+        uses: webfactory/ssh-agent@v0.9.0
+        with:
+          ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY_MAD }}
+
+      - name: Disable host key check
+        run: |
+          mkdir -p ~/.ssh
+          printf "Host *\n\tStrictHostKeyChecking no\n\tUserKnownHostsFile=/dev/null\n" > ~/.ssh/config
+
+      - name: Deploy dist folder to server via rsync
+        run: |
+          rsync -avzr --delete \
+            --exclude=".git" \
+            --exclude=".github" \
+            -e "ssh -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null" \
+            ./dist/ \
+            u3330235@37.140.192.181:/var/www/u3330235/data/www/podolsk.mad.moclean.ru/
