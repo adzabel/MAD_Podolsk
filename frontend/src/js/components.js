@@ -18,6 +18,12 @@ import {
 } from "@js/summary.js";
 import { renderCategoriesView } from "@js/ui/categoriesView.js";
 import { initWorkListView, renderWorkRowsView } from "@js/ui/workListView.js";
+import {
+  openAverageDailyModal,
+  openWorkBreakdownModal,
+  closeDailyModalView,
+  renderDailyModalListView,
+} from "@js/ui/dailyModalView.js";
 
 // Цветовые палитры категорий вынесены в константу верхнего уровня,
 // чтобы `UIManager` концентрировался на логике, а не на данных оформления.
@@ -468,21 +474,16 @@ export class UIManager {
   }
 
   async openDailyModal() {
-    if (!this.elements.dailyModal) return;
-    const { applyDailyData } = await this.loadDailyModule();
-    if (this.currentDailyData) {
-      applyDailyData({
-        data: this.currentDailyData,
-        elements: this.elements,
-        onAfterRender: () => this.updateDailyNameCollapsers(),
-      });
-    }
-    this.elements.dailyModal.dataset.open = "true";
+    openAverageDailyModal({
+      elements: this.elements,
+      summaryDailyRevenue: this.summaryDailyRevenue,
+      selectedMonthLabel: this.getSelectedMonthLabel(),
+      isCurrentMonth: this.isCurrentMonth(this.selectedMonthIso),
+    });
   }
 
   closeDailyModal() {
-    if (!this.elements.dailyModal) return;
-    this.elements.dailyModal.dataset.open = "false";
+    closeDailyModalView({ elements: this.elements });
   }
 
   async downloadPdfReport(event) {
@@ -832,26 +833,20 @@ export class UIManager {
   openDailyModal() {
     if (
       !this.summaryDailyRevenue.length
-      || !this.elements.dailyModal
       || !this.isCurrentMonth(this.selectedMonthIso)
     ) {
       return;
     }
-    // Устанавливаем заголовок модального окна для среднедневной выручки
-    const titleEl = this.elements.dailyModal.querySelector("#daily-modal-title") || document.getElementById("daily-modal-title");
-    if (titleEl) titleEl.textContent = "Среднедневная выручка";
-    
-    // Устанавливаем подзаголовок
-    const monthLabel = this.getSelectedMonthLabel() || "выбранный месяц";
-    if (this.elements.dailyModalSubtitle) {
-      this.elements.dailyModalSubtitle.textContent = `По дням за ${monthLabel.toLowerCase()}`;
-    }
-    
+
     this.dailyRevenue = [...this.summaryDailyRevenue];
     this.dailyModalMode = "average";
     this.renderDailyModalList();
-    this.elements.dailyModal.classList.add("visible");
-    this.elements.dailyModal.setAttribute("aria-hidden", "false");
+    openAverageDailyModal({
+      elements: this.elements,
+      summaryDailyRevenue: this.summaryDailyRevenue,
+      selectedMonthLabel: this.getSelectedMonthLabel(),
+      isCurrentMonth: this.isCurrentMonth(this.selectedMonthIso),
+    });
   }
 
   async openWorkModal(item) {
@@ -869,12 +864,10 @@ export class UIManager {
     url.searchParams.set("work", workName);
 
     try {
-      // Установим заголовок модального окна
-      const titleEl = this.elements.dailyModal.querySelector("#daily-modal-title") || document.getElementById("daily-modal-title");
-      if (titleEl) titleEl.textContent = `Расшифровка: ${workName}`;
-      if (this.elements.dailyModalSubtitle) {
-        this.elements.dailyModalSubtitle.textContent = "";
-      }
+      openWorkBreakdownModal({
+        elements: this.elements,
+        workName,
+      });
 
       const response = await fetch(url.toString(), {
         headers: this.visitorTracker ? this.visitorTracker.buildHeaders() : {},
@@ -896,8 +889,6 @@ export class UIManager {
       }).filter(Boolean);
 
       this.renderDailyModalList();
-      this.elements.dailyModal.classList.add("visible");
-      this.elements.dailyModal.setAttribute("aria-hidden", "false");
     } catch (err) {
       console.error("Ошибка загрузки расшифровки по работе:", err);
       showToast("Не удалось загрузить расшифровку по работе.", "error");
@@ -905,94 +896,16 @@ export class UIManager {
   }
 
   closeDailyModal() {
-    if (!this.elements.dailyModal) return;
-    this.elements.dailyModal.classList.remove("visible");
-    this.elements.dailyModal.setAttribute("aria-hidden", "true");
+    closeDailyModalView({ elements: this.elements });
   }
 
   renderDailyModalList() {
-    if (!this.elements.dailyModalList || !this.elements.dailyModalEmpty) return;
-
-    const monthLabel = this.getSelectedMonthLabel() || "выбранный месяц";
-    if (this.elements.dailyModalSubtitle) {
-      this.elements.dailyModalSubtitle.textContent = `По дням за ${monthLabel.toLowerCase()}`;
-    }
-
-    this.elements.dailyModalList.innerHTML = "";
-    const sorted = [...this.dailyRevenue].sort((a, b) => new Date(a.date) - new Date(b.date));
-
-    if (!sorted.length) {
-      this.elements.dailyModalEmpty.style.display = "block";
-      this.elements.dailyModalList.style.display = "none";
-      return;
-    }
-
-    this.elements.dailyModalEmpty.style.display = "none";
-    this.elements.dailyModalList.style.display = "grid";
-
-    // Определяем режим отображения: по-умолчанию — если у элементов есть unit или total_amount,
-    // показываем колонки "Объем" + "Сумма" (работы). Иначе — показываем только "Сумма" (среднедневная выручка).
-    const isWorkMode = this.dailyModalMode === "work" || sorted.some((it) => it.unit || (it.total_amount !== null && it.total_amount !== undefined));
-
-    // Добавляем заголовки
-      const header = document.createElement("div");
-      header.className = "modal-row modal-row-header";
-      if (isWorkMode) {
-        header.innerHTML = `
-          <div class="modal-row-date">Дата</div>
-          <div class="modal-row-value"><span class="modal-value-number">Объем</span></div>
-          <div class="modal-row-sum">Сумма,₽</div>
-        `;
-      } else {
-        header.innerHTML = `
-          <div class="modal-row-date">Дата</div>
-          <div class="modal-row-sum">Сумма, ₽</div>
-        `;
-      }
-    this.elements.dailyModalList.appendChild(header);
-
-    const fragment = document.createDocumentFragment();
-    sorted.forEach((item) => {
-      const row = document.createElement("div");
-      row.className = "modal-row";
-      // Для мобильной версии используем компактный формат даты DD.MM
-      const isMobile = typeof window !== "undefined" && window.matchMedia
-        ? window.matchMedia("(max-width: 767px)").matches
-        : false;
-      const dateLabel = isMobile
-        ? formatDate(item.date, { day: "2-digit", month: "2-digit" })
-        : formatDate(item.date);
-      if (isWorkMode) {
-        const amount = Number(item.amount);
-        const formattedAmount = Number.isFinite(amount) ? amount.toFixed(1) : "–";
-        const unit = item.unit || "";
-        const totalAmount = Number(item.total_amount);
-        const formattedTotal = Number.isFinite(totalAmount)
-          ? totalAmount.toLocaleString("ru-RU", { minimumFractionDigits: 0, maximumFractionDigits: 0 })
-          : "–";
-        row.innerHTML = `
-          <div class="modal-row-date">${dateLabel}</div>
-          <div class="modal-row-value">
-            <span class="modal-value-number">${Number.isFinite(amount) ? formattedAmount : formattedAmount}</span>
-            ${unit ? `<span class="modal-value-unit">(${unit})</span>` : ""}
-          </div>
-          <div class="modal-row-sum">${formattedTotal}</div>
-        `;
-      } else {
-        // Режим среднедневной выручки: item.amount — это денежная величина
-        const sumAmount = Number(item.amount);
-        const formattedSum = Number.isFinite(sumAmount)
-          ? sumAmount.toLocaleString("ru-RU", { minimumFractionDigits: 0, maximumFractionDigits: 0 })
-          : "–";
-        row.innerHTML = `
-          <div class="modal-row-date">${dateLabel}</div>
-          <div class="modal-row-sum">${formattedSum}</div>
-        `;
-      }
-      fragment.appendChild(row);
+    renderDailyModalListView({
+      elements: this.elements,
+      dailyRevenue: this.dailyRevenue,
+      dailyModalMode: this.dailyModalMode,
+      selectedMonthLabel: this.getSelectedMonthLabel(),
     });
-
-    this.elements.dailyModalList.appendChild(fragment);
   }
 
   renderCategories() {
