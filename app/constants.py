@@ -30,6 +30,14 @@ CATEGORY_VNR_CODES = {CATEGORY_VNR_1, CATEGORY_VNR_2}
 
 CATEGORY_VNR_LABEL = "внерегламент"
 
+# Имена таблиц БД
+TABLE_PLAN_VS_FACT_MONTHLY = "skpdi_plan_vs_fact_monthly"
+TABLE_RATES = "skpdi_rates"
+TABLE_FACT_AGG = "skpdi_fact_agg"
+TABLE_PLAN_AGG = "skpdi_plan_agg"
+TABLE_CONTRACT_TOTAL = "podolsk_mad_2025_contract_amount"
+TABLE_CONTRACT_EXECUTED = "skpdi_fact_monthly_cat_mv"
+
 # PDF / отчёты
 LAST_UPDATED_DATETIME_FORMAT = "%d.%m.%Y %H:%M МСК"
 MIN_VALUE_THRESHOLD = 1.0

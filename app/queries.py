@@ -9,7 +9,17 @@ from typing import Any, Callable, TypeVar
 from psycopg2 import InterfaceError, OperationalError
 from psycopg2.extras import RealDictCursor
 
-from .constants import CATEGORY_SEASONAL, CATEGORY_VNR_CODES, CATEGORY_VNR_LABEL
+from .constants import (
+    CATEGORY_SEASONAL,
+    CATEGORY_VNR_CODES,
+    CATEGORY_VNR_LABEL,
+    TABLE_CONTRACT_EXECUTED,
+    TABLE_CONTRACT_TOTAL,
+    TABLE_FACT_AGG,
+    TABLE_PLAN_AGG,
+    TABLE_PLAN_VS_FACT_MONTHLY,
+    TABLE_RATES,
+)
 from .db import get_connection
 from .retry import db_retry
 from .models import (
@@ -44,45 +54,45 @@ _DB_RETRY_BACKOFF = 1.0  # Можно увеличить (>1.0) для эксп�
 T = TypeVar("T")
 
 
-ITEMS_SQL = """
+ITEMS_SQL = f"""
     SELECT
         pvf.*,
         rates.smeta_code AS category_code
-    FROM skpdi_plan_vs_fact_monthly AS pvf
-    LEFT JOIN skpdi_rates AS rates
+    FROM {TABLE_PLAN_VS_FACT_MONTHLY} AS pvf
+    LEFT JOIN {TABLE_RATES} AS rates
         ON TRIM(LOWER(rates.work_name)) = TRIM(LOWER(pvf.description))
     WHERE pvf.month_start = %s
     ORDER BY ABS(COALESCE(pvf.delta_amount_done, 0)) DESC, pvf.description;
 """
 
-AVAILABLE_MONTHS_SQL = """
+AVAILABLE_MONTHS_SQL = f"""
     SELECT DISTINCT month_start
-    FROM skpdi_plan_vs_fact_monthly
+    FROM {TABLE_PLAN_VS_FACT_MONTHLY}
     WHERE planned_amount IS NOT NULL OR fact_amount_done IS NOT NULL
     ORDER BY month_start DESC
     LIMIT %s;
 """
 
-LAST_UPDATED_SQL = """
+LAST_UPDATED_SQL = f"""
     SELECT COALESCE(MAX(loaded_at), 'epoch'::timestamptz) AS last_updated
     FROM (
-        SELECT loaded_at FROM skpdi_fact_agg
+        SELECT loaded_at FROM {TABLE_FACT_AGG}
         UNION ALL
-        SELECT loaded_at FROM skpdi_plan_agg
+        SELECT loaded_at FROM {TABLE_PLAN_AGG}
     ) AS loads;
 """
 
-CONTRACT_TOTAL_SQL = """
+CONTRACT_TOTAL_SQL = f"""
     SELECT COALESCE(SUM(contract_amount), 0) AS contract_total
-    FROM podolsk_mad_2025_contract_amount;
+    FROM {TABLE_CONTRACT_TOTAL};
 """
 
-CONTRACT_EXECUTED_SQL = """
+CONTRACT_EXECUTED_SQL = f"""
     SELECT COALESCE(SUM(category_amount), 0) AS executed_total
-    FROM skpdi_fact_monthly_cat_mv;
+    FROM {TABLE_CONTRACT_EXECUTED};
 """
 
-SUMMARY_SQL = """
+SUMMARY_SQL = f"""
     WITH agg AS (
         SELECT
             SUM(CASE
@@ -91,7 +101,7 @@ SUMMARY_SQL = """
                     ELSE planned_amount
                 END) AS planned_total,
             SUM(fact_amount_done) AS fact_total
-        FROM skpdi_plan_vs_fact_monthly
+        FROM {TABLE_PLAN_VS_FACT_MONTHLY}
         WHERE month_start = %s
     )
     SELECT
