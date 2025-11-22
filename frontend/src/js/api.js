@@ -1,4 +1,4 @@
-import { normalizeAmount } from "@js/utils.js";
+import { normalizeAmount } from "@shared/utils.js";
 import {
   hasMeaningfulAmount,
   shouldIncludeItem,
@@ -14,7 +14,7 @@ import {
   API_MONTHS_URL,
   API_DAYS_URL,
   API_DAILY_URL,
-} from "@js/config.frontend.js";
+} from "@config/config.frontend.js";
 
 const RETRYABLE_STATUS_CODES = new Set([408, 425, 429, 500, 502, 503, 504]);
 const DEFAULT_RETRY_DELAY_MS = 700;

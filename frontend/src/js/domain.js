@@ -1,4 +1,4 @@
-import { calculateDelta, normalizeAmount } from "@js/utils.js";
+import { calculateDelta, normalizeAmount } from "@shared/utils.js";
 
 const MERGED_SMETA_OVERRIDES = {
   "внерегл_ч_1": { key: "внерегламент", title: "внерегламент" },

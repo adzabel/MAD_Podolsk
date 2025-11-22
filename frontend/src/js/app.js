@@ -1,5 +1,5 @@
-import { cacheDomElements, setElementsDisabled } from "@js/utils.js";
-import { DataManager } from "@js/api.js";
+import { cacheDomElements, setElementsDisabled } from "@shared/utils.js";
+import { DataManager } from "@api/api.js";
 import { UIManager } from "@js/components.js";
 import { VisitorTracker } from "@js/visitor.js";
 import {
@@ -12,7 +12,7 @@ import {
   MOBILE_MEDIA_QUERY,
   DEFAULT_PDF_LABEL,
   SELECTORS,
-} from "@js/config.frontend.js";
+} from "@config/config.frontend.js";
 
 export function initApp() {
   const visitorTracker = new VisitorTracker();

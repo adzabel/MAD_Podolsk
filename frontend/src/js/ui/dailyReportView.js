@@ -1,4 +1,4 @@
-import { formatDate, formatNumber, formatMoneyRub } from "@js/utils.js";
+import { formatDate, formatNumber, formatMoneyRub } from "@shared/utils.js";
 
 export function applyDailyDataView({ data, elements, onAfterRender }) {
   if (elements.dailySkeleton) {

@@ -1,4 +1,4 @@
-import { formatMoney, formatPercent } from "@js/utils.js";
+import { formatMoney, formatPercent } from "@shared/utils.js";
 
 const PROGRESS_MAX_WIDTH = 115;
 const PROGRESS_MAX_ARIA = 120;

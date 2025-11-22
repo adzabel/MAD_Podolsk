@@ -8,7 +8,7 @@ import {
   showToast,
   calculateDelta,
   debounce,
-} from "@js/utils.js";
+} from "@shared/utils.js";
 import {
   renderSummary as renderSummaryExternal,
   updateSummaryProgress as updateSummaryProgressExternal,

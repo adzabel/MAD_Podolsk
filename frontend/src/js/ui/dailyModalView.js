@@ -1,4 +1,4 @@
-import { formatDate } from "@js/utils.js";
+import { formatDate } from "@shared/utils.js";
 
 export function openAverageDailyModal({ elements, summaryDailyRevenue, selectedMonthLabel, isCurrentMonth }) {
   if (!summaryDailyRevenue.length || !elements.dailyModal || !isCurrentMonth) {

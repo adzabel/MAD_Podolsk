@@ -1,5 +1,5 @@
 import { initializeWorkList, renderWorkRows as renderWorkRowsExternal } from "@js/work-list.js";
-import { calculateDelta } from "@js/utils.js";
+import { calculateDelta } from "@shared/utils.js";
 
 export function initWorkListView({ container, onSortChange, onWorkClick, initializeNameToggle }) {
   return initializeWorkList({

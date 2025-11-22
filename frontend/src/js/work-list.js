@@ -1,4 +1,4 @@
-import { formatMoney, calculateDelta } from "@js/utils.js";
+import { formatMoney, calculateDelta } from "@shared/utils.js";
 
 export function initializeWorkList({ container, onSortChange, onWorkClick }) {
   const headerEl = document.createElement("div");
