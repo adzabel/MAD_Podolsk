@@ -1,9 +1,10 @@
 #!/usr/bin/env python3
-"""Generate cache-busted static assets for deployment.
+"""Apply additional cache-busting for static assets.
 
-Copies files from ``docs`` into ``docs-build`` while appending a version
-suffix to JS and CSS filenames and updating references in HTML and module
-imports.
+This script is now tailored for the Vite build output in ``dist``.
+It appends a version suffix to built JS and CSS filenames and updates
+references in ``index.html`` and in JS imports so that users always
+receive the latest version.
 """
 from __future__ import annotations
 
@@ -15,47 +16,64 @@ from pathlib import Path
 
 def main() -> None:
     project_root = Path(__file__).resolve().parent.parent
-    source_dir = project_root / "docs"
-    build_dir = project_root / "docs-build"
+    # For the Vite build we operate directly on ``dist``
+    dist_dir = project_root / "dist"
 
     version = (os.environ.get("CACHE_BUSTER") or os.environ.get("GITHUB_SHA") or "").strip()
     if not version:
         version = datetime.utcnow().strftime("%Y%m%d%H%M%S")
     version = version[:12]
 
-    if build_dir.exists():
-        shutil.rmtree(build_dir)
-    (build_dir / "js").mkdir(parents=True, exist_ok=True)
-    (build_dir / "css").mkdir(parents=True, exist_ok=True)
+    if not dist_dir.exists():
+        raise SystemExit(f"dist directory not found at {dist_dir!s}. Run the Vite build first.")
 
-    js_mapping = {
-        path.name: f"{path.stem}.{version}{path.suffix}"
-        for path in (source_dir / "js").glob("*.js")
-    }
-    css_mapping = {
-        path.name: f"{path.stem}.{version}{path.suffix}"
-        for path in (source_dir / "css").glob("*.css")
-    }
+    assets_dir = dist_dir / "assets"
+    if not assets_dir.exists():
+        # Vite normally outputs assets into ``dist/assets``; bail out loudly if not.
+        raise SystemExit(f"assets directory not found at {assets_dir!s}.")
 
-    index_content = (source_dir / "index.html").read_text(encoding="utf-8")
+    # Build mappings for all top-level JS/CSS files inside ``assets``
+    js_mapping: dict[str, str] = {}
+    css_mapping: dict[str, str] = {}
+
+    for path in assets_dir.glob("*.js"):
+        js_mapping[path.name] = f"{path.stem}.{version}{path.suffix}"
+
+    for path in assets_dir.glob("*.css"):
+        css_mapping[path.name] = f"{path.stem}.{version}{path.suffix}"
+
+    # Update index.html references
+    index_path = dist_dir / "index.html"
+    index_content = index_path.read_text(encoding="utf-8")
     for original, versioned in css_mapping.items():
-        index_content = index_content.replace(f"css/{original}", f"css/{versioned}")
+        index_content = index_content.replace(f"assets/{original}", f"assets/{versioned}")
     for original, versioned in js_mapping.items():
-        index_content = index_content.replace(f"js/{original}", f"js/{versioned}")
-    (build_dir / "index.html").write_text(index_content, encoding="utf-8")
+        index_content = index_content.replace(f"assets/{original}", f"assets/{versioned}")
+    index_path.write_text(index_content, encoding="utf-8")
 
-    for original, versioned in css_mapping.items():
-        content = (source_dir / "css" / original).read_text(encoding="utf-8")
-        (build_dir / "css" / versioned).write_text(content, encoding="utf-8")
+    # Rename CSS/JS files and update JS imports inside them.
+    # We do this in two passes: first compute mappings, then mutate.
+    for src_path in list(assets_dir.glob("*.css")) + list(assets_dir.glob("*.js")):
+        original_name = src_path.name
+        if original_name in css_mapping:
+            new_name = css_mapping[original_name]
+        elif original_name in js_mapping:
+            new_name = js_mapping[original_name]
+        else:
+            continue
 
-    for src_path in (source_dir / "js").glob("*.js"):
         content = src_path.read_text(encoding="utf-8")
-        for original, versioned in js_mapping.items():
-            content = content.replace(f"./{original}", f"./{versioned}")
-        destination = build_dir / "js" / js_mapping[src_path.name]
-        destination.write_text(content, encoding="utf-8")
+        # Update relative imports like "./index-xxxxx.js" inside JS files
+        for js_original, js_versioned in js_mapping.items():
+            content = content.replace(f"./{js_original}", f"./{js_versioned}")
 
-    print(f"Created cache-busted assets in {build_dir} using version {version}")
+        target_path = src_path.with_name(new_name)
+        target_path.write_text(content, encoding="utf-8")
+
+        if target_path != src_path:
+            src_path.unlink()
+
+    print(f"Applied cache-busting to assets in {dist_dir} using version {version}")
 
 
 if __name__ == "__main__":
