@@ -946,7 +946,7 @@ export class UIManager {
   }
 
   handleWorkSortChange(column) {
-    const currentColumn = this.uiStore.workSort.column;
+    const currentColumn = this.uiStore.getWorkSortColumn();
     if (!column || currentColumn === column) {
       return;
     }
@@ -957,14 +957,14 @@ export class UIManager {
 
   updateWorkSortButtons() {
     if (this.workSortButtons) {
-      const currentColumn = this.uiStore.workSort.column;
+      const currentColumn = this.uiStore.getWorkSortColumn();
       this.workSortButtons.forEach((button) => {
         const isActive = button.dataset.sort === currentColumn;
         button.classList.toggle("active", isActive);
         button.setAttribute("aria-pressed", String(isActive));
       });
     }
-    const currentColumn = this.uiStore.workSort.column;
+    const currentColumn = this.uiStore.getWorkSortColumn();
     if (this.elements.workSortSelect && this.elements.workSortSelect.value !== currentColumn) {
       this.elements.workSortSelect.value = currentColumn;
     }
@@ -975,7 +975,7 @@ export class UIManager {
       return Number.NEGATIVE_INFINITY;
     }
     let value;
-    const currentColumn = this.uiStore.workSort.column;
+    const currentColumn = this.uiStore.getWorkSortColumn();
     switch (currentColumn) {
       case "fact":
         value = item.fact_amount;
@@ -996,7 +996,7 @@ export class UIManager {
     if (!Array.isArray(works)) {
       return works;
     }
-    const currentColumn = this.uiStore.workSort.column;
+    const currentColumn = this.uiStore.getWorkSortColumn();
     if (currentColumn === "delta") {
       works.sort((a, b) => {
         const deltaA = calculateDelta(a);
