@@ -4,7 +4,7 @@ import logging
 import calendar
 from datetime import date, datetime, timedelta
 from decimal import Decimal
-from typing import Any, Callable, TypeVar
+from typing import Any, Callable, TypeVar, Iterable, Optional
 
 from psycopg2 import InterfaceError, OperationalError
 from psycopg2.extras import RealDictCursor
@@ -264,6 +264,25 @@ def _aggregate_items_streaming(cursor) -> list[DashboardItem]:
     return aggregated_items
 
 
+def _fetch_dates(
+    conn,
+    sql: str,
+    params: tuple[Any, ...] | None = None,
+    *,
+    cursor_factory=None,
+) -> list[date]:
+    """Вспомогательная утилита для выборки списка дат/месяцев.
+
+    Выполняет переданный SQL, читает все строки и возвращает
+    плоский список первых столбцов, отфильтровывая None.
+    """
+
+    with conn.cursor(cursor_factory=cursor_factory) as cur:
+        cur.execute(sql, params or ())
+        rows: Iterable[Optional[tuple]] = cur.fetchall() or []
+    return [row[0] for row in rows if row and row[0] is not None]
+
+
 def _fetch_daily_fact_totals(conn, month_start: date) -> list[DailyRevenue]:
     """Извлекает дневные суммы фактических работ используя билдер."""
     daily_rows: list[DailyRevenue] = []
@@ -486,11 +505,7 @@ def fetch_plan_vs_fact_for_month(
 
         contract_progress = _fetch_contract_progress(conn, month_start)
 
-        with conn.cursor() as cur:
-            cur.execute(LAST_UPDATED_SQL)
-            res = cur.fetchone()
-            if res:
-                last_updated = res[0]
+        last_updated = _fetch_last_updated(conn)
 
         with conn.cursor(cursor_factory=RealDictCursor) as cur:
             cur.execute(SUMMARY_SQL, (month_start,))
@@ -549,10 +564,8 @@ def fetch_plan_vs_fact_for_month(
 )
 def fetch_available_months(limit: int = 12) -> list[date]:
     """Возвращает список месяцев, за которые есть данные."""
-    with get_connection() as conn, conn.cursor() as cur:
-        cur.execute(AVAILABLE_MONTHS_SQL, (limit,))
-        rows = cur.fetchall() or []
-    return [row[0] for row in rows if row and row[0] is not None]
+    with get_connection() as conn:
+        return _fetch_dates(conn, AVAILABLE_MONTHS_SQL, (limit,))
 
 
 @db_retry(
@@ -564,7 +577,7 @@ def fetch_available_months(limit: int = 12) -> list[date]:
 )
 def fetch_available_days() -> list[date]:
     """Возвращает список дат текущего месяца (через билдер), по которым есть фактические данные."""
-    with get_connection() as conn, conn.cursor() as cur:
+    with get_connection() as conn:
         sql, params = (
             FactQueryBuilder()
             .distinct()
@@ -574,9 +587,7 @@ def fetch_available_days() -> list[date]:
             .order_by("work_date DESC")
             .build()
         )
-        cur.execute(sql, params)
-        rows = cur.fetchall() or []
-    return [row[0] for row in rows if row and row[0] is not None]
+        return _fetch_dates(conn, sql, params)
 
 
 @db_retry(
@@ -611,12 +622,7 @@ def fetch_daily_report(target_date: date) -> DailyReportResponse:
             cur.execute(sql, params)
             rows = cur.fetchall() or []
 
-        last_updated = None
-        with conn.cursor() as cur:
-            cur.execute(LAST_UPDATED_SQL)
-            res = cur.fetchone()
-            if res:
-                last_updated = res[0]
+        last_updated = _fetch_last_updated(conn)
 
     items: list[DailyReportItem] = []
     for row in rows:
@@ -637,3 +643,14 @@ def fetch_daily_report(target_date: date) -> DailyReportResponse:
         items=items,
         has_data=bool(items),
     )
+
+
+def _fetch_last_updated(conn) -> datetime | None:
+    """Возвращает максимальный loaded_at из агрегаций или None."""
+
+    with conn.cursor() as cur:
+        cur.execute(LAST_UPDATED_SQL)
+        res = cur.fetchone()
+        if not res:
+            return None
+        return res[0]
