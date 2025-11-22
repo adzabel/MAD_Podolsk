@@ -481,19 +481,6 @@ export class UIManager {
     }
   }
 
-  async openDailyModal() {
-    openAverageDailyModal({
-      elements: this.elements,
-      summaryDailyRevenue: this.summaryDailyRevenue,
-      selectedMonthLabel: this.getSelectedMonthLabel(),
-      isCurrentMonth: this.isCurrentMonth(this.uiStore.getSelectedMonth()),
-    });
-  }
-
-  closeDailyModal() {
-    closeDailyModalView({ elements: this.elements });
-  }
-
   async downloadPdfReport(event) {
     if (!this.elements.pdfButton || this.elements.pdfButton.disabled) return;
     event.preventDefault();
