@@ -15,6 +15,7 @@ import {
   updateSummaryProgress as updateSummaryProgressExternal,
   updateDailyAverage as updateDailyAverageExternal,
   updateContractCard as updateContractCardExternal,
+  updateContractProgress as updateContractProgressExternal,
 } from "@js/summary.js";
 import { renderCategories as renderCategoriesExternal } from "@js/categories.js";
 
@@ -707,8 +708,7 @@ export class UIManager {
   }
 
   updateContractProgress(completion) {
-    // Сохраняем метод для обратной совместимости, делегируя реализацию в summary.js
-    updateContractProgress({ completion, elements: this.elements });
+    updateContractProgressExternal({ completion, elements: this.elements });
   }
 
   updateDailyAverage(averageValue, daysWithData) {
