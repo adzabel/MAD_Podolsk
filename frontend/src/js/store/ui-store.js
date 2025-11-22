@@ -7,6 +7,26 @@ export class UiStore {
     this.workSort = { column: "planned" };
   }
 
+  getViewMode() {
+    return this.viewMode || "monthly";
+  }
+
+  getSelectedMonth() {
+    return this.selectedMonthIso;
+  }
+
+  getSelectedDay() {
+    return this.selectedDayIso;
+  }
+
+  getAvailableDays() {
+    return Array.isArray(this.availableDays) ? this.availableDays : [];
+  }
+
+  getWorkSortColumn() {
+    return (this.workSort && this.workSort.column) || "planned";
+  }
+
   setViewMode(mode) {
     this.viewMode = mode === "daily" ? "daily" : "monthly";
   }

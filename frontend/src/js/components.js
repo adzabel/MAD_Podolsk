@@ -141,7 +141,7 @@ export class UIManager {
   }
 
   updateViewModeLayout() {
-    const viewMode = this.uiStore.viewMode || this.viewMode;
+    const viewMode = this.uiStore.getViewMode();
 
     if (this.elements.page) {
       this.elements.page.dataset.viewMode = viewMode;
@@ -340,7 +340,7 @@ export class UIManager {
         this.uiStore.setAvailableDays(fallbackDays);
       }
 
-      const uiAvailableDays = this.uiStore.availableDays;
+      const uiAvailableDays = this.uiStore.getAvailableDays();
 
       const minDayIso = uiAvailableDays.reduce(
         (min, item) => (!min || item.iso < min ? item.iso : min),
@@ -358,7 +358,7 @@ export class UIManager {
         inputEl.max = maxDayIso;
       }
 
-      const selectedDayFromStore = this.uiStore.selectedDayIso;
+      const selectedDayFromStore = this.uiStore.getSelectedDay();
       const initialDayIso = (selectedDayFromStore && uiAvailableDays.some((item) => item.iso === selectedDayFromStore))
         ? selectedDayFromStore
         : uiAvailableDays[0]?.iso;
@@ -426,7 +426,7 @@ export class UIManager {
 
   async switchViewMode(mode) {
     const normalized = mode === "daily" ? "daily" : "monthly";
-    if (this.uiStore.viewMode === normalized) {
+    if (this.uiStore.getViewMode() === normalized) {
       return;
     }
     this.uiStore.setViewMode(normalized);
@@ -436,9 +436,10 @@ export class UIManager {
       if (!this.dayOptionsLoaded) {
         await this.initDaySelect();
       }
+      const availableDays = this.uiStore.getAvailableDays();
       const targetDay = this.elements.daySelect?.value
-        || this.uiStore.selectedDayIso
-        || (this.uiStore.availableDays[0] ? this.uiStore.availableDays[0].iso : null)
+        || this.uiStore.getSelectedDay()
+        || (availableDays[0] ? availableDays[0].iso : null)
         || this.getCurrentDayIso();
       if (targetDay) {
         this.setDaySelectValue(targetDay);
@@ -485,7 +486,7 @@ export class UIManager {
       elements: this.elements,
       summaryDailyRevenue: this.summaryDailyRevenue,
       selectedMonthLabel: this.getSelectedMonthLabel(),
-      isCurrentMonth: this.isCurrentMonth(this.uiStore.selectedMonthIso),
+      isCurrentMonth: this.isCurrentMonth(this.uiStore.getSelectedMonth()),
     });
   }
 
@@ -507,12 +508,13 @@ export class UIManager {
       if (pdfModule && typeof pdfModule.downloadPdf === "function") {
         await pdfModule.downloadPdf({
           apiPdfUrl: this.apiPdfUrl,
-            selectedMonthIso: this.uiStore.selectedMonthIso,
+            selectedMonthIso: this.uiStore.getSelectedMonth(),
         });
       } else {
         const url = new URL(this.apiPdfUrl, window.location.origin);
-          if (this.uiStore.selectedMonthIso) {
-            url.searchParams.set("month", this.uiStore.selectedMonthIso);
+          const currentMonthIso = this.uiStore.getSelectedMonth();
+          if (currentMonthIso) {
+            url.searchParams.set("month", currentMonthIso);
         }
         window.open(url.toString(), "_blank");
       }
@@ -524,7 +526,7 @@ export class UIManager {
     }
   }
 
-  updateDailyAverageVisibility(monthIso = this.uiStore.selectedMonthIso) {
+  updateDailyAverageVisibility(monthIso = this.uiStore.getSelectedMonth()) {
     const isCurrentMonth = this.isCurrentMonth(monthIso);
     if (this.elements.dailyAverageNote) {
       this.elements.dailyAverageNote.hidden = !isCurrentMonth;
@@ -692,7 +694,7 @@ export class UIManager {
       this.elements.lastUpdatedTextDaily.textContent = dailyLabel;
     }
 
-    if (this.uiStore.viewMode === "daily") {
+    if (this.uiStore.getViewMode() === "daily") {
       this.updateContractTitleDate(dailyDateLabel);
     } else {
       this.updateContractTitleDate(monthlyDateLabel);
@@ -720,7 +722,7 @@ export class UIManager {
   }
 
   updateDailyAverage(averageValue, daysWithData) {
-    const isCurrentMonth = this.isCurrentMonth(this.uiStore.selectedMonthIso);
+    const isCurrentMonth = this.isCurrentMonth(this.uiStore.getSelectedMonth());
     updateDailyAverageExternal({
       averageValue,
       daysWithData,
