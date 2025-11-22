@@ -11,6 +11,13 @@ import {
 } from "./utils.js";
 import { initializeWorkList, renderWorkRows as renderWorkRowsExternal } from "./work-list.js";
 import { applyDailyData as applyDailyDataExternal } from "./daily-report.js";
+import {
+  renderSummary as renderSummaryExternal,
+  updateSummaryProgress as updateSummaryProgressExternal,
+  updateDailyAverage as updateDailyAverageExternal,
+  updateContractCard as updateContractCardExternal,
+} from "./summary.js";
+import { renderCategories as renderCategoriesExternal } from "./categories.js";
 
 // Цветовые палитры категорий вынесены в константу верхнего уровня,
 // чтобы `UIManager` концентрировался на логике, а не на данных оформления.
@@ -555,52 +562,21 @@ export class UIManager {
     this.updateContractCard(contractMetrics);
     this.metrics = metrics;
 
-    if (!metrics) {
-      this.elements.sumPlanned.textContent = "–";
-      this.elements.sumFact.textContent = "–";
-      this.elements.sumDelta.textContent = "–";
-      this.elements.sumDelta.classList.remove("positive", "negative");
-      this.summaryDailyRevenue = [];
-      this.dailyRevenue = [];
-      this.updateSummaryProgress(null, "–");
-      this.updateDailyAverage(null, 0);
-      return;
-    }
+    const {
+      summaryDailyRevenue,
+      averageDailyRevenue,
+      completion,
+      completionLabel,
+    } = renderSummaryExternal({ metrics, elements: this.elements });
 
-    this.summaryDailyRevenue = Array.isArray(metrics.dailyRevenue) ? metrics.dailyRevenue : [];
+    this.summaryDailyRevenue = summaryDailyRevenue || [];
     this.dailyRevenue = [...this.summaryDailyRevenue];
-    this.elements.sumPlanned.textContent = formatMoney(metrics.planned);
-    this.elements.sumFact.textContent = formatMoney(metrics.fact);
-    this.elements.sumDelta.textContent = formatMoney(metrics.delta);
-    this.elements.sumDelta.classList.remove("positive", "negative");
-    if (metrics.delta > 0) this.elements.sumDelta.classList.add("positive");
-    if (metrics.delta < 0) this.elements.sumDelta.classList.add("negative");
-
-    const completionLabel = metrics.completion !== null && metrics.completion !== undefined
-      ? formatPercent(metrics.completion)
-      : "–";
-    this.updateSummaryProgress(metrics.completion, completionLabel);
-    this.updateDailyAverage(metrics.averageDailyRevenue, this.summaryDailyRevenue.length);
+    this.updateSummaryProgress(completion, completionLabel);
+    this.updateDailyAverage(averageDailyRevenue, this.summaryDailyRevenue.length);
   }
 
   updateSummaryProgress(completion, label) {
-    const percent = completion !== null && completion !== undefined && !Number.isNaN(completion)
-      ? Math.max(0, completion * 100)
-      : 0;
-    const progressWidth = Math.min(115, percent);
-    const cappedHue = Math.min(120, Math.max(0, percent));
-    const progressColor = percent > 100
-      ? "#16a34a"
-      : `hsl(${cappedHue}, 78%, ${percent >= 50 ? 43 : 47}%)`;
-
-    if (this.elements.sumFactProgress) {
-      this.elements.sumFactProgress.style.width = `${progressWidth}%`;
-      this.elements.sumFactProgress.classList.toggle("overflow", percent > 100);
-      this.elements.sumFactProgress.style.setProperty("--progress-color", progressColor);
-    }
-    if (this.elements.sumFactProgressLabel) {
-      this.elements.sumFactProgressLabel.textContent = label;
-    }
+    updateSummaryProgressExternal({ completion, label, elements: this.elements });
   }
 
   updateLastUpdatedPills() {
@@ -631,75 +607,27 @@ export class UIManager {
   }
 
   updateContractCard(contractMetrics) {
-    if (!this.elements.contractCard) {
-      return;
-    }
-
-    const hasData = contractMetrics && contractMetrics.contractAmount !== null && contractMetrics.executed !== null;
-    const completion = hasData ? contractMetrics.completion : null;
-    const percentLabel = completion !== null && completion !== undefined && !Number.isNaN(completion)
-      ? formatPercent(completion)
-      : "–";
-
-    if (this.elements.contractAmount) {
-      this.elements.contractAmount.textContent = hasData
-        ? formatMoney(contractMetrics.contractAmount)
-        : "–";
-    }
-    if (this.elements.contractExecuted) {
-      this.elements.contractExecuted.textContent = hasData
-        ? formatMoney(contractMetrics.executed)
-        : "–";
-    }
-    if (this.elements.contractPercent) {
-      this.elements.contractPercent.textContent = percentLabel;
-    }
-
-    this.updateContractProgress(completion);
+    updateContractCardExternal({
+      contractMetrics,
+      elements: this.elements,
+      formatMoneyFn: (value) => formatMoney(value),
+      formatPercentFn: (value) => formatPercent(value),
+    });
   }
 
   updateContractProgress(completion) {
-    if (!this.elements.contractProgress) {
-      return;
-    }
-    const percent = completion !== null && completion !== undefined && !Number.isNaN(completion)
-      ? Math.max(0, completion * 100)
-      : 0;
-    const progressWidth = Math.min(115, percent);
-    const progressOverflow = percent > 100;
-    const progressColor = progressOverflow ? "#16a34a" : "var(--accent)";
-
-    this.elements.contractProgress.style.width = `${progressWidth}%`;
-    this.elements.contractProgress.style.setProperty("--progress-color", progressColor);
-    this.elements.contractProgress.style.background = progressColor;
-    this.elements.contractProgress.classList.toggle("overflow", progressOverflow);
-    if (this.elements.contractProgress.parentElement) {
-      this.elements.contractProgress.parentElement.setAttribute("aria-valuenow", Math.min(120, percent).toFixed(1));
-    }
+    // Сохраняем метод для обратной совместимости, делегируя реализацию в summary.js
+    updateContractProgress({ completion, elements: this.elements });
   }
 
   updateDailyAverage(averageValue, daysWithData) {
-    const hasData = Number.isFinite(daysWithData) && daysWithData > 0;
     const isCurrentMonth = this.isCurrentMonth(this.selectedMonthIso);
-    const isInteractive = hasData && isCurrentMonth;
-
-    if (this.elements.sumDailyAverage) {
-      this.elements.sumDailyAverage.textContent = averageValue !== null
-        && averageValue !== undefined
-        && !Number.isNaN(averageValue)
-        ? formatMoney(averageValue)
-        : "–";
-    }
-
-    if (this.elements.dailyAverageCard) {
-      this.elements.dailyAverageCard.classList.toggle("is-disabled", !isInteractive);
-      this.elements.dailyAverageCard.setAttribute("aria-disabled", String(!isInteractive));
-
-      const srHint = this.elements.dailyAverageCard.querySelector(".sr-only");
-      if (srHint) {
-        srHint.hidden = !isInteractive;
-      }
-    }
+    updateDailyAverageExternal({
+      averageValue,
+      daysWithData,
+      isCurrentMonth,
+      elements: this.elements,
+    });
   }
 
   setDaySelectValue(dayIso) {
@@ -949,73 +877,17 @@ export class UIManager {
   }
 
   renderCategories() {
-    const currentData = this.dataManager.getCurrentData();
-    this.elements.categoryGrid.innerHTML = "";
-    if (!this.groupedCategories.length) {
-      const emptyText = currentData && !currentData.has_data
-        ? "Данные за выбранный месяц отсутствуют"
-        : "Нет данных для отображения";
-      this.elements.categoryGrid.innerHTML = `<div class="empty-state">${emptyText}</div>`;
-      this.activeCategoryKey = null;
-      this.renderWorkList();
-      return;
-    }
-
-    const fragment = document.createDocumentFragment();
-    this.groupedCategories.forEach((category, idx) => {
-      const palette = CATEGORY_COLORS[idx % CATEGORY_COLORS.length];
-      const card = document.createElement("button");
-      card.type = "button";
-      card.className = `card card--interactive category-card${category.key === this.activeCategoryKey ? " active" : ""}`;
-      card.style.setProperty("--accent", palette.accent);
-      card.style.setProperty("--accent-soft", palette.soft);
-      const isOffPlanCategory = typeof category.key === "string" && category.key.toLowerCase() === "внерегламент";
-      const deltaClass = category.delta > 0 ? "delta-positive" : category.delta < 0 ? "delta-negative" : "";
-      const completion = category.planned ? (category.fact ?? 0) / category.planned : null;
-      const hasProgress = completion !== null && !Number.isNaN(completion) && Number.isFinite(completion);
-      const completionLabel = hasProgress ? formatPercent(completion) : "–";
-      const progressPercent = hasProgress ? Math.max(0, completion * 100) : 0;
-      const progressWidth = Math.min(115, progressPercent);
-      const progressOverflowClass = progressPercent > 100 ? " overflow" : "";
-      const cappedHue = Math.min(120, Math.max(0, progressPercent));
-      const progressColor = progressPercent > 100
-        ? "#16a34a"
-        : `hsl(${cappedHue}, 78%, ${progressPercent >= 50 ? 43 : 47}%)`;
-      const progressStyle = `width: ${progressWidth}%; --progress-color: ${progressColor};`;
-      const ariaValue = hasProgress ? Math.min(120, progressPercent).toFixed(1) : "0";
-      const categoryTitleNote = isOffPlanCategory
-        ? '<span class="category-offplan-note"><span>30% от</span><span>общего плана</span></span>'
-        : `<span class="category-pill">${category.works.length} работ</span>`;
-      card.innerHTML = `
-        <div class="category-title">
-          <span>${category.title}</span>
-          ${categoryTitleNote}
-        </div>
-        <div class="category-values">
-          <span><span class="label">План</span><strong>${formatMoney(category.planned)}</strong></span>
-          <span><span class="label">Факт</span><strong>${formatMoney(category.fact)}</strong></span>
-          <span><span class="label">Отклонение</span><strong class="category-delta ${deltaClass}">${formatMoney(category.delta)}</strong></span>
-        </div>
-        <div class="category-progress">
-          <div class="category-progress-labels">
-            <span>Исполнение плана</span>
-            <strong>${completionLabel}</strong>
-          </div>
-          <div class="category-progress-bar" role="progressbar" aria-valuemin="0" aria-valuemax="120" aria-valuenow="${ariaValue}">
-            <div class="category-progress-fill${progressOverflowClass}" style="${progressStyle}"></div>
-          </div>
-        </div>
-      `;
-      card.setAttribute("aria-pressed", category.key === this.activeCategoryKey ? "true" : "false");
-      card.addEventListener("click", () => {
-        this.activeCategoryKey = category.key;
+    renderCategoriesExternal({
+      groupedCategories: this.groupedCategories,
+      activeCategoryKey: this.activeCategoryKey,
+      elements: this.elements,
+      colors: CATEGORY_COLORS,
+      onSelect: (key) => {
+        this.activeCategoryKey = key;
         this.renderCategories();
         this.renderWorkList();
-      });
-      fragment.appendChild(card);
+      },
     });
-
-    this.elements.categoryGrid.appendChild(fragment);
 
     this.enhanceAccessibility();
   }
