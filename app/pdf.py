@@ -47,18 +47,31 @@ LOGGER = logging.getLogger(__name__)
 
 FONT_DIR = Path(__file__).resolve().parent / "fonts"
 ensure_embedded_fonts(FONT_DIR)
-BODY_FONT = "DejaVuSans"
-BODY_FONT_BOLD = "DejaVuSans-Bold"
+
+# Основной шрифт PDF — Roboto (variable font), поддерживает кириллицу.
+# При отсутствии файлов Roboto будет использован безопасный fallback.
+BODY_FONT = "Roboto"
+BODY_FONT_BOLD = "Roboto-Bold"
 DEFAULT_FONT = "Helvetica"
 DEFAULT_FONT_BOLD = "Helvetica-Bold"
 
 FONT_ALTERNATIVES: dict[str, list[str]] = {
     BODY_FONT: [
+        # локальные файлы Roboto (variable TTF)
+        "Roboto-VariableFont_wdth,wght.ttf",
+        # системные варианты Roboto, если присутствуют
+        "Roboto-Regular.ttf",
+        "Roboto.ttf",
+        # прежние варианты с полной кириллицей как запасной путь
         "DejaVuSans.ttf",
         "FreeSans.ttf",
         "LiberationSans-Regular.ttf",
     ],
     BODY_FONT_BOLD: [
+        # variable Roboto также покрывает bold-начертания
+        "Roboto-VariableFont_wdth,wght.ttf",
+        "Roboto-Bold.ttf",
+        # запасные варианты с кириллицей
         "DejaVuSans-Bold.ttf",
         "FreeSansBold.ttf",
         "LiberationSans-Bold.ttf",
@@ -66,8 +79,8 @@ FONT_ALTERNATIVES: dict[str, list[str]] = {
 }
 
 FONT_FALLBACKS: dict[str, str] = {
-    BODY_FONT: DEFAULT_FONT,
-    BODY_FONT_BOLD: DEFAULT_FONT_BOLD,
+    BODY_FONT: "DejaVuSans",  # fallback с поддержкой кириллицы
+    BODY_FONT_BOLD: "DejaVuSans-Bold",
 }
 
 try:
