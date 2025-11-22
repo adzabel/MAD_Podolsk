@@ -9,7 +9,11 @@ import {
   calculateDelta,
   debounce,
 } from "./utils.js";
+import { initializeWorkList, renderWorkRows as renderWorkRowsExternal } from "./work-list.js";
+import { applyDailyData as applyDailyDataExternal } from "./daily-report.js";
 
+// Цветовые палитры категорий вынесены в константу верхнего уровня,
+// чтобы `UIManager` концентрировался на логике, а не на данных оформления.
 const CATEGORY_COLORS = [
   { accent: "#22c55e", soft: "rgba(34, 197, 94, 0.25)" },
   { accent: "#2563eb", soft: "rgba(37, 99, 235, 0.25)" },
@@ -18,6 +22,27 @@ const CATEGORY_COLORS = [
   { accent: "#a855f7", soft: "rgba(168, 85, 247, 0.25)" },
   { accent: "#0f766e", soft: "rgba(15, 118, 110, 0.25)" },
 ];
+
+// Вспомогательные pure-функции, не завязанные на состояние UIManager.
+
+function isValidPercent(value) {
+  return value !== null && value !== undefined && !Number.isNaN(value);
+}
+
+function normalizePercent(value) {
+  if (!isValidPercent(value)) return 0;
+  return Math.max(0, value * 100);
+}
+
+function buildProgressColor(percent) {
+  const progressPercent = Math.max(0, percent);
+  const cappedHue = Math.min(120, Math.max(0, progressPercent));
+  if (progressPercent > 100) {
+    return "#16a34a";
+  }
+  const lightness = progressPercent >= 50 ? 43 : 47;
+  return `hsl(${cappedHue}, 78%, ${lightness}%)`;
+}
 
 export class UIManager {
   constructor({ dataManager, elements, apiPdfUrl, pdfButtonDefaultLabel, visitorTracker }) {
@@ -123,48 +148,19 @@ export class UIManager {
   }
 
   prepareWorkList() {
-    this.workHeaderEl = document.createElement("div");
-    this.workHeaderEl.className = "work-row work-row-header";
-    this.workHeaderEl.innerHTML = `
-      <div>Работа</div>
-      <div>
-        <button type="button" class="work-sort-button" data-sort="planned">
-          <span>План, ₽</span>
-          <span class="sort-indicator" aria-hidden="true"></span>
-          <span class="sr-only">Сортировка по плану (по убыванию)</span>
-        </button>
-      </div>
-      <div>
-        <button type="button" class="work-sort-button" data-sort="fact">
-          <span>Факт, ₽</span>
-          <span class="sort-indicator" aria-hidden="true"></span>
-          <span class="sr-only">Сортировка по факту (по убыванию)</span>
-        </button>
-      </div>
-      <div>
-        <button type="button" class="work-sort-button" data-sort="delta">
-          <span>Отклонение</span>
-          <span class="sort-indicator" aria-hidden="true"></span>
-          <span class="sr-only">Сортировка по отклонению (по убыванию)</span>
-        </button>
-      </div>
-    `;
-    this.workHeaderEl.hidden = true;
-    this.elements.workList.appendChild(this.workHeaderEl);
-
-    this.workSortButtons = Array.from(this.workHeaderEl.querySelectorAll(".work-sort-button"));
-    this.workSortButtons.forEach((button) => {
-      button.addEventListener("click", () => {
-        const column = button.dataset.sort;
-        this.handleWorkSortChange(column);
-      });
+    const { headerEl, scroller, sortButtons } = initializeWorkList({
+      container: this.elements.workList,
+      onSortChange: (column) => this.handleWorkSortChange(column),
+      onWorkClick: (item, event) => {
+        if (event && event.target.closest(".work-row-name-toggle")) return;
+        this.openWorkModal(item);
+      },
     });
-    this.updateWorkSortButtons();
 
-    this.elements.workListScroller = document.createElement("div");
-    this.elements.workListScroller.className = "work-list-scroller";
-    this.elements.workList.appendChild(this.elements.workListScroller);
-    this.elements.workListScroller.style.display = "none";
+    this.workHeaderEl = headerEl;
+    this.elements.workListScroller = scroller;
+    this.workSortButtons = sortButtons;
+    this.updateWorkSortButtons();
   }
 
   clearWorkRows() {
@@ -174,18 +170,16 @@ export class UIManager {
   }
 
   renderWorkRows(works) {
-    this.clearWorkRows();
-    if (!Array.isArray(works) || !works.length) {
-      return;
-    }
-    const fragment = document.createDocumentFragment();
-    works.forEach((item, index) => {
-      const row = this.createWorkRow(item, index, works.length);
-      if (row) {
-        fragment.appendChild(row);
-      }
+    renderWorkRowsExternal({
+      scroller: this.elements.workListScroller,
+      works,
+      onWorkClick: (item, event) => {
+        if (event && event.target.closest(".work-row-name-toggle")) return;
+        this.openWorkModal(item);
+      },
+      initializeNameToggle: (nameWrapper) => this.initializeNameToggle(nameWrapper),
+      calculateDeltaFn: (item) => calculateDelta(item),
     });
-    this.elements.workListScroller.appendChild(fragment);
     requestAnimationFrame(() => this.updateWorkNameCollapsers());
   }
 
@@ -745,130 +739,19 @@ export class UIManager {
 
   applyDailyData(data) {
     this.currentDailyData = data;
-    if (this.elements.dailySkeleton) {
-      this.elements.dailySkeleton.style.display = "none";
-    }
 
-    const items = Array.isArray(data?.items) ? data.items : [];
-    if (!items.length) {
-      this.showDailyEmptyState("Нет данных по выбранному дню");
-    } else if (this.elements.dailyEmptyState) {
-      this.elements.dailyEmptyState.style.display = "none";
-    }
-
-    const selectedDayLabel = formatDate(data?.date, { day: "2-digit", month: "long" });
-    const titleText = selectedDayLabel
-      ? `Данные за ${selectedDayLabel}`
-      : "Данные за выбранный день";
-
-    if (this.elements.dailyPanelTitle) {
-      this.elements.dailyPanelTitle.textContent = titleText;
-    }
-
-    if (this.elements.dailyPanelSubtitle) {
-      const subtitleText = selectedDayLabel 
-        ? "Данные доступны только для текущего месяца" 
-        : "Выберите день, чтобы увидеть данные";
-      this.elements.dailyPanelSubtitle.textContent = subtitleText;
-      this.elements.dailyPanelSubtitle.hidden = false;
-    }
-
-    this.lastUpdatedDailyLabel = data?.has_data ? formatDateTime(data.last_updated) : "Нет данных";
-    this.lastUpdatedDailyDateLabel = data?.has_data
-      ? formatDate(data.last_updated, { day: "2-digit", month: "2-digit", year: "numeric" })
-      : this.lastUpdatedDailyLabel;
-    this.updateLastUpdatedPills();
-
-    this.renderDailyTable(items);
-  }
-
-  renderDailyTable(items) {
-    if (!this.elements.dailyTable) return;
-    this.elements.dailyTable.innerHTML = "";
-
-    if (!Array.isArray(items) || !items.length) {
-      this.showDailyEmptyState("Нет данных по выбранному дню");
-      return;
-    }
-
-    const sortedItems = [...items].sort((a, b) => {
-      const amountA = Number.isFinite(Number(a?.total_amount)) ? Number(a.total_amount) : 0;
-      const amountB = Number.isFinite(Number(b?.total_amount)) ? Number(b.total_amount) : 0;
-      return amountB - amountA;
+    applyDailyDataExternal({
+      data,
+      elements: this.elements,
+      onAfterRender: () => {
+        this.lastUpdatedDailyLabel = data?.has_data ? formatDateTime(data.last_updated) : "Нет данных";
+        this.lastUpdatedDailyDateLabel = data?.has_data
+          ? formatDate(data.last_updated, { day: "2-digit", month: "2-digit", year: "numeric" })
+          : this.lastUpdatedDailyLabel;
+        this.updateLastUpdatedPills();
+        requestAnimationFrame(() => this.updateDailyNameCollapsers());
+      },
     });
-
-    this.elements.dailyTable.style.display = "block";
-    this.elements.dailyTable.classList.add("has-data");
-
-    const header = document.createElement("div");
-    header.className = "work-row work-row-header";
-    header.innerHTML = `
-      <div>Смета</div>
-      <div>Работы</div>
-      <div>Ед. изм.</div>
-      <div>Объём</div>
-      <div>Сумма, ₽</div>
-    `;
-
-    const fragment = document.createDocumentFragment();
-    fragment.appendChild(header);
-
-    sortedItems.forEach((item, index) => {
-      const row = document.createElement("div");
-      row.className = "work-row daily-row";
-      if (index === sortedItems.length - 1) {
-        row.classList.add("work-row-last");
-      }
-      row.innerHTML = `
-        <div class="daily-cell daily-cell-smeta">${item.smeta || "—"}</div>
-        <div class="daily-cell daily-cell-name">
-          <div class="work-row-name work-row-name--collapsed" data-expanded="false">
-            <span class="work-row-name-text">${item.description || "Без названия"}</span>
-            <button
-              type="button"
-              class="work-row-name-toggle"
-              aria-expanded="false"
-              aria-label="Развернуть полное название"
-            >
-              <span class="work-row-name-toggle-icon" aria-hidden="true"></span>
-            </button>
-          </div>
-        </div>
-        <div class="daily-cell daily-cell-unit">
-          <span class="daily-cell-label">Ед. изм.</span>
-          <span class="daily-cell-value">${item.unit || "—"}</span>
-        </div>
-        <div class="daily-cell daily-cell-volume">
-          <span class="daily-cell-label">Объём</span>
-          <span class="daily-cell-value"><strong>${formatNumber(item.total_volume, { maximumFractionDigits: 3 })}</strong></span>
-        </div>
-        <div class="daily-cell daily-cell-amount">
-          <span class="daily-cell-label">Сумма</span>
-          <span class="daily-cell-value"><strong>${formatMoneyRub(item.total_amount)}</strong></span>
-        </div>
-      `;
-      this.initializeNameToggle(row.querySelector(".work-row-name"));
-      fragment.appendChild(row);
-    });
-
-    const totalAmount = sortedItems.reduce((sum, item) => {
-      const amount = Number(item.total_amount);
-      return sum + (Number.isFinite(amount) ? amount : 0);
-    }, 0);
-
-    const totalRow = document.createElement("div");
-    totalRow.className = "work-row work-row-total daily-total-row";
-    totalRow.innerHTML = `
-      <div class="daily-cell daily-cell-total-label">Итого по сумме</div>
-      <div class="daily-cell daily-cell-total-gap"></div>
-      <div class="daily-cell daily-cell-total-gap"></div>
-      <div class="daily-cell daily-cell-total-gap"></div>
-      <div class="daily-cell daily-cell-total-amount"><strong>${formatMoneyRub(totalAmount)}</strong></div>
-    `;
-    fragment.appendChild(totalRow);
-
-    this.elements.dailyTable.appendChild(fragment);
-    requestAnimationFrame(() => this.updateDailyNameCollapsers());
   }
 
   async loadDailyData(dayIso) {
