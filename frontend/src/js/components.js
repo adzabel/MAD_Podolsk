@@ -15,7 +15,7 @@ import {
   updateDailyAverage as updateDailyAverageExternal,
   updateContractCard as updateContractCardExternal,
   updateContractProgress as updateContractProgressExternal,
-} from "@js/summary.js";
+} from "@js/views/summary-view.js";
 import { renderCategoriesView } from "@js/ui/categoriesView.js";
 import { initWorkListView, renderWorkRowsView } from "@js/ui/workListView.js";
 import {

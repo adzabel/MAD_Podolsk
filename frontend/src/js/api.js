@@ -7,7 +7,7 @@ import {
   calculateMetrics as calculateMetricsDomain,
   calculateContractMetrics as calculateContractMetricsDomain,
   buildCategories as buildCategoriesDomain,
-} from "@js/domain.js";
+} from "@js/services/domain-service.js";
 import {
   API_URL,
   API_PDF_URL,

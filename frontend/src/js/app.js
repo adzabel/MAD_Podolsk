@@ -1,7 +1,9 @@
 import { cacheDomElements, setElementsDisabled } from "@shared/utils.js";
-import { DataManager } from "@api/api.js";
-import { UIManager } from "@js/components.js";
-import { VisitorTracker } from "@js/visitor.js";
+// Слой доменных данных (services)
+import { DataManager } from "@js/services/data-service.js";
+import { VisitorTracker } from "@js/services/visitor-service.js";
+// Слой UI / представлений (views)
+import { UIManager } from "@js/views/ui-manager.js";
 import {
   API_URL,
   API_BASE,
