@@ -24,6 +24,7 @@ import {
   closeDailyModalView,
   renderDailyModalListView,
 } from "@js/ui/dailyModalView.js";
+import { showDailyLoadingState, showDailyEmptyState, handleDailyLoadError, applyDailyDataView } from "@js/views/daily-view.js";
 
 // Цветовые палитры категорий вынесены в константу верхнего уровня,
 // чтобы `UIManager` концентрировался на логике, а не на данных оформления.
@@ -731,75 +732,69 @@ export class UIManager {
   }
 
   showDailyLoadingState() {
-    if (!this.elements.dailySkeleton || !this.elements.dailyTable || !this.elements.dailyEmptyState) {
-      return;
-    }
-    this.elements.dailySkeleton.style.display = "block";
-    this.elements.dailyTable.style.display = "none";
-    this.elements.dailyEmptyState.style.display = "none";
-    this.lastUpdatedDailyLabel = "Загрузка данных…";
-    this.lastUpdatedDailyDateLabel = "";
+  showDailyLoadingState({
+    elements: this.elements,
+    setLastUpdated: ({ label, dateLabel }) => {
+    this.lastUpdatedDailyLabel = label;
+    this.lastUpdatedDailyDateLabel = dateLabel;
     this.updateLastUpdatedPills();
+    },
+  });
   }
 
   handleDailyLoadError(message = "Ошибка загрузки данных") {
-    if (this.elements.dailySkeleton) this.elements.dailySkeleton.style.display = "none";
-    this.showDailyEmptyState(message);
-    this.lastUpdatedDailyLabel = message;
-    this.lastUpdatedDailyDateLabel = "";
-    this.updateLastUpdatedPills();
+  handleDailyLoadError({
+    elements: this.elements,
+    message,
+    setLastUpdated: ({ label, dateLabel }) => {
+    this.lastUpdatedDailyLabel = label;
+    this.lastUpdatedDailyDateLabel = dateLabel;
+    },
+    updateLastUpdatedPills: () => this.updateLastUpdatedPills(),
+  });
   }
 
   showDailyEmptyState(message) {
-    if (!this.elements.dailyEmptyState || !this.elements.dailyTable) return;
-    this.elements.dailyEmptyState.textContent = message;
-    this.elements.dailyEmptyState.style.display = "block";
-    this.elements.dailyTable.style.display = "none";
+  showDailyEmptyState({ elements: this.elements, message });
   }
 
   applyDailyData(data) {
     this.currentDailyData = data;
-    const invokeApply = (applyFn) => {
-      try {
-        applyFn({
-          data,
-          elements: this.elements,
-          onAfterRender: () => {
-            this.lastUpdatedDailyLabel = data?.has_data ? formatDateTime(data.last_updated) : "Нет данных";
-            this.lastUpdatedDailyDateLabel = data?.has_data
-              ? formatDate(data.last_updated, { day: "2-digit", month: "2-digit", year: "numeric" })
-              : this.lastUpdatedDailyLabel;
-            this.updateLastUpdatedPills();
-            requestAnimationFrame(() => this.updateDailyNameCollapsers());
-          },
-        });
-      } catch (err) {
-        console.error("Ошибка при применении дневных данных:", err);
-      }
-    };
+  const { apply } = applyDailyDataView({
+    data,
+    elements: this.elements,
+    formatDateTime,
+    formatDate,
+    updateLastUpdatedPills: ({ label, dateLabel }) => {
+    this.lastUpdatedDailyLabel = label;
+    this.lastUpdatedDailyDateLabel = dateLabel;
+    this.updateLastUpdatedPills();
+    },
+    updateDailyNameCollapsers: () => this.updateDailyNameCollapsers(),
+  });
 
-    if (this.dailyModule && typeof this.dailyModule.applyDailyData === "function") {
-      invokeApply(this.dailyModule.applyDailyData);
-      return;
+  if (this.dailyModule && typeof this.dailyModule.applyDailyData === "function") {
+    apply({ applyFn: this.dailyModule.applyDailyData });
+    return;
+  }
+
+  // Если модуль ещё не загружен — подгружаем динамически и затем вызываем функцию
+  this.loadDailyModule()
+    .then((mod) => {
+    const fn = mod && (mod.applyDailyData || (mod.default && mod.default.applyDailyData));
+    if (typeof fn === "function") {
+      // Сохраняем ссылку на модуль для последующих вызовов
+      this.dailyModule = mod;
+      apply({ applyFn: fn });
+    } else {
+      console.error("Модуль daily-report не экспортирует applyDailyData");
+      this.handleDailyLoadError();
     }
-
-    // Если модуль ещё не загружен — подгружаем динамически и затем вызываем функцию
-    this.loadDailyModule()
-      .then((mod) => {
-        const fn = mod && (mod.applyDailyData || (mod.default && mod.default.applyDailyData));
-        if (typeof fn === "function") {
-          // Сохраняем ссылку на модуль для последующих вызовов
-          this.dailyModule = mod;
-          invokeApply(fn);
-        } else {
-          console.error("Модуль daily-report не экспортирует applyDailyData");
-          this.handleDailyLoadError();
-        }
-      })
-      .catch((err) => {
-        console.error("Не удалось загрузить модуль daily-report:", err);
-        this.handleDailyLoadError();
-      });
+    })
+    .catch((err) => {
+    console.error("Не удалось загрузить модуль daily-report:", err);
+    this.handleDailyLoadError();
+    });
   }
 
   async loadDailyData(dayIso) {
