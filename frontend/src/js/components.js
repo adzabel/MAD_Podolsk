@@ -16,7 +16,7 @@ import {
   updateContractCard as updateContractCardExternal,
   updateContractProgress as updateContractProgressExternal,
 } from "@js/views/summary-view.js";
-import { renderCategoriesView } from "@js/ui/categoriesView.js";
+import { renderCategoriesFacade } from "@js/views/categories-view.js";
 import { initWorkListView, renderWorkRowsView } from "@js/ui/workListView.js";
 import {
   openAverageDailyModal,
@@ -33,16 +33,8 @@ import {
   formatDailyDateLabel,
 } from "@js/views/daily-modal-view.js";
 
-// Цветовые палитры категорий вынесены в константу верхнего уровня,
-// чтобы `UIManager` концентрировался на логике, а не на данных оформления.
-const CATEGORY_COLORS = [
-  { accent: "#22c55e", soft: "rgba(34, 197, 94, 0.25)" },
-  { accent: "#2563eb", soft: "rgba(37, 99, 235, 0.25)" },
-  { accent: "#f97316", soft: "rgba(249, 115, 22, 0.25)" },
-  { accent: "#dc2626", soft: "rgba(220, 38, 38, 0.25)" },
-  { accent: "#a855f7", soft: "rgba(168, 85, 247, 0.25)" },
-  { accent: "#0f766e", soft: "rgba(15, 118, 110, 0.25)" },
-];
+// Цветовая схема и отрисовка категорий вынесены в отдельный фасад
+// views/categories-view, чтобы UIManager занимался только логикой.
 
 // Вспомогательные pure-функции, не завязанные на состояние UIManager.
 
@@ -885,17 +877,16 @@ export class UIManager {
   }
 
   renderCategories() {
-    renderCategoriesView({
-      groupedCategories: this.groupedCategories,
-      activeCategoryKey: this.activeCategoryKey,
-      elements: this.elements,
-      colors: CATEGORY_COLORS,
-      onSelect: (key) => {
-        this.activeCategoryKey = key;
-        this.renderCategories();
-        this.renderWorkList();
-      },
-    });
+  renderCategoriesFacade({
+    groupedCategories: this.groupedCategories,
+    activeCategoryKey: this.activeCategoryKey,
+    elements: this.elements,
+    onSelect: (key) => {
+    this.activeCategoryKey = key;
+    this.renderCategories();
+    this.renderWorkList();
+    },
+  });
 
     this.enhanceAccessibility();
   }
