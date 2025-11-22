@@ -25,7 +25,7 @@ const API_MONTHS_URL = `${API_BASE}${API_MONTHS_SUFFIX}`;
 const API_DAYS_URL = `${API_BASE}${API_DAYS_SUFFIX}`;
 const API_DAILY_URL = `${API_BASE}${API_DAILY_SUFFIX}`;
 
-document.addEventListener("DOMContentLoaded", () => {
+export function initApp() {
   const visitorTracker = new VisitorTracker();
 
   const DOM = cacheDomElements({
@@ -120,4 +120,8 @@ document.addEventListener("DOMContentLoaded", () => {
 
   const endpointPath = new URL(API_URL, window.location.origin).pathname;
   visitorTracker.sendVisitLog({ apiBase: API_BASE, endpoint: endpointPath });
+}
+
+document.addEventListener("DOMContentLoaded", () => {
+  initApp();
 });

@@ -15,7 +15,7 @@ export function initializeWorkList({ container, onSortChange, onWorkClick }) {
       <div>
         <button type="button" class="work-sort-button" data-sort="fact">
           <span>Факт, ₽</span>
-          <span class="sort-indикатор" aria-hidden="true"></span>
+          <span class="sort-indicator" aria-hidden="true"></span>
           <span class="sr-only">Сортировка по факту (по убыванию)</span>
         </button>
       </div>

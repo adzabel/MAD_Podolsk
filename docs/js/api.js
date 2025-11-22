@@ -72,6 +72,18 @@ async function withRetry(requestFn, { retries = 1, delayMs = DEFAULT_RETRY_DELAY
   throw lastError;
 }
 
+// Экспортируем утилиты, чтобы их можно было переиспользовать в других модулях
+// и в будущем в Vite-проекте без дублирования кода.
+export {
+  hasMeaningfulAmount,
+  shouldIncludeItem,
+  resolveCategoryMeta,
+  wait,
+  buildHttpError,
+  isRetryableError,
+  withRetry,
+};
+
 export class DataManager {
   constructor(apiUrl, { monthsUrl, daysUrl, dailyUrl, visitorTracker } = {}) {
     this.apiUrl = apiUrl;

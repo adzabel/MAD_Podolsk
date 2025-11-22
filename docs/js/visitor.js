@@ -36,7 +36,9 @@ function persistCookie(name, value, { days = 365 } = {}) {
   }
 }
 
-
+// Экспорт низкоуровневых утилит, которые могут пригодиться и в других модулях
+// (например, при расширении трекинга или логике аутентификации).
+export { generateUuid, safeGet, safeSet, persistCookie };
 
 export class VisitorTracker {
   constructor({
