@@ -16,6 +16,5 @@ export default defineConfig({
     rollupOptions: {
       input: resolve(__dirname, "frontend/index.html"),
     },
-  },
-  publicDir: resolve(__dirname, "frontend/public"),
+  }
 });
