@@ -77,8 +77,8 @@ export class UIManager {
     this.lastUpdatedDailyDateLabel = null;
     this.summaryDailyRevenue = [];
     this.dailyRevenue = [];
+    this.workSort = { column: "planned" };
     this.initialMonth = new URLSearchParams(window.location.search).get("month");
-    this.uiStore.setWorkSortColumn("planned");
     this.uiStore.setViewMode("monthly");
     this.dayOptionsLoaded = false;
     this.currentDailyData = null;
@@ -946,27 +946,24 @@ export class UIManager {
   }
 
   handleWorkSortChange(column) {
-    const currentColumn = this.uiStore.getWorkSortColumn();
-    if (!column || currentColumn === column) {
+    if (!column || this.workSort.column === column) {
       return;
     }
-    this.uiStore.setWorkSortColumn(column);
+    this.workSort.column = column;
     this.updateWorkSortButtons();
     this.renderWorkList();
   }
 
   updateWorkSortButtons() {
     if (this.workSortButtons) {
-      const currentColumn = this.uiStore.getWorkSortColumn();
       this.workSortButtons.forEach((button) => {
-        const isActive = button.dataset.sort === currentColumn;
+        const isActive = button.dataset.sort === this.workSort.column;
         button.classList.toggle("active", isActive);
         button.setAttribute("aria-pressed", String(isActive));
       });
     }
-    const currentColumn = this.uiStore.getWorkSortColumn();
-    if (this.elements.workSortSelect && this.elements.workSortSelect.value !== currentColumn) {
-      this.elements.workSortSelect.value = currentColumn;
+    if (this.elements.workSortSelect && this.elements.workSortSelect.value !== this.workSort.column) {
+      this.elements.workSortSelect.value = this.workSort.column;
     }
   }
 
@@ -975,8 +972,7 @@ export class UIManager {
       return Number.NEGATIVE_INFINITY;
     }
     let value;
-    const currentColumn = this.uiStore.getWorkSortColumn();
-    switch (currentColumn) {
+    switch (this.workSort.column) {
       case "fact":
         value = item.fact_amount;
         break;
@@ -996,8 +992,7 @@ export class UIManager {
     if (!Array.isArray(works)) {
       return works;
     }
-    const currentColumn = this.uiStore.getWorkSortColumn();
-    if (currentColumn === "delta") {
+    if (this.workSort.column === "delta") {
       works.sort((a, b) => {
         const deltaA = calculateDelta(a);
         const deltaB = calculateDelta(b);

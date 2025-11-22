@@ -4,7 +4,6 @@ export class UiStore {
     this.selectedMonthIso = null;
     this.selectedDayIso = null;
     this.availableDays = [];
-    this.workSort = { column: "planned" };
   }
 
   getViewMode() {
@@ -23,10 +22,6 @@ export class UiStore {
     return Array.isArray(this.availableDays) ? this.availableDays : [];
   }
 
-  getWorkSortColumn() {
-    return (this.workSort && this.workSort.column) || "planned";
-  }
-
   setViewMode(mode) {
     this.viewMode = mode === "daily" ? "daily" : "monthly";
   }
@@ -41,10 +36,5 @@ export class UiStore {
 
   setAvailableDays(days) {
     this.availableDays = Array.isArray(days) ? days : [];
-  }
-
-  setWorkSortColumn(column) {
-    if (!column) return;
-    this.workSort = { ...this.workSort, column };
   }
 }
