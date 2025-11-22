@@ -14,34 +14,38 @@ import {
   SELECTORS,
 } from "@config/config.frontend.js";
 
-export function bootstrapApp() {
-  const visitorTracker = new VisitorTracker();
+export function initDom() {
+  const elements = cacheDomElements(SELECTORS);
 
-  const DOM = cacheDomElements(SELECTORS);
-
-  const pdfButtonDefaultLabel = DOM.pdfButton ? DOM.pdfButton.innerHTML : DEFAULT_PDF_LABEL;
+  const pdfButtonDefaultLabel = elements.pdfButton ? elements.pdfButton.innerHTML : DEFAULT_PDF_LABEL;
   setElementsDisabled(
     {
-      pdfButton: DOM.pdfButton,
-      workSortSelect: DOM.workSortSelect,
+      pdfButton: elements.pdfButton,
+      workSortSelect: elements.workSortSelect,
     },
     true,
   );
 
   const pdfMobileMediaQuery = window.matchMedia(MOBILE_MEDIA_QUERY);
   const movePdfButton = (isMobile) => {
-    if (!DOM.pdfButton || !DOM.pdfButtonContainerDesktop || !DOM.pdfButtonContainerMobile) {
+    if (!elements.pdfButton || !elements.pdfButtonContainerDesktop || !elements.pdfButtonContainerMobile) {
       return;
     }
 
-    const target = isMobile ? DOM.pdfButtonContainerMobile : DOM.pdfButtonContainerDesktop;
-    if (DOM.pdfButton.parentElement !== target) {
-      target.appendChild(DOM.pdfButton);
+    const target = isMobile ? elements.pdfButtonContainerMobile : elements.pdfButtonContainerDesktop;
+    if (elements.pdfButton.parentElement !== target) {
+      target.appendChild(elements.pdfButton);
     }
   };
 
   movePdfButton(pdfMobileMediaQuery.matches);
   pdfMobileMediaQuery.addEventListener("change", (event) => movePdfButton(event.matches));
+
+  return { elements, pdfButtonDefaultLabel };
+}
+
+export function initServices() {
+  const visitorTracker = new VisitorTracker();
 
   const dataManager = new DataManager(API_URL, {
     monthsUrl: API_MONTHS_URL,
@@ -49,14 +53,28 @@ export function bootstrapApp() {
     dailyUrl: API_DAILY_URL,
     visitorTracker,
   });
+
+  return { visitorTracker, dataManager };
+}
+
+export function initUi({ elements, pdfButtonDefaultLabel, dataManager, visitorTracker }) {
   const uiManager = new UIManager({
     dataManager,
-    elements: DOM,
+    elements,
     apiPdfUrl: API_PDF_URL,
     pdfButtonDefaultLabel,
     visitorTracker,
   });
+
   uiManager.init();
+
+  return { uiManager };
+}
+
+export function bootstrapApp() {
+  const { elements, pdfButtonDefaultLabel } = initDom();
+  const { visitorTracker, dataManager } = initServices();
+  initUi({ elements, pdfButtonDefaultLabel, dataManager, visitorTracker });
 
   const endpointPath = new URL(API_URL, window.location.origin).pathname;
   visitorTracker.logInitialVisit({ apiBase: API_BASE, endpoint: endpointPath });
