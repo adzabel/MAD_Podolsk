@@ -1,4 +1,4 @@
-/* Базовые компоненты и утилиты лейаута */
+/* Layout primitives */
 
 .card {
   background: var(--bg-card);
@@ -42,6 +42,7 @@
   grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
 }
 
+/* Panels */
 .panel {
   background: rgba(255, 255, 255, 0.95);
   border-radius: var(--radius-xl);
