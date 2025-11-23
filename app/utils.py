@@ -125,7 +125,7 @@ def format_percent(value: float | None, decimals: int = 1) -> str:
 def extract_dict_strings(
     row: dict[str, Any],
     category_keys: tuple[str, ...] = ("category_code", "smeta"),
-    smeta_keys: tuple[str, ...] = ("smeta", "smeta_name", "smeta_title", "section"),
+    smeta_keys: tuple[str, ...] = ("smeta_code",),
     work_keys: tuple[str, ...] = ("work_name", "work_title"),
     description_keys: tuple[str, ...] = ("description",),
     default_description: str = "",
