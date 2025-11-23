@@ -197,8 +197,6 @@ export class DataManager {
   }
 
   calculateMetrics(data) {
-    return domainStore.calculateMetrics(data);
-  }
 
   calculateContractMetrics(data) {
     return domainStore.calculateContractMetrics(data);
