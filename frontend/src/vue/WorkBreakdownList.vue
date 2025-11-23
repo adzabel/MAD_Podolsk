@@ -3,41 +3,43 @@
     <div class="work-list-header">
       <h2>Расшифровка работ по смете</h2>
     </div>
-    <div v-if="isLoading" class="work-list-skeleton">
-      <div class="work-row-skeleton" v-for="n in 4" :key="n">
-        <div class="skeleton skeleton-line" v-for="i in 5" :key="i"></div>
-      </div>
-    </div>
-    <div v-else-if="error" class="work-list-error">Ошибка загрузки данных</div>
-    <div v-else>
-      <div v-if="!filteredWorks.length" class="work-list-empty">Нет работ по смете</div>
-      <div class="work-list-table" v-else>
-        <div class="work-row work-row-header">
-          <div>Работа</div>
-          <div>План, ₽</div>
-          <div>Факт, ₽</div>
-          <div>Отклонение</div>
+    <div class="work-list-surface">
+      <div v-if="isLoading" class="work-list-skeleton">
+        <div class="work-row-skeleton" v-for="n in 4" :key="n">
+          <div class="skeleton skeleton-line" v-for="i in 5" :key="i"></div>
         </div>
-        <div
-          v-for="(item, index) in filteredWorks"
-          :key="item.id || index"
-          class="work-row"
-          :class="{ 'work-row-last': index === filteredWorks.length - 1 }"
-        >
-          <div class="work-row-name work-row-name--collapsed" data-expanded="false">
-            <span class="work-row-name-text" @click="openWorkModal(item)" style="cursor:pointer; color:#0077cc; text-decoration:underline;">{{ item.work_name || item.description || 'Без названия' }}</span>
+      </div>
+      <div v-else-if="error" class="work-list-error">Ошибка загрузки данных</div>
+      <div v-else>
+        <div v-if="!filteredWorks.length" class="work-list-empty">Нет работ по смете</div>
+        <div class="work-list-table" v-else>
+          <div class="work-row work-row-header">
+            <div>Работа</div>
+            <div>План, ₽</div>
+            <div>Факт, ₽</div>
+            <div>Отклонение</div>
           </div>
-          <div class="work-row-money work-row-plan">
-            <span class="work-row-label">План</span>
-            <span>{{ formatMoney(item.planned_amount) }}</span>
-          </div>
-          <div class="work-row-money work-row-fact">
-            <span class="work-row-label">Факт</span>
-            <span>{{ formatMoney(item.fact_amount) }}</span>
-          </div>
-          <div class="work-row-delta" :class="deltaClass(item)">
-            <span class="work-row-label">Отклонение</span>
-            <span class="work-row-delta-value">{{ formatMoney(item.fact_amount - item.planned_amount) }}</span>
+          <div
+            v-for="(item, index) in filteredWorks"
+            :key="item.id || index"
+            class="work-row"
+            :class="{ 'work-row-last': index === filteredWorks.length - 1 }"
+          >
+            <div class="work-row-name work-row-name--collapsed" data-expanded="false">
+              <span class="work-row-name-text" @click="openWorkModal(item)" style="cursor:pointer; color:#0077cc; text-decoration:underline;">{{ item.work_name || item.description || 'Без названия' }}</span>
+            </div>
+            <div class="work-row-money work-row-plan">
+              <span class="work-row-label">План</span>
+              <span>{{ formatMoney(item.planned_amount) }}</span>
+            </div>
+            <div class="work-row-money work-row-fact">
+              <span class="work-row-label">Факт</span>
+              <span>{{ formatMoney(item.fact_amount) }}</span>
+            </div>
+            <div class="work-row-delta" :class="deltaClass(item)">
+              <span class="work-row-label">Отклонение</span>
+              <span class="work-row-delta-value">{{ formatMoney(item.fact_amount - item.planned_amount) }}</span>
+            </div>
           </div>
         </div>
       </div>

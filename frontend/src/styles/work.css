@@ -85,11 +85,13 @@
   width: 100%;
 }
 
-.work-list.has-data {
+.work-list-surface,
+.work-list.has-data,
+.daily-table.has-data {
   border: 1px solid var(--border-soft);
   border-radius: 20px;
   overflow: hidden;
-  background: rgba(255,255,255,0.95);
+  background: rgba(255, 255, 255, 0.95);
   box-shadow: var(--shadow-soft);
 }
 
@@ -295,14 +297,6 @@
   border: 1px dashed var(--border-soft);
   border-radius: var(--radius-lg);
   background: var(--bg-muted);
-}
-
-.daily-table.has-data {
-  border: 1px solid var(--border-soft);
-  border-radius: 20px;
-  overflow: hidden;
-  background: rgba(255, 255, 255, 0.95);
-  box-shadow: var(--shadow-soft);
 }
 
 .daily-table .work-row,

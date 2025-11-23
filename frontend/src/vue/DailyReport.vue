@@ -11,65 +11,67 @@
       </div>
     </div>
 
-    <div
-      class="work-list work-list-skeleton daily-skeleton"
-      aria-hidden="true"
-      v-show="isLoading"
-    >
-      <div class="work-row-skeleton" v-for="n in 4" :key="n">
-        <div class="skeleton skeleton-line"></div>
-        <div class="skeleton skeleton-line"></div>
-        <div class="skeleton skeleton-line"></div>
-        <div class="skeleton skeleton-line"></div>
-        <div class="skeleton skeleton-line"></div>
-      </div>
-    </div>
-
-    <div class="empty-state" v-if="!isLoading && emptyMessage">
-      {{ emptyMessage }}
-    </div>
-
-    <div class="work-list daily-table" v-if="!isLoading && rows.length">
-      <div class="work-row work-row-header">
-        <div>Смета</div>
-        <div>Работы</div>
-        <div>Ед. изм.</div>
-        <div>Объём</div>
-        <div>Сумма, ₽</div>
-      </div>
-
+    <div class="work-list-surface">
       <div
-        v-for="(item, index) in rows"
-        :key="index"
-        class="work-row daily-row"
-        :class="{ 'work-row-last': index === rows.length - 1 }"
+        class="work-list work-list-skeleton daily-skeleton"
+        aria-hidden="true"
+        v-show="isLoading"
       >
-        <div class="daily-cell daily-cell-smeta">{{ item.smeta || "—" }}</div>
-        <div class="daily-cell daily-cell-name">
-          <div class="work-row-name work-row-name--collapsed" data-expanded="false">
-            <span class="work-row-name-text" @click="openWorkModal(item)" style="cursor:pointer; color:#0077cc; text-decoration:underline;">{{ item.description || "Без названия" }}</span>
+        <div class="work-row-skeleton" v-for="n in 4" :key="n">
+          <div class="skeleton skeleton-line"></div>
+          <div class="skeleton skeleton-line"></div>
+          <div class="skeleton skeleton-line"></div>
+          <div class="skeleton skeleton-line"></div>
+          <div class="skeleton skeleton-line"></div>
+        </div>
+      </div>
+
+      <div class="empty-state" v-if="!isLoading && emptyMessage">
+        {{ emptyMessage }}
+      </div>
+
+      <div class="work-list daily-table" v-if="!isLoading && rows.length">
+        <div class="work-row work-row-header">
+          <div>Смета</div>
+          <div>Работы</div>
+          <div>Ед. изм.</div>
+          <div>Объём</div>
+          <div>Сумма, ₽</div>
+        </div>
+
+        <div
+          v-for="(item, index) in rows"
+          :key="index"
+          class="work-row daily-row"
+          :class="{ 'work-row-last': index === rows.length - 1 }"
+        >
+          <div class="daily-cell daily-cell-smeta">{{ item.smeta || "—" }}</div>
+          <div class="daily-cell daily-cell-name">
+            <div class="work-row-name work-row-name--collapsed" data-expanded="false">
+              <span class="work-row-name-text" @click="openWorkModal(item)" style="cursor:pointer; color:#0077cc; text-decoration:underline;">{{ item.description || "Без названия" }}</span>
+            </div>
+          </div>
+          <div class="daily-cell daily-cell-unit">
+            <span class="daily-cell-label">Ед. изм.</span>
+            <span class="daily-cell-value">{{ item.unit || "—" }}</span>
+          </div>
+          <div class="daily-cell daily-cell-volume">
+            <span class="daily-cell-label">Объём</span>
+            <span class="daily-cell-value"><strong>{{ item.volumeLabel }}</strong></span>
+          </div>
+          <div class="daily-cell daily-cell-amount">
+            <span class="daily-cell-label">Сумма</span>
+            <span class="daily-cell-value"><strong>{{ item.amountLabel }}</strong></span>
           </div>
         </div>
-        <div class="daily-cell daily-cell-unit">
-          <span class="daily-cell-label">Ед. изм.</span>
-          <span class="daily-cell-value">{{ item.unit || "—" }}</span>
-        </div>
-        <div class="daily-cell daily-cell-volume">
-          <span class="daily-cell-label">Объём</span>
-          <span class="daily-cell-value"><strong>{{ item.volumeLabel }}</strong></span>
-        </div>
-        <div class="daily-cell daily-cell-amount">
-          <span class="daily-cell-label">Сумма</span>
-          <span class="daily-cell-value"><strong>{{ item.amountLabel }}</strong></span>
-        </div>
-      </div>
 
-      <div class="work-row work-row-total daily-total-row">
-        <div class="daily-cell daily-cell-total-label">Итого по сумме</div>
-        <div class="daily-cell daily-cell-total-gap"></div>
-        <div class="daily-cell daily-cell-total-gap"></div>
-        <div class="daily-cell daily-cell-total-gap"></div>
-        <div class="daily-cell daily-cell-total-amount"><strong>{{ totalAmountLabel }}</strong></div>
+        <div class="work-row work-row-total daily-total-row">
+          <div class="daily-cell daily-cell-total-label">Итого по сумме</div>
+          <div class="daily-cell daily-cell-total-gap"></div>
+          <div class="daily-cell daily-cell-total-gap"></div>
+          <div class="daily-cell daily-cell-total-gap"></div>
+          <div class="daily-cell daily-cell-total-amount"><strong>{{ totalAmountLabel }}</strong></div>
+        </div>
       </div>
     </div>
 
