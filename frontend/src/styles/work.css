@@ -269,6 +269,10 @@
   text-align: right;
 }
 
+.work-row-delta.delta-negative {
+  color: var(--danger);
+}
+
 
 .status-bar {
   margin-top: 16px;

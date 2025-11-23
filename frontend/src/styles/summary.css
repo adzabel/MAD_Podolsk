@@ -162,7 +162,7 @@
 }
 
 .summary-value.negative {
-  color: #e53935 !important; /* насыщенный красный, перекрывает var(--danger) */
+  color: var(--danger) !important;
 }
 
 /* Управление видимостью и эффектами для Среднедневной выручки */
@@ -282,7 +282,7 @@
 }
 
 .summary-value.negative {
-  color: #e53935 !important; /* насыщенный красный, перекрывает var(--danger) */
+  color: var(--danger) !important;
 }
 
 .summary-progress {
