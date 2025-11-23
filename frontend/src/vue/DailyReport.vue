@@ -251,7 +251,7 @@ if (typeof window !== "undefined") {
 
 watchEffect(() => {
   const dayIso = state.selectedDateIso;
-  if (dayIso && state.source === "day-select") {
+  if (dayIso) {
     fetchDailyReport(dayIso);
   }
 });
