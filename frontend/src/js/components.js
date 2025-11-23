@@ -697,12 +697,21 @@ export class UIManager {
   }
 
   updateContractCard(contractMetrics) {
-    updateContractCardExternal({
-      contractMetrics,
-      elements: this.elements,
-      formatMoneyFn: (value) => formatMoney(value),
-      formatPercentFn: (value) => formatPercent(value),
-    });
+    // Передаём данные во Vue-компонент (если он смонтирован),
+    // параллельно поддерживая старый механизм обновления на случай отката.
+    if (typeof window !== "undefined" && typeof window.__vueSetContractMetrics === "function") {
+      window.__vueSetContractMetrics({
+        ...contractMetrics,
+        titleDateLabel: this.lastUpdatedMonthlyDateLabel || "",
+      });
+    } else {
+      updateContractCardExternal({
+        contractMetrics,
+        elements: this.elements,
+        formatMoneyFn: (value) => formatMoney(value),
+        formatPercentFn: (value) => formatPercent(value),
+      });
+    }
   }
 
   updateContractProgress(completion) {

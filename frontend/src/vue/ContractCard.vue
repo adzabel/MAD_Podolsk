@@ -1,0 +1,122 @@
+<template>
+  <section
+    class="contract-card monthly-only"
+    id="contract-card"
+  >
+    <div class="contract-card-header">
+      <div class="contract-card-title">
+        Исполнение контракта
+        <span class="contract-card-title-date" id="contract-title-date">
+          {{ titleDateLabel }}
+        </span>
+      </div>
+      <div class="contract-card-values">
+        <div>
+          <span class="label">Контракт</span>
+          <strong>{{ contractAmountLabel }}</strong>
+        </div>
+        <div>
+          <span class="label">Выполнено</span>
+          <strong>{{ executedLabel }}</strong>
+        </div>
+        <div>
+          <span class="label">Исполнение</span>
+          <strong>{{ percentLabel }}</strong>
+        </div>
+      </div>
+    </div>
+    <div
+      class="contract-progress-bar"
+      role="progressbar"
+      aria-valuemin="0"
+      aria-valuemax="120"
+      :aria-valuenow="ariaValueNow"
+      aria-label="Исполнение контракта"
+    >
+      <div
+        class="contract-progress-fill"
+        :class="{ overflow: isOverflow }"
+        :style="progressStyle"
+      ></div>
+    </div>
+  </section>
+</template>
+
+<script setup>
+import { computed } from "vue";
+
+const props = defineProps({
+  contractMetrics: {
+    type: Object,
+    default: null,
+  },
+});
+
+const PROGRESS_MAX_WIDTH = 115;
+const PROGRESS_MAX_ARIA = 120;
+const PROGRESS_OVERFLOW_COLOR = "#16a34a";
+const PROGRESS_BASE_ACCENT = "var(--accent)";
+
+const hasData = computed(() => {
+  return (
+    props.contractMetrics &&
+    props.contractMetrics.contractAmount != null &&
+    props.contractMetrics.executed != null
+  );
+});
+
+const contractAmountLabel = computed(() => {
+  if (!hasData.value) return "–";
+  return new Intl.NumberFormat("ru-RU", {
+    style: "currency",
+    currency: "RUB",
+    maximumFractionDigits: 0,
+  }).format(props.contractMetrics.contractAmount || 0);
+});
+
+const executedLabel = computed(() => {
+  if (!hasData.value) return "–";
+  return new Intl.NumberFormat("ru-RU", {
+    style: "currency",
+    currency: "RUB",
+    maximumFractionDigits: 0,
+  }).format(props.contractMetrics.executed || 0);
+});
+
+const completion = computed(() => {
+  if (!hasData.value) return null;
+  const value = props.contractMetrics.completion;
+  if (value == null || Number.isNaN(value)) return null;
+  return Math.max(0, value * 100);
+});
+
+const percentLabel = computed(() => {
+  if (completion.value == null) return "–";
+  return `${completion.value.toFixed(1)}%`;
+});
+
+const isOverflow = computed(() => {
+  return completion.value != null && completion.value > 100;
+});
+
+const ariaValueNow = computed(() => {
+  if (completion.value == null) return 0;
+  return Math.min(PROGRESS_MAX_ARIA, completion.value);
+});
+
+const progressStyle = computed(() => {
+  const percent = completion.value ?? 0;
+  const width = Math.min(PROGRESS_MAX_WIDTH, percent);
+  const color = isOverflow.value ? PROGRESS_OVERFLOW_COLOR : PROGRESS_BASE_ACCENT;
+
+  return {
+    width: `${width}%`,
+    "--progress-color": color,
+    background: color,
+  };
+});
+
+const titleDateLabel = computed(() => {
+  return props.contractMetrics?.titleDateLabel || "";
+});
+</script>
