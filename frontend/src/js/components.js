@@ -20,6 +20,7 @@ import {
   renderDailyModalListView,
 } from "@js/ui/dailyModalView.js";
 import { showDailyLoadingState, showDailyEmptyState, handleDailyLoadError } from "@js/views/daily-view.js";
+import { usePdfStore } from "@/vue/usePdfStore.js";
 
 function normalizePercent(value) {
   if (!isValidPercent(value)) return 0;
@@ -44,6 +45,7 @@ export class UIManager {
     this.apiPdfUrl = apiPdfUrl;
     this.pdfButtonDefaultLabel = pdfButtonDefaultLabel;
     this.visitorTracker = visitorTracker || null;
+    this.pdfStore = usePdfStore();
     this.groupedCategories = [];
     this.activeCategoryKey = null;
     this.workHeaderEl = null;
@@ -72,6 +74,15 @@ export class UIManager {
     }, 150);
     this.monthOptionsLoaded = false;
     this.pdfModule = null;
+
+    this.pdfStore.setConfig({
+      apiPdfUrl,
+      defaultLabel: this.normalizePdfLabel(pdfButtonDefaultLabel),
+      visitorTracker: this.visitorTracker,
+    });
+    this.pdfStore.setViewMode(this.uiStore.getViewMode());
+    this.pdfStore.setGroupedCategoriesCount(0);
+    this.pdfStore.setDataAvailability(false);
   }
 
   setActiveCategoryTitle(desktopText, mobileValueText = desktopText) {
@@ -140,10 +151,7 @@ export class UIManager {
       this.elements.viewModeDaily.setAttribute("aria-selected", viewMode === "daily" ? "true" : "false");
     }
 
-    const shouldDisablePdf = viewMode === "daily";
-    if (this.elements.pdfButton) {
-      this.elements.pdfButton.disabled = shouldDisablePdf || !this.groupedCategories.length;
-    }
+    this.pdfStore.setViewMode(viewMode);
 
     this.updateLastUpdatedPills();
   }
@@ -157,7 +165,6 @@ export class UIManager {
         this.handleWorkSortChange(column);
       });
     }
-    this.elements.pdfButton.addEventListener("click", (event) => this.downloadPdfReport(event));
     if (this.elements.viewModeMonthly) {
       this.elements.viewModeMonthly.addEventListener("click", () => this.switchViewMode("monthly"));
     }
@@ -228,6 +235,21 @@ export class UIManager {
     }
 
     return null;
+  }
+
+  normalizePdfLabel(label) {
+    if (!label) {
+      return "PDF";
+    }
+
+    try {
+      const wrapper = document.createElement("div");
+      wrapper.innerHTML = label;
+      const text = wrapper.textContent ? wrapper.textContent.trim() : "";
+      return text || label || "PDF";
+    } catch (e) {
+      return typeof label === "string" && label.trim() ? label.trim() : "PDF";
+    }
   }
 
   isCurrentMonth(monthIso) {
@@ -303,6 +325,10 @@ export class UIManager {
     this.uiStore.setSelectedMonth(monthIso);
     this.selectedMonthIso = monthIso;
     this.updateDailyAverageVisibility(monthIso);
+    this.pdfStore.setSelectedMonth({
+      iso: monthIso || "",
+      label: this.getSelectedMonthLabel() || "",
+    });
     const cached = this.dataManager.getCached(monthIso);
     if (cached) {
       this.applyData(cached);
@@ -363,7 +389,8 @@ export class UIManager {
     this.workHeaderEl.hidden = true;
     this.elements.workListScroller.style.display = "none";
     this.clearWorkRows();
-    this.elements.pdfButton.disabled = true;
+    this.pdfStore.setGroupedCategoriesCount(0);
+    this.pdfStore.setDataAvailability(false);
     this.elements.categoryGrid.innerHTML = '<div class="empty-state">Ошибка загрузки данных</div>';
   }
 
@@ -373,6 +400,7 @@ export class UIManager {
     const items = Array.isArray(data.items) ? data.items : [];
     this.groupedCategories = this.dataManager.buildCategories(items);
     this.ensureActiveCategory();
+    this.pdfStore.setGroupedCategoriesCount(this.groupedCategories.length);
     const hasData = data.has_data;
     const lastUpdatedLabel = hasData
       ? formatDateTime(data.last_updated)
@@ -390,7 +418,11 @@ export class UIManager {
       window.__vueSetMonthlyLastUpdatedStatus(hasData ? "idle" : "idle");
     }
     const hasAnyData = data.has_data && items.length > 0;
-    this.elements.pdfButton.disabled = !hasAnyData;
+    this.pdfStore.setDataAvailability(hasAnyData);
+    this.pdfStore.setSelectedMonth({
+      iso: this.uiStore.getSelectedMonth() || this.selectedMonthIso || "",
+      label: this.getSelectedMonthLabel() || "",
+    });
     // Отладка: логируем метрики, которые передаются во Vue-компоненты
     const metrics = this.dataManager.calculateMetrics(data);
     // Обновляем Vue-компоненты с метриками
@@ -816,58 +848,6 @@ export class UIManager {
       });
     } catch (e) {
       return "";
-    }
-  }
-
-  async downloadPdfReport(event) {
-    event.preventDefault();
-    if (this.elements.pdfButton.disabled) {
-      return;
-    }
-    const currentMonthIso = this.uiStore.getSelectedMonth() || this.selectedMonthIso || "";
-    const selectedMonth = this.getSelectedMonthLabel() || currentMonthIso || "period";
-    const fileNameSlug = selectedMonth
-      .toString()
-      .trim()
-      .replace(/\s+/g, "-")
-      .replace(/[^0-9A-Za-zА-Яа-я\-]+/g, "")
-      .replace(/-+/g, "-")
-      .replace(/^-|-$/g, "");
-    const fileName = fileNameSlug ? `mad-podolsk-otchet-${fileNameSlug}.pdf` : "mad-podolsk-otchet.pdf";
-    this.elements.pdfButton.disabled = true;
-    this.elements.pdfButton.innerHTML = "Формируем PDF…";
-    try {
-      const pdfUrl = new URL(this.apiPdfUrl, window.location.origin);
-      if (currentMonthIso) {
-        pdfUrl.searchParams.set("month", currentMonthIso);
-      }
-      const response = await fetch(pdfUrl.toString(), {
-        headers: {
-          Accept: "application/pdf",
-          ...(this.visitorTracker ? this.visitorTracker.buildHeaders() : {}),
-        },
-      });
-      if (!response.ok) {
-        throw new Error("HTTP " + response.status);
-      }
-      const blob = await response.blob();
-      const downloadUrl = URL.createObjectURL(blob);
-      const anchor = document.createElement("a");
-      anchor.href = downloadUrl;
-      anchor.download = fileName;
-      anchor.style.display = "none";
-      document.body.appendChild(anchor);
-      anchor.click();
-      anchor.remove();
-      setTimeout(() => URL.revokeObjectURL(downloadUrl), 0);
-      this.announce("PDF-отчёт сформирован.");
-    } catch (error) {
-      console.error("PDF export error", error);
-      showToast("Не удалось сформировать PDF. Попробуйте ещё раз позже.", "error");
-      this.announce("Ошибка формирования PDF");
-    } finally {
-      this.elements.pdfButton.innerHTML = this.pdfButtonDefaultLabel;
-      this.elements.pdfButton.disabled = !this.groupedCategories.length;
     }
   }
 

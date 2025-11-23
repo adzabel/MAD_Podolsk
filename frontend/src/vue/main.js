@@ -8,6 +8,8 @@ import DaySelect from "./DaySelect.vue";
 import DailyReport from "./DailyReport.vue";
 import LastUpdatedPill from "./LastUpdatedPill.vue";
 import { useLastUpdatedStore } from "./useLastUpdatedStore";
+import PdfButton from "./PdfButton.vue";
+import { usePdfStore } from "./usePdfStore";
 
 // Единое реактивное состояние для карточки контракта, чтобы сеттер из
 // старого JS-кода и Vue-компонент делили одни и те же данные.
@@ -67,6 +69,18 @@ export function mountDailyReport(selector = "#daily-panel") {
   if (!el) return null;
 
   const app = createApp(DailyReport);
+  const vm = app.mount(el);
+
+  return { app, vm };
+}
+
+const pdfStore = usePdfStore();
+
+export function mountPdfButton(selector) {
+  const el = document.querySelector(selector);
+  if (!el) return null;
+
+  const app = createApp(PdfButton, { pdfStore });
   const vm = app.mount(el);
 
   return { app, vm };
