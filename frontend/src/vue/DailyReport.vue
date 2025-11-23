@@ -178,7 +178,6 @@ async function fetchDailyReport(dayIso) {
 
     if (typeof window !== "undefined" && typeof window.__vueSetLastUpdated === "function") {
       window.__vueSetLastUpdated({
-        dailyLabel: "Загрузка данных…",
         dailyStatus: "loading",
       });
     }
@@ -215,12 +214,7 @@ async function fetchDailyReport(dayIso) {
     state.source = "day-select";
 
     if (typeof window !== "undefined" && typeof window.__vueSetLastUpdated === "function") {
-      const labelDate = state.selectedDateIso || dayIso;
-      const label = labelDate
-        ? `Данные за ${new Date(labelDate).toLocaleDateString("ru-RU", { day: "2-digit", month: "long" })}`
-        : "Данные обновлены";
       window.__vueSetLastUpdated({
-        dailyLabel: label,
         dailyStatus: "idle",
       });
     }
@@ -230,7 +224,6 @@ async function fetchDailyReport(dayIso) {
     state.hasData = false;
     if (typeof window !== "undefined" && typeof window.__vueSetLastUpdated === "function") {
       window.__vueSetLastUpdated({
-        dailyLabel: "Ошибка загрузки данных",
         dailyStatus: "error",
       });
     }
