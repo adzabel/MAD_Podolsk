@@ -176,10 +176,8 @@ async function fetchDailyReport(dayIso) {
     state.hasData = false;
     state.items = [];
 
-    if (typeof window !== "undefined" && typeof window.__vueSetLastUpdated === "function") {
-      window.__vueSetLastUpdated({
-        dailyStatus: "loading",
-      });
+    if (typeof window !== "undefined" && typeof window.__vueSetDailyLastUpdatedStatus === "function") {
+      window.__vueSetDailyLastUpdatedStatus("loading");
     }
 
     const url = new URL(API_DAILY_URL, window.location.origin);
@@ -213,19 +211,15 @@ async function fetchDailyReport(dayIso) {
     state.selectedDateIso = data?.date || dayIso;
     state.source = "day-select";
 
-    if (typeof window !== "undefined" && typeof window.__vueSetLastUpdated === "function") {
-      window.__vueSetLastUpdated({
-        dailyStatus: "idle",
-      });
+    if (typeof window !== "undefined" && typeof window.__vueSetDailyLastUpdatedStatus === "function") {
+      window.__vueSetDailyLastUpdatedStatus("idle");
     }
   } catch (error) {
     console.error("DailyReport: failed to load daily report", error);
     state.items = [];
     state.hasData = false;
-    if (typeof window !== "undefined" && typeof window.__vueSetLastUpdated === "function") {
-      window.__vueSetLastUpdated({
-        dailyStatus: "error",
-      });
+    if (typeof window !== "undefined" && typeof window.__vueSetDailyLastUpdatedStatus === "function") {
+      window.__vueSetDailyLastUpdatedStatus("error");
     }
   } finally {
     state.isLoading = false;

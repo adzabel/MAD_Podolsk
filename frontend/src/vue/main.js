@@ -5,6 +5,7 @@ import MonthSelect from "./MonthSelect.vue";
 import DaySelect from "./DaySelect.vue";
 import DailyReport from "./DailyReport.vue";
 import LastUpdatedPill from "./LastUpdatedPill.vue";
+import { useLastUpdatedStore } from "./useLastUpdatedStore";
 
 // Единое реактивное состояние для карточки контракта, чтобы сеттер из
 // старого JS-кода и Vue-компонент делили одни и те же данные.
@@ -71,37 +72,26 @@ export function mountDailyReport(selector = "#daily-panel") {
   return { app, vm };
 }
 
-// Состояние индикатора "Данные обновлены" для обоих режимов.
-const lastUpdatedState = reactive({
-  monthlyLabel: "Нет данных",
-  monthlyStatus: "loading",
-  dailyLabel: "Нет данных",
-  dailyStatus: "loading",
-});
+// Единый стор для индикаторов "Данные обновлены".
+const lastUpdatedStore = useLastUpdatedStore();
 
 if (typeof window !== "undefined") {
-  window.__vueSetLastUpdated = (payload) => {
-    if (!payload || typeof payload !== "object") return;
-    if (payload.monthlyLabel !== undefined) {
-      lastUpdatedState.monthlyLabel = payload.monthlyLabel;
-    }
-    if (payload.monthlyStatus !== undefined) {
-      lastUpdatedState.monthlyStatus = payload.monthlyStatus;
-    }
-    if (payload.dailyLabel !== undefined) {
-      lastUpdatedState.dailyLabel = payload.dailyLabel;
-    }
-    if (payload.dailyStatus !== undefined) {
-      lastUpdatedState.dailyStatus = payload.dailyStatus;
-    }
+  window.__vueSetLastUpdatedFromDb = (label) => {
+    lastUpdatedStore.setLabelFromDb(label);
+  };
+  window.__vueSetMonthlyLastUpdatedStatus = (status) => {
+    lastUpdatedStore.setMonthlyStatus(status);
+  };
+  window.__vueSetDailyLastUpdatedStatus = (status) => {
+    lastUpdatedStore.setDailyStatus(status);
   };
 }
 
 const MonthlyLastUpdatedShell = defineComponent({
   name: "MonthlyLastUpdatedShell",
   setup() {
-    const label = computed(() => lastUpdatedState.monthlyLabel);
-    const status = computed(() => lastUpdatedState.monthlyStatus);
+  const label = computed(() => lastUpdatedStore.state.labelFromDb);
+  const status = computed(() => lastUpdatedStore.state.monthlyStatus);
     return () => h(LastUpdatedPill, { label: label.value, status: status.value });
   },
 });
@@ -109,8 +99,8 @@ const MonthlyLastUpdatedShell = defineComponent({
 const DailyLastUpdatedShell = defineComponent({
   name: "DailyLastUpdatedShell",
   setup() {
-    const label = computed(() => lastUpdatedState.dailyLabel);
-    const status = computed(() => lastUpdatedState.dailyStatus);
+  const label = computed(() => lastUpdatedStore.state.labelFromDb);
+  const status = computed(() => lastUpdatedStore.state.dailyStatus);
     return () => h(LastUpdatedPill, { label: label.value, status: status.value });
   },
 });

@@ -483,11 +483,11 @@ export class UIManager {
     this.lastUpdatedMonthlyLabel = lastUpdatedLabel;
     this.lastUpdatedMonthlyDateLabel = lastUpdatedDateLabel;
     this.updateLastUpdatedPills();
-    if (typeof window !== "undefined" && typeof window.__vueSetLastUpdated === "function") {
-      window.__vueSetLastUpdated({
-        monthlyLabel: lastUpdatedLabel,
-        monthlyStatus: hasData ? "idle" : "idle",
-      });
+    if (typeof window !== "undefined" && typeof window.__vueSetLastUpdatedFromDb === "function") {
+      window.__vueSetLastUpdatedFromDb(lastUpdatedLabel);
+    }
+    if (typeof window !== "undefined" && typeof window.__vueSetMonthlyLastUpdatedStatus === "function") {
+      window.__vueSetMonthlyLastUpdatedStatus(hasData ? "idle" : "idle");
     }
     const hasAnyData = data.has_data && items.length > 0;
     this.elements.pdfButton.disabled = !hasAnyData;
@@ -552,11 +552,8 @@ export class UIManager {
       this.updateContractTitleDate(monthlyDateLabel);
     }
 
-    if (typeof window !== "undefined" && typeof window.__vueSetLastUpdated === "function") {
-      window.__vueSetLastUpdated({
-        monthlyLabel,
-        dailyLabel,
-      });
+    if (typeof window !== "undefined" && typeof window.__vueSetLastUpdatedFromDb === "function") {
+      window.__vueSetLastUpdatedFromDb(monthlyLabel);
     }
   }
 
