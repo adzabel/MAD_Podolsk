@@ -397,14 +397,11 @@ export class UIManager {
     this.dailyRevenue = [];
     this.toggleSkeletons(true);
     this.elements.categoryGrid.innerHTML = "";
-    this.lastUpdatedMonthlyLabel = "Загрузка данных…";
-    this.lastUpdatedMonthlyDateLabel = "Загрузка данных…";
+    this.lastUpdatedMonthlyLabel = null;
+    this.lastUpdatedMonthlyDateLabel = null;
     this.updateLastUpdatedPills();
-    if (typeof window !== "undefined" && typeof window.__vueSetLastUpdated === "function") {
-      window.__vueSetLastUpdated({
-        monthlyLabel: "Загрузка данных…",
-        monthlyStatus: "loading",
-      });
+    if (typeof window !== "undefined" && typeof window.__vueSetMonthlyLastUpdatedStatus === "function") {
+      window.__vueSetMonthlyLastUpdatedStatus("loading");
     }
     // Сводка теперь рендерится Vue: уведомляем её о состоянии загрузки,
     // а прямой доступ к DOM-элементам sumPlanned/sumFact/sumDelta убираем.
@@ -433,14 +430,11 @@ export class UIManager {
     this.toggleSkeletons(false);
     this.elements.workEmptyState.style.display = "block";
     this.elements.workEmptyState.textContent = "Ошибка загрузки данных";
-    this.lastUpdatedMonthlyLabel = "Ошибка загрузки данных";
-    this.lastUpdatedMonthlyDateLabel = "";
+    this.lastUpdatedMonthlyLabel = null;
+    this.lastUpdatedMonthlyDateLabel = null;
     this.updateLastUpdatedPills();
-    if (typeof window !== "undefined" && typeof window.__vueSetLastUpdated === "function") {
-      window.__vueSetLastUpdated({
-        monthlyLabel: "Ошибка загрузки данных",
-        monthlyStatus: "error",
-      });
+    if (typeof window !== "undefined" && typeof window.__vueSetMonthlyLastUpdatedStatus === "function") {
+      window.__vueSetMonthlyLastUpdatedStatus("error");
     }
     // Сводка теперь управляется Vue, поэтому обновляем её через глобальный хук,
     // а прямые манипуляции с DOM-элементами sum* убираем.
@@ -609,11 +603,7 @@ export class UIManager {
   showDailyLoadingState() {
     showDailyLoadingState({
       elements: this.elements,
-      setLastUpdated: ({ label, dateLabel }) => {
-        this.lastUpdatedDailyLabel = label;
-        this.lastUpdatedDailyDateLabel = dateLabel;
-        this.updateLastUpdatedPills();
-      },
+      setLastUpdated: () => {},
     });
   }
 
@@ -621,11 +611,8 @@ export class UIManager {
     handleDailyLoadError({
       elements: this.elements,
       message,
-      setLastUpdated: ({ label, dateLabel }) => {
-        this.lastUpdatedDailyLabel = label;
-        this.lastUpdatedDailyDateLabel = dateLabel;
-      },
-      updateLastUpdatedPills: () => this.updateLastUpdatedPills(),
+      setLastUpdated: () => {},
+      updateLastUpdatedPills: () => {},
     });
   }
 
