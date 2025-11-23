@@ -724,24 +724,27 @@ export class UIManager {
   }
 
   updateContractCard(contractMetrics) {
-    // Передаём данные во Vue-компонент (если он смонтирован),
-    // параллельно поддерживая старый механизм обновления на случай отката.
-    if (typeof window !== "undefined" && typeof window.__vueSetContractMetrics === "function") {
-      window.__vueSetContractMetrics({
-        ...(contractMetrics || {}),
-        titleDateLabel:
-          this.uiStore.getViewMode() === "daily"
-            ? this.lastUpdatedDailyDateLabel || ""
-            : this.lastUpdatedMonthlyDateLabel || "",
-      });
-    } else {
-      updateContractCardExternal({
-        contractMetrics,
-        elements: this.elements,
-        formatMoneyFn: (value) => formatMoney(value),
-        formatPercentFn: (value) => formatPercent(value),
-      });
+    const payload = {
+      ...(contractMetrics || {}),
+      titleDateLabel:
+        this.uiStore.getViewMode() === "daily"
+          ? this.lastUpdatedDailyDateLabel || ""
+          : this.lastUpdatedMonthlyDateLabel || "",
+    };
+
+    // Если Vue-дашборд активен — обновляем его реактивное состояние.
+    // Иначе используем старый DOM-рендер.
+    if (typeof window !== "undefined" && window.__dashboardState) {
+      window.__dashboardState.contractMetrics = payload;
+      return;
     }
+
+    updateContractCardExternal({
+      contractMetrics,
+      elements: this.elements,
+      formatMoneyFn: (value) => formatMoney(value),
+      formatPercentFn: (value) => formatPercent(value),
+    });
   }
 
   updateContractProgress(completion) {

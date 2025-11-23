@@ -46,9 +46,9 @@
 import { computed } from "vue";
 
 const props = defineProps({
-  contractMetrics: {
+  dashboardState: {
     type: Object,
-    default: null,
+    required: true,
   },
 });
 
@@ -57,16 +57,18 @@ const PROGRESS_MAX_ARIA = 120;
 const PROGRESS_OVERFLOW_COLOR = "#16a34a";
 const PROGRESS_BASE_ACCENT = "var(--accent)";
 
+const contractMetrics = computed(() => props.dashboardState.contractMetrics || null);
+
 const hasData = computed(() => {
-  if (!props.contractMetrics) return false;
-  const hasAmount = props.contractMetrics.contractAmount != null;
-  const hasExecuted = props.contractMetrics.executed != null;
-  const hasCompletion = props.contractMetrics.completion != null;
+  if (!contractMetrics.value) return false;
+  const hasAmount = contractMetrics.value.contractAmount != null;
+  const hasExecuted = contractMetrics.value.executed != null;
+  const hasCompletion = contractMetrics.value.completion != null;
   return hasAmount || hasExecuted || hasCompletion;
 });
 
 const contractAmountLabel = computed(() => {
-  if (!hasData.value || props.contractMetrics.contractAmount == null) return "–";
+  if (!hasData.value || contractMetrics.value.contractAmount == null) return "–";
   return new Intl.NumberFormat("ru-RU", {
     style: "currency",
     currency: "RUB",
@@ -75,7 +77,7 @@ const contractAmountLabel = computed(() => {
 });
 
 const executedLabel = computed(() => {
-  if (!hasData.value || props.contractMetrics.executed == null) return "–";
+  if (!hasData.value || contractMetrics.value.executed == null) return "–";
   return new Intl.NumberFormat("ru-RU", {
     style: "currency",
     currency: "RUB",
@@ -85,7 +87,7 @@ const executedLabel = computed(() => {
 
 const completion = computed(() => {
   if (!hasData.value) return null;
-  const value = props.contractMetrics.completion;
+  const value = contractMetrics.value.completion;
   if (value == null || Number.isNaN(value)) return null;
   return Math.max(0, value * 100);
 });
@@ -117,6 +119,6 @@ const progressStyle = computed(() => {
 });
 
 const titleDateLabel = computed(() => {
-  return props.contractMetrics?.titleDateLabel || "";
+  return contractMetrics.value?.titleDateLabel || "";
 });
 </script>
