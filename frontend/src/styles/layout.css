@@ -213,10 +213,10 @@ header {
 }
 
 .contract-card {
-	background: transparent;
+	background: var(--bg-card);
 	border-radius: var(--radius-lg);
-	border: none;
-	box-shadow: none;
+	border: 1px solid var(--border-soft);
+	box-shadow: var(--shadow-card);
 	padding: clamp(14px, 2vw, var(--gap-lg));
 	display: grid;
 	gap: var(--gap-md);
