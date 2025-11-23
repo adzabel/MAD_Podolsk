@@ -503,6 +503,8 @@ export class UIManager {
         averageValue: metrics?.averageDailyRevenue ?? null,
         daysWithData: Array.isArray(metrics?.dailyRevenue) ? metrics.dailyRevenue.length : 0,
         isCurrentMonth: this.isCurrentMonth(this.uiStore.getSelectedMonth()),
+        summaryDailyRevenue: Array.isArray(metrics?.dailyRevenue) ? metrics.dailyRevenue : [],
+        selectedMonthLabel: this.getSelectedMonthLabel ? this.getSelectedMonthLabel() : '',
       });
     }
     // Обновляем Vue-компонент ContractCard
