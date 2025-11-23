@@ -563,15 +563,15 @@ export class UIManager {
   }
 
   updateContractCard(contractMetrics) {
-    // Храним метрики для Vue-карточки и старого DOM-фолбэка
+    // Обновляем Vue-карточку напрямую
     this.contractMetrics = contractMetrics || null;
-
-    updateContractCardExternal({
-      contractMetrics,
-      elements: this.elements,
-      formatMoneyFn: (value) => formatMoney(value),
-      formatPercentFn: (value) => formatPercent(value),
-    });
+    if (typeof window !== "undefined" && typeof window.__vueSetContractMetrics === "function") {
+      window.__vueSetContractMetrics({
+        contractAmount: contractMetrics?.contractAmount ?? null,
+        executed: contractMetrics?.executed ?? null,
+        completion: contractMetrics?.completion ?? null,
+      });
+    }
   }
 
   updateContractProgress(completion) {
