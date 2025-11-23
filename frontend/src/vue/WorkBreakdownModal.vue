@@ -1,5 +1,11 @@
 <template>
-  <div v-if="visible && workNameSafe && workNameSafe.trim() !== ''" :class="['modal-backdrop', { visible: visible }]" id="work-modal" :aria-hidden="!visible">
+  <div
+    v-if="visible && workNameSafe && workNameSafe.trim() !== ''"
+    :class="['modal-backdrop', { visible: visible }]"
+    id="work-modal"
+    :aria-hidden="!visible"
+    @click.self="$emit('close')"
+  >
     <div class="modal" role="dialog" aria-modal="true" aria-labelledby="work-modal-title">
       <div class="modal-title" id="work-modal-title">Расшифровка: {{ workNameSafe }}</div>
       <div class="modal-subtitle" id="work-modal-subtitle">{{ selectedMonthLabel }}</div>
