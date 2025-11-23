@@ -1,33 +1,19 @@
+
 <template>
-  <SummaryCard
-    label="План, ₽"
-    sub="Сметная стоимость"
-    :value="summaryState.planned"
-  />
-  <SummaryCard
-    label="Факт, ₽"
-    sub="Сумма принятых работ"
-    :value="summaryState.fact"
-    :progress="summaryState.completion"
-    :progress-label="summaryState.completionLabel"
-  />
-  <SummaryCard
-    label="Отклонение, ₽"
-    sub="Факт − План"
-    :value="summaryState.delta"
-    :delta="true"
-  />
-  <DailyAverageCard
-    :average-value="dailyAverageState.averageValue"
-    :days-with-data="dailyAverageState.daysWithData"
-    :is-current-month="dailyAverageState.isCurrentMonth"
+  <SummaryCards
+    :plan="summaryState.planned"
+    :fact="summaryState.fact"
+    :deviation="summaryState.delta"
+    :isInteractive="true"
+    :dailyAverage="dailyAverageState.averageValue"
+    :daysWithData="dailyAverageState.daysWithData"
+    :isCurrentMonth="dailyAverageState.isCurrentMonth"
   />
 </template>
 
 <script setup>
 import { reactive, ref, onMounted } from "vue";
-import SummaryCard from "./SummaryCard.vue";
-import DailyAverageCard from "./DailyAverageCard.vue";
+import SummaryCards from "./SummaryCards.vue";
 import MonthSelect from "./MonthSelect.vue";
 
 const months = ref([]);
