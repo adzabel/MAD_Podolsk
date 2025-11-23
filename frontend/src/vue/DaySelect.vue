@@ -50,6 +50,19 @@ function getTodayIso() {
   return `${year}-${month}-${day}`;
 }
 
+function pickClosestToToday(days) {
+  if (!days.length) return null;
+  const today = getTodayIso();
+  const toTime = (iso) => new Date(iso).getTime();
+  const todayTime = toTime(today);
+  return days.reduce((best, iso) => {
+    const diffBest = Math.abs(toTime(best) - todayTime);
+    const diffCur = Math.abs(toTime(iso) - todayTime);
+    if (diffCur < diffBest) return iso;
+    return best;
+  }, days[0]);
+}
+
 async function loadInitial() {
   state.isLoading = true;
   state.loadError = false;
@@ -80,10 +93,13 @@ async function loadInitial() {
     state.min = minDayIso || "";
     state.max = maxDayIso || "";
 
-    // Выбираем initialDay, если он попадает в диапазон, иначе первый из списка.
-    const initialFromProps =
-      props.initialDay && normalized.includes(props.initialDay) ? props.initialDay : null;
-    const initialIso = initialFromProps || normalized[0];
+    // Выбираем initialDay: сначала ближайший к сегодняшнему, если есть;
+    // если передан props.initialDay и он в списке — используем его.
+    const initialFromProps = props.initialDay && normalized.includes(props.initialDay)
+      ? props.initialDay
+      : null;
+    const closestToToday = pickClosestToToday(normalized);
+    const initialIso = initialFromProps || closestToToday || normalized[0];
 
     state.selected = initialIso;
     if (typeof window !== "undefined" && typeof window.__onDayChange === "function") {
