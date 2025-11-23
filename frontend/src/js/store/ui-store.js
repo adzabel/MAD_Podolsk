@@ -24,6 +24,9 @@ export class UiStore {
 
   setViewMode(mode) {
     this.viewMode = mode === "daily" ? "daily" : "monthly";
+    if (typeof window !== "undefined" && typeof window.__vueSetViewMode === "function") {
+      window.__vueSetViewMode(this.viewMode);
+    }
   }
 
   setSelectedMonth(monthIso) {

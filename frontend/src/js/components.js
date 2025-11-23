@@ -659,6 +659,17 @@ export class UIManager {
       completionLabel,
     } = renderSummaryExternal({ metrics, elements: this.elements });
 
+    // Передаём сводку в Vue (если он подключен)
+    if (typeof window !== "undefined" && typeof window.__vueSetSummaryMetrics === "function") {
+      window.__vueSetSummaryMetrics({
+        planned: metrics ? metrics.planned : null,
+        fact: metrics ? metrics.fact : null,
+        delta: metrics ? metrics.delta : null,
+        completion: metrics ? metrics.completion : null,
+        completionLabel,
+      });
+    }
+
     this.summaryDailyRevenue = summaryDailyRevenue || [];
     this.dailyRevenue = [...this.summaryDailyRevenue];
     this.updateSummaryProgress(completion, completionLabel);
@@ -701,8 +712,11 @@ export class UIManager {
     // параллельно поддерживая старый механизм обновления на случай отката.
     if (typeof window !== "undefined" && typeof window.__vueSetContractMetrics === "function") {
       window.__vueSetContractMetrics({
-        ...contractMetrics,
-        titleDateLabel: this.lastUpdatedMonthlyDateLabel || "",
+        ...(contractMetrics || {}),
+        titleDateLabel:
+          this.uiStore.getViewMode() === "daily"
+            ? this.lastUpdatedDailyDateLabel || ""
+            : this.lastUpdatedMonthlyDateLabel || "",
       });
     } else {
       updateContractCardExternal({

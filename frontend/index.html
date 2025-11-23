@@ -67,32 +67,9 @@
       <!-- Карточка исполняется через Vue-компонент ContractCard.vue -->
     </section>
 
-    <!-- Сводка -->
+    <!-- Сводка (рендерится через Vue в App.vue) -->
     <section class="summary-grid layout-grid monthly-only" id="summary-grid">
-      <div class="summary-card card card--stacked">
-        <div class="summary-label">План, ₽</div>
-        <div class="summary-value" id="sum-planned">–</div>
-        <div class="summary-sub">Сметная стоимость</div>
-      </div>
-      <div class="summary-card card card--stacked">
-        <div class="summary-label">Факт, ₽</div>
-        <div class="summary-value" id="sum-fact">–</div>
-        <div class="summary-sub">Сумма принятых работ</div>
-        <div class="summary-progress" id="fact-progress" aria-live="polite">
-          <div class="summary-progress-labels">
-            <span>Исполнение</span>
-            <strong id="sum-fact-progress-label">–</strong>
-          </div>
-          <div class="summary-progress-bar">
-            <div class="summary-progress-fill" id="sum-fact-progress"></div>
-          </div>
-        </div>
-      </div>
-      <div class="summary-card card card--stacked">
-        <div class="summary-label">Отклонение, ₽</div>
-        <div class="summary-value" id="sum-delta">–</div>
-        <div class="summary-sub">Факт − План</div>
-      </div>
+    </section>
       <button class="summary-card card card--interactive card--stacked summary-card-interactive" id="daily-average-card" type="button">
         <div class="summary-label">Среднедневная выручка, ₽</div>
         <div class="summary-value" id="sum-daily-average">–</div>
