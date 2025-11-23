@@ -38,7 +38,13 @@ const state = reactive({
 
 const selected = ref("");
 
-const isDisabled = computed(() => state.isLoading || state.loadError);
+const isDisabled = computed(() => {
+  // Блокируем селектор только во время загрузки
+  // или при ошибке, когда вообще нет опций.
+  if (state.isLoading) return true;
+  if (state.loadError && !state.options.length) return true;
+  return false;
+});
 
 function getCurrentMonthIso() {
   const now = new Date();
