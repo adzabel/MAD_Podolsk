@@ -1,9 +1,9 @@
 .summary-cards {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 24px;
+  gap: var(--card-frame-gap);
   width: 100%;
-  margin-bottom: 32px;
+  margin-bottom: var(--section-gap);
   align-items: stretch;
   grid-auto-rows: 1fr;
 }
@@ -19,7 +19,7 @@
 }
 .summary-grid {
   display: block;
-  margin-bottom: var(--grid-gap);
+  margin-bottom: var(--section-gap);
 }
 
 @media (max-width: 640px) {
