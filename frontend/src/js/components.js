@@ -683,7 +683,9 @@ export class UIManager {
       this.applyDailyData(data);
       this.announce(`Данные за ${formatDailyDateLabel(dayIso)} обновлены.`);
       if (typeof window !== "undefined" && typeof window.__vueSetLastUpdated === "function") {
-        const label = this.lastUpdatedDailyLabel || this.lastUpdatedMonthlyLabel || "Данные обновлены";
+        const label =
+          this.lastUpdatedDailyLabel ||
+          `Данные за ${formatDailyDateLabel(dayIso)}`;
         window.__vueSetLastUpdated({
           dailyLabel: label,
           dailyStatus: "idle",
