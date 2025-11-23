@@ -40,7 +40,12 @@ async function loadMonths() {
   error.value = false;
   try {
     const availableMonths = await fetchAvailableMonths();
-    const arr = Array.isArray(availableMonths) ? availableMonths : [];
+    let arr = [];
+    if (Array.isArray(availableMonths)) {
+      arr = availableMonths;
+    } else if (availableMonths && Array.isArray(availableMonths.months)) {
+      arr = availableMonths.months;
+    }
     months.value = arr
       .map((iso) => {
         if (!iso) return null;
