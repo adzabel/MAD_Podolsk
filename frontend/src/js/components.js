@@ -359,7 +359,10 @@ export class UIManager {
       const { data } = await this.dataManager.fetchDailyReport(dayIso, { force: true });
       this.currentDailyData = data;
       applyDailyData({
-        data,
+        // Жёстко привязываем отображаемую дату к выбранной в селекторе,
+        // чтобы заголовок и подзаголовок совпадали с выбором пользователя,
+        // даже если backend вернёт другое значение в поле date.
+        data: { ...data, date: dayIso },
         elements: this.elements,
         onAfterRender: () => this.updateDailyNameCollapsers(),
       });
