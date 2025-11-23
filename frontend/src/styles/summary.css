@@ -49,8 +49,8 @@
 }
 
 
-.summary-card,
-.summary-card-interactive {
+ .summary-card,
+ .summary-card-interactive {
   background: var(--bg-card);
   border: 1px solid var(--border-soft);
   border-radius: var(--radius-lg);
@@ -65,6 +65,7 @@
   flex: 1 1 0;
   box-sizing: border-box;
   transition: var(--transition-lift), var(--transition-border);
+  align-items: stretch;
 }
 
 .summary-card-interactive {
@@ -128,6 +129,7 @@
   letter-spacing: 0.08em;
   word-break: break-word;
   width: 100%;
+  text-align: center;
 }
 
 @media (min-width: 768px) {
@@ -141,6 +143,7 @@
   font-weight: 600;
   word-break: break-word;
   width: 100%;
+  text-align: center;
 }
 
 /* Make sure value inside interactive card has identical numeric rendering
