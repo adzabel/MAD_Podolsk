@@ -57,6 +57,7 @@ T = TypeVar("T")
 ITEMS_SQL = f"""
     SELECT
         pvf.*,
+        pvf.description AS work_name,
         rates.smeta_code AS category_code
     FROM {TABLE_PLAN_VS_FACT_MONTHLY} AS pvf
     LEFT JOIN {TABLE_RATES} AS rates
