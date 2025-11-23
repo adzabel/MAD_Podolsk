@@ -35,7 +35,6 @@ from .query_builder import FactQueryBuilder
 from .utils import (
     to_float,
     normalize_string,
-    safe_get_from_dict,
     get_month_start,
     get_next_month_start,
     extract_dict_strings,
@@ -125,94 +124,6 @@ SUMMARY_SQL = f"""
 # Используются: to_float, safe_get_from_dict, extract_dict_strings
 
 
-def _calculate_vnr_plan(items: list["DashboardItem"]) -> float:
-    """Вычисляет план для внерегламента как 43% от планов по сметам лето и зима."""
-
-    base_total = Decimal(0)
-    for item in items:
-        if item.planned_amount is None:
-            continue
-        category = (item.category or "").strip().lower()
-        if category in _PLAN_BASE_CATEGORIES:
-            base_total += Decimal(str(item.planned_amount))
-
-    if base_total <= 0:
-        return 0.0
-
-    return float(base_total * _VNR_PLAN_SHARE)
-
-
-def _is_vnr_row(row: dict[str, Any]) -> bool:
-    smeta_code = normalize_string(
-        safe_get_from_dict(row, "smeta_code", "category_code", default="")
-    ).lower()
-    return smeta_code in _VNR_CATEGORY_CODES
-
-
-def _build_vnr_plan_item(plan_value: float, items: list["DashboardItem"]) -> "DashboardItem | None":
-    if plan_value <= 0:
-        return None
-
-    category = None
-    smeta = None
-    description = CATEGORY_VNR_LABEL
-
-    for item in items:
-        category_code = (item.category or "").strip().lower()
-        if category_code in _VNR_CATEGORY_CODES:
-            category = category or item.category or item.smeta
-            smeta = smeta or item.smeta or item.category
-            description = item.smeta or item.description or description
-            if category and smeta:
-                break
-
-    fallback = smeta or category or description
-    return DashboardItem(
-        category=category or fallback,
-        smeta=fallback,
-        work_name=None,
-        description=description or fallback,
-        planned_amount=plan_value,
-        fact_amount=None,
-        category_plan_only=True,
-    )
-
-
-def _update_summary_with_vnr_plan(
-    summary: "DashboardSummary | None",
-    plan_adjustment: float,
-    items: list["DashboardItem"],
-    average_daily_revenue: float | None,
-    daily_revenue: list[DailyRevenue] | None,
-) -> "DashboardSummary | None":
-    if plan_adjustment <= 0:
-        return summary
-
-    if summary:
-        planned_total = (summary.planned_amount or 0.0) + plan_adjustment
-        fact_total = summary.fact_amount or 0.0
-        summary.planned_amount = planned_total
-        summary.fact_amount = fact_total
-        summary.delta_amount = fact_total - planned_total
-        summary.completion_pct = fact_total / planned_total if planned_total else None
-        return summary
-
-    fact_total = 0.0
-    for item in items:
-        if item.fact_amount is not None:
-            fact_total += item.fact_amount
-
-    planned_total = plan_adjustment
-    return DashboardSummary(
-        planned_amount=planned_total,
-        fact_amount=fact_total,
-        completion_pct=fact_total / planned_total if planned_total else None,
-        delta_amount=fact_total - planned_total,
-        average_daily_revenue=average_daily_revenue,
-        daily_revenue=daily_revenue,
-    )
-
-
 def _aggregate_items_streaming(cursor) -> list[DashboardItem]:
     """
     Агрегирует строки запроса используя курсор напрямую (потоковая обработка).
@@ -230,34 +141,35 @@ def _aggregate_items_streaming(cursor) -> list[DashboardItem]:
         item = items_map.get(key)
         if item is None:
             item = {
-                "category": smeta_code,
                 "smeta": smeta_code,
                 "work_name": description,
-                "description": description,
                 "planned_amount": None,
                 "fact_amount": None,
             }
             items_map[key] = item
 
-        planned_value = None if _is_vnr_row(row) else to_float(row.get("planned_amount"))
-        if planned_value is not None:
+        planned_value = to_float(row.get("planned_amount"))
+        smeta_normalized = normalize_string(smeta_code, default="")
+        if smeta_normalized not in _VNR_CATEGORY_CODES and planned_value is not None:
             item["planned_amount"] = (item["planned_amount"] or 0.0) + planned_value
 
         fact_value = to_float(row.get("fact_amount_done"))
         if fact_value is not None:
             item["fact_amount"] = (item["fact_amount"] or 0.0) + fact_value
 
-    aggregated_items = []
+    aggregated_items: list[DashboardItem] = []
     for item in items_map.values():
+        smeta_normalized = normalize_string(item.get("smeta"), default="")
+        planned_value = item.get("planned_amount")
+        if smeta_normalized in _VNR_CATEGORY_CODES:
+            planned_value = 0.0
+
         aggregated_items.append(
             DashboardItem(
-                category=item["category"],
-                smeta=item["smeta"],
-                work_name=item["work_name"],
-                description=item["description"],
-                planned_amount=item["planned_amount"],
-                fact_amount=item["fact_amount"],
-                # delta_amount будет вычислено через field_validator в DashboardItem
+                smeta=item.get("smeta"),
+                work_name=item.get("work_name"),
+                planned_amount=planned_value,
+                fact_amount=item.get("fact_amount"),
             )
         )
 
@@ -489,12 +401,28 @@ def fetch_plan_vs_fact_for_month(
             cur.execute(ITEMS_SQL, (month_start,))
             items = _aggregate_items_streaming(cur)
 
-        vnr_plan_amount = _calculate_vnr_plan(items)
-        vnr_plan_item = _build_vnr_plan_item(vnr_plan_amount, items)
-        if vnr_plan_item:
-            items.append(vnr_plan_item)
+        base_plan_total = Decimal(0)
+        vnr_fact_total = Decimal(0)
+        for item in items:
+            smeta_code = normalize_string(item.smeta, default="")
+            if smeta_code in _PLAN_BASE_CATEGORIES and item.planned_amount is not None:
+                base_plan_total += Decimal(str(item.planned_amount))
+            if smeta_code in _VNR_CATEGORY_CODES and item.fact_amount is not None:
+                vnr_fact_total += Decimal(str(item.fact_amount))
 
-        month_fact_total = sum(item.fact_amount or 0.0 for item in items if item.fact_amount is not None)
+        vnr_plan_amount = float(base_plan_total * _VNR_PLAN_SHARE) if base_plan_total > 0 else 0.0
+        items.append(
+            DashboardItem(
+                smeta=CATEGORY_VNR_LABEL,
+                work_name=None,
+                planned_amount=vnr_plan_amount,
+                fact_amount=float(vnr_fact_total),
+            )
+        )
+
+        month_fact_total = sum(
+            item.fact_amount or 0.0 for item in items if item.fact_amount is not None and item.smeta != CATEGORY_VNR_LABEL
+        )
 
         daily_revenue = _fetch_daily_fact_totals(conn, month_start)
         average_daily_revenue = _calculate_daily_average(
@@ -543,14 +471,6 @@ def fetch_plan_vs_fact_for_month(
             summary.contract_executed = contract_progress.get("executed_total")
             if summary.contract_amount:
                 summary.contract_completion_pct = summary.contract_executed / summary.contract_amount
-
-        summary = _update_summary_with_vnr_plan(
-            summary=summary,
-            plan_adjustment=vnr_plan_amount,
-            items=items,
-            average_daily_revenue=average_daily_revenue,
-            daily_revenue=daily_revenue,
-        )
 
     return items, summary, last_updated
 

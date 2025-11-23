@@ -68,7 +68,7 @@
               :data-expanded="expandedRows[getItemKey(item, index)] ? 'true' : 'false'"
               :ref="(el) => setNameRef(el, getItemKey(item, index))"
             >
-              <span class="work-row-name-text work-row-name-link" @click="openWorkModal(item)">{{ item.work_name || item.description || 'Без названия' }}</span>
+              <span class="work-row-name-text work-row-name-link" @click="openWorkModal(item)">{{ item.work_name || 'Без названия' }}</span>
               <button
                 v-if="collapsibleRows[getItemKey(item, index)]"
                 class="work-row-name-toggle"
@@ -147,12 +147,20 @@ const updateIsMobile = (event) => {
   isMobile.value = Boolean(matches);
 };
 
-// Фильтрация работ по выбранной смете/категории
+const VNR_CODES = ['внерегл_ч_1', 'внерегл_ч_2'];
+
+// Фильтрация работ по выбранной смете
 const filteredWorks = computed(() => {
-  if (!props.activeCategoryKey) return works.value;
-  return works.value.filter(item => {
-    const key = item.category || item.smeta || 'Без категории';
-    return key === props.activeCategoryKey;
+  if (!props.activeCategoryKey) return works.value.filter((item) => Boolean(item.work_name));
+  const key = props.activeCategoryKey.toLowerCase();
+
+  return works.value.filter((item) => {
+    const smetaKey = (item.smeta || '').toString().trim().toLowerCase();
+    if (!item.work_name) return false;
+    if (key === 'внерегламент') {
+      return VNR_CODES.includes(smetaKey);
+    }
+    return smetaKey === key;
   });
 });
 
@@ -260,8 +268,8 @@ watch(sortedWorks, () => {
   evaluateCollapsibleRows();
 });
 async function openWorkModal(item) {
-  if (!item || (!item.work_name && !item.description)) return;
-  workModalData.workName = typeof item.work_name === 'string' ? item.work_name : (item.description || 'Без названия');
+  if (!item || !item.work_name) return;
+  workModalData.workName = typeof item.work_name === 'string' ? item.work_name : 'Без названия';
   workModalData.selectedMonthLabel = selectedMonth.value || '';
   // Загружаем детализацию работы через API
   try {
