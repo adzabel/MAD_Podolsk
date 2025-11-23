@@ -1,7 +1,7 @@
 <template>
   <section class="panel work-list-panel">
     <div class="panel-header work-list-header">
-      <div class="panel-title">Расшифровка работ по смете</div>
+      <div class="panel-title">{{ headerTitle }}</div>
     </div>
     <div class="work-list-surface">
       <div v-if="isLoading" class="work-list-skeleton">
@@ -93,7 +93,16 @@ const props = defineProps({
   activeCategoryKey: {
     type: String,
     default: ''
+  },
+  activeCategoryTitle: {
+    type: String,
+    default: ''
   }
+});
+
+const headerTitle = computed(() => {
+  const title = props.activeCategoryTitle?.trim();
+  return title ? `Расшифровка работ по смете ${title}` : 'Расшифровка работ по смете';
 });
 
 const isLoading = ref(true);
