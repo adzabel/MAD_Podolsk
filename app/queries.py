@@ -444,7 +444,7 @@ def fetch_plan_vs_fact_for_month(
             summary = {
                 "planned_amount": plan_total,
                 "fact_amount": fact_total,
-                "delta_amount": plan_total - fact_total,
+                "delta_amount": fact_total - plan_total,
             }
 
             # Среднедневное значение
@@ -464,21 +464,21 @@ def fetch_plan_vs_fact_for_month(
                     "title": "Лето",
                     "planned": plan_leto,
                     "fact": fact_leto,
-                    "delta": plan_leto - fact_leto,
+                    "delta": fact_leto - plan_leto,
                 },
                 {
                     "key": "зима",
                     "title": "Зима",
                     "planned": plan_zima,
                     "fact": fact_zima,
-                    "delta": plan_zima - fact_zima,
+                    "delta": fact_zima - plan_zima,
                 },
                 {
                     "key": "внерегламент",
                     "title": "Внерегламент",
                     "planned": plan_vnereglament,
                     "fact": fact_vnereglament,
-                    "delta": plan_vnereglament - fact_vnereglament,
+                    "delta": fact_vnereglament - plan_vnereglament,
                 },
             ]
 
@@ -518,7 +518,7 @@ def fetch_plan_vs_fact_for_month(
                                 "description": desc,
                                 "planned_amount": planned,
                                 "fact_amount": fact,
-                                "delta": planned - fact,
+                                "delta": fact - planned,
                             })
 
             # last_updated
