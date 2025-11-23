@@ -9,7 +9,7 @@ import "@styles/work.css";
 import "@styles/modal.css";
 
 import { initApp } from "@js/app.js";
-import { mountSummary, mountContractCard, mountMonthSelect, mountDaySelect, mountDailyReport, mountLastUpdatedPillMonthly, mountLastUpdatedPillDaily } from "./vue/main.js";
+import { mountSummary, mountContractCard, mountMonthSelect, mountDaySelect, mountDailyReport, mountLastUpdatedPillMonthly, mountLastUpdatedPillDaily, mountPdfButton } from "./vue/main.js";
 
 document.addEventListener("DOMContentLoaded", () => {
   if (typeof window !== "undefined") {
@@ -29,6 +29,9 @@ document.addEventListener("DOMContentLoaded", () => {
       // Монтируем Vue-индикаторы "Данные обновлены".
       mountLastUpdatedPillMonthly("#last-updated-pill");
       mountLastUpdatedPillDaily("#last-updated-pill-daily");
+      // Монтируем кнопки PDF для десктопа и мобильной версии.
+      mountPdfButton("#pdf-button-desktop");
+      mountPdfButton("#pdf-button-mobile");
 
       // Тестовая инициализация данных для модального окна среднедневной выручки
       setTimeout(() => {

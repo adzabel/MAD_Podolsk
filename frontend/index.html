@@ -45,7 +45,9 @@
             <!-- Vue компонент плашки -->
           </div>
         </div>
-        <div class="pdf-action pdf-action-desktop"></div>
+        <div class="pdf-action pdf-action-desktop">
+          <div id="pdf-button-desktop"></div>
+        </div>
       </div>
     </header>
 
@@ -106,12 +108,7 @@
 
   <!-- Мобильная кнопка PDF перенесена в самый низ страницы -->
   <div class="pdf-action pdf-action-mobile pdf-action-mobile-bottom">
-    <button class="btn btn-airy btn-pdf-compact" type="button" id="download-pdf" aria-live="polite">
-      <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false" stroke="currentColor" stroke-width="1.5" width="18" height="18">
-        <path d="M12 3v11m-4-4l4 4 4-4M4 19h16" fill="none" stroke-linecap="round" stroke-linejoin="round"></path>
-      </svg>
-      <span>PDF</span>
-    </button>
+    <div id="pdf-button-mobile"></div>
   </div>
 
     <script type="module" src="/src/main.js"></script>
