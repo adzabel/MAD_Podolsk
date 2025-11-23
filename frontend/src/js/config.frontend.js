@@ -25,7 +25,7 @@ export const DEFAULT_PDF_LABEL = "Скачать PDF";
 
 export const SELECTORS = {
   page: ".page",
-  monthSelect: "#month",
+  monthSelect: null,
   daySelect: "#day",
   monthControls: "#month-controls",
   dayControls: "#day-controls",

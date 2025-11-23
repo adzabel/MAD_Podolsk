@@ -24,7 +24,7 @@
 </template>
 
 <script setup>
-import { onMounted, reactive, ref } from "vue";
+import { onMounted, reactive, ref, computed } from "vue";
 
 const props = defineProps({
   initialMonth: { type: String, default: null },

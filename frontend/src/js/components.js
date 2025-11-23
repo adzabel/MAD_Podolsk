@@ -117,6 +117,10 @@ export class UIManager {
     this.updateViewModeLayout();
     this.initMonthSelect();
     window.addEventListener("resize", this.handleResize);
+
+    if (typeof window !== "undefined" && typeof window.__onUiReady === "function") {
+      window.__onUiReady(this);
+    }
   }
 
   toggleSkeletons(isLoading) {
