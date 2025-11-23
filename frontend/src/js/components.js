@@ -464,7 +464,6 @@ export class UIManager {
     this.elements.pdfButton.disabled = !hasAnyData;
     // Отладка: логируем метрики, которые передаются во Vue-компоненты
     const metrics = this.dataManager.calculateMetrics(data);
-    console.log('[DEBUG] Metrics for Vue:', metrics);
     // Обновляем Vue-компоненты с метриками
     if (typeof window !== "undefined" && typeof window.__vueSetSummaryMetrics === "function") {
       window.__vueSetSummaryMetrics({
