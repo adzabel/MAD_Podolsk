@@ -51,12 +51,26 @@
           </div>
           <div
             v-for="(item, index) in sortedWorks"
-            :key="item.id || index"
+            :key="getItemKey(item, index)"
             class="work-row"
             :class="{ 'work-row-last': index === sortedWorks.length - 1 }"
           >
-            <div class="work-row-name work-row-name--collapsed" data-expanded="false">
+            <div
+              class="work-row-name"
+              :class="nameClasses(getItemKey(item, index))"
+              :data-expanded="expandedRows[getItemKey(item, index)] ? 'true' : 'false'"
+              :ref="(el) => setNameRef(el, getItemKey(item, index))"
+            >
               <span class="work-row-name-text work-row-name-link" @click="openWorkModal(item)">{{ item.work_name || item.description || 'Без названия' }}</span>
+              <button
+                v-if="collapsibleRows[getItemKey(item, index)]"
+                class="work-row-name-toggle"
+                type="button"
+                :aria-expanded="expandedRows[getItemKey(item, index)] ? 'true' : 'false'"
+                @click.stop="toggleRowName(getItemKey(item, index))"
+              >
+                <span class="work-row-name-toggle-icon"></span>
+              </button>
             </div>
             <div class="work-row-money work-row-plan">
               <span class="work-row-label">План</span>
@@ -85,7 +99,7 @@
 </template>
 
 <script setup>
-import { ref, reactive, onMounted, computed } from 'vue';
+import { ref, reactive, onMounted, computed, watch, nextTick } from 'vue';
 import WorkBreakdownModal from './WorkBreakdownModal.vue';
 import '@/styles/work.css';
 
@@ -111,6 +125,9 @@ const works = ref([]);
 const selectedMonth = ref(null);
 const sortKey = ref('plan');
 const sortDirection = ref('desc');
+const expandedRows = reactive({});
+const collapsibleRows = reactive({});
+const nameRefs = ref(new Map());
 
 // Фильтрация работ по выбранной смете/категории
 const filteredWorks = computed(() => {
@@ -142,6 +159,63 @@ const sortedWorks = computed(() => {
   });
 });
 
+const toggleRowName = (key) => {
+  if (!key || !collapsibleRows[key]) return;
+  expandedRows[key] = !expandedRows[key];
+};
+
+const setNameRef = (el, key) => {
+  if (!key) return;
+  if (el) {
+    nameRefs.value.set(key, el);
+  } else {
+    nameRefs.value.delete(key);
+  }
+};
+
+const nameClasses = (key) => ({
+  'work-row-name--collapsed': collapsibleRows[key] && !expandedRows[key],
+  'work-row-name--collapsible': collapsibleRows[key]
+});
+
+const resetNameStates = () => {
+  Object.keys(expandedRows).forEach((key) => delete expandedRows[key]);
+  Object.keys(collapsibleRows).forEach((key) => delete collapsibleRows[key]);
+  nameRefs.value.clear();
+};
+
+const evaluateCollapsibleRows = () => {
+  nextTick(() => {
+    const currentCollapsible = {};
+
+    nameRefs.value.forEach((container, key) => {
+      const textEl = container?.querySelector('.work-row-name-text');
+      if (!textEl) return;
+
+      const lineHeight = parseFloat(getComputedStyle(textEl).lineHeight) || 0;
+      if (!lineHeight) return;
+
+      const maxHeight = lineHeight * 2 + 1;
+      const isOverflow = textEl.scrollHeight > maxHeight;
+
+      if (isOverflow) {
+        currentCollapsible[key] = true;
+        if (!(key in expandedRows)) {
+          expandedRows[key] = false;
+        }
+      }
+    });
+
+    Object.keys(collapsibleRows).forEach((key) => {
+      if (!currentCollapsible[key]) delete collapsibleRows[key];
+    });
+
+    Object.assign(collapsibleRows, currentCollapsible);
+  });
+};
+
+const getItemKey = (item, index) => item?.id ?? `row-${index}`;
+
 const isWorkModalOpen = ref(false);
 const workModalData = reactive({
   workName: '',
@@ -166,6 +240,11 @@ function deltaClass(item) {
   const delta = item.fact_amount - item.planned_amount;
   return delta > 0 ? 'delta-positive' : delta < 0 ? 'delta-negative' : '';
 }
+
+watch(sortedWorks, () => {
+  resetNameStates();
+  evaluateCollapsibleRows();
+});
 async function openWorkModal(item) {
   if (!item || (!item.work_name && !item.description)) return;
   workModalData.workName = typeof item.work_name === 'string' ? item.work_name : (item.description || 'Без названия');
@@ -226,6 +305,7 @@ async function fetchWorks() {
 }
 
 onMounted(fetchWorks);
+onMounted(evaluateCollapsibleRows);
 </script>
 
 <style scoped>
