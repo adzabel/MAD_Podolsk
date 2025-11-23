@@ -25,13 +25,9 @@
 </template>
 
 <script setup>
-import { reactive, ref } from "vue";
+import { reactive } from "vue";
 import SummaryCard from "./SummaryCard.vue";
 import DailyAverageCard from "./DailyAverageCard.vue";
-import ContractCard from "./ContractCard.vue";
-
-const contractMetrics = ref(null);
-const viewMode = ref("monthly");
 
 const summaryState = reactive({
   planned: null,
@@ -48,10 +44,6 @@ const dailyAverageState = reactive({
 });
 
 if (typeof window !== "undefined") {
-  window.__vueSetContractMetrics = (metrics) => {
-    contractMetrics.value = metrics;
-  };
-
   window.__vueSetSummaryMetrics = (payload) => {
     summaryState.planned = payload?.planned ?? null;
     summaryState.fact = payload?.fact ?? null;
