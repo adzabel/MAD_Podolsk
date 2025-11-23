@@ -77,6 +77,7 @@
 
 <script setup>
 import { computed, reactive, watchEffect } from "vue";
+import { API_DAILY_URL } from "@config/config.frontend.js";
 
 const state = reactive({
   isLoading: true,
@@ -171,7 +172,7 @@ async function fetchDailyReport(dayIso) {
     state.hasData = false;
     state.items = [];
 
-    const url = new URL("/api/dashboard/daily", window.location.origin);
+    const url = new URL(API_DAILY_URL, window.location.origin);
     url.searchParams.set("day", dayIso);
     url.searchParams.set("_", Date.now().toString());
 
