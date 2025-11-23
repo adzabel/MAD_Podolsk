@@ -63,20 +63,38 @@ function groupCategories(items) {
   });
   return Object.values(groups);
 }
-// Пример загрузки данных для категорий при инициализации
-onMounted(() => {
-  // ...existing code...
-  // После загрузки данных дашборда
-  // Здесь предполагается, что window.__vueSetDashboardItems вызывается с items
-  if (typeof window !== "undefined") {
-    window.__vueSetDashboardItems = (items) => {
-      groupedCategories.value = groupCategories(items);
-      // По умолчанию активная категория — первая
-      if (groupedCategories.value.length) {
-        activeCategoryKey.value = groupedCategories.value[0].key;
-      }
-    };
+// Прямая загрузка данных дашборда при монтировании
+async function loadDashboardItems() {
+  let apiBase = '/api/dashboard';
+  if (typeof document !== 'undefined') {
+    const metaApiUrl = document.querySelector('meta[name="mad-api-url"]');
+    if (metaApiUrl && metaApiUrl.content) {
+      apiBase = metaApiUrl.content;
+    }
   }
+  // Получаем месяц из initialMonth или текущий
+  let monthIso = initialMonth.value;
+  if (!monthIso) {
+    const now = new Date();
+    monthIso = `${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}-01`;
+  }
+  try {
+    const response = await fetch(`${apiBase}?month=${monthIso}`, { cache: 'no-store' });
+    if (!response.ok) throw new Error('HTTP ' + response.status);
+    const data = await response.json();
+    const items = Array.isArray(data?.items) ? data.items : [];
+    groupedCategories.value = groupCategories(items);
+    if (groupedCategories.value.length) {
+      activeCategoryKey.value = groupedCategories.value[0].key;
+    }
+  } catch (e) {
+    groupedCategories.value = [];
+    activeCategoryKey.value = '';
+  }
+}
+
+onMounted(() => {
+  loadDashboardItems();
 });
 
 const months = ref([]);
