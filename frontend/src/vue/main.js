@@ -1,4 +1,4 @@
-import { createApp, reactive } from "vue";
+import { createApp, reactive, computed, defineComponent, h } from "vue";
 import App from "./App.vue";
 import ContractCard from "./ContractCard.vue";
 import MonthSelect from "./MonthSelect.vue";
@@ -97,19 +97,29 @@ if (typeof window !== "undefined") {
   };
 }
 
+const MonthlyLastUpdatedShell = defineComponent({
+  name: "MonthlyLastUpdatedShell",
+  setup() {
+    const label = computed(() => lastUpdatedState.monthlyLabel);
+    const status = computed(() => lastUpdatedState.monthlyStatus);
+    return () => h(LastUpdatedPill, { label: label.value, status: status.value });
+  },
+});
+
+const DailyLastUpdatedShell = defineComponent({
+  name: "DailyLastUpdatedShell",
+  setup() {
+    const label = computed(() => lastUpdatedState.dailyLabel);
+    const status = computed(() => lastUpdatedState.dailyStatus);
+    return () => h(LastUpdatedPill, { label: label.value, status: status.value });
+  },
+});
+
 export function mountLastUpdatedPillMonthly(selector = "#last-updated-pill") {
   const el = document.querySelector(selector);
   if (!el) return null;
 
-  const app = createApp(LastUpdatedPill, {
-    get label() {
-      return lastUpdatedState.monthlyLabel;
-    },
-    get status() {
-      return lastUpdatedState.monthlyStatus;
-    },
-  });
-
+  const app = createApp(MonthlyLastUpdatedShell);
   const vm = app.mount(el);
   return { app, vm };
 }
@@ -118,15 +128,7 @@ export function mountLastUpdatedPillDaily(selector = "#last-updated-pill-daily")
   const el = document.querySelector(selector);
   if (!el) return null;
 
-  const app = createApp(LastUpdatedPill, {
-    get label() {
-      return lastUpdatedState.dailyLabel;
-    },
-    get status() {
-      return lastUpdatedState.dailyStatus;
-    },
-  });
-
+  const app = createApp(DailyLastUpdatedShell);
   const vm = app.mount(el);
   return { app, vm };
 }

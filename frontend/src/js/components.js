@@ -546,13 +546,6 @@ export class UIManager {
     const dailyLabel = this.lastUpdatedDailyLabel || monthlyLabel;
     const dailyDateLabel = this.lastUpdatedDailyDateLabel || dailyLabel;
 
-    if (this.elements.lastUpdatedText) {
-      this.elements.lastUpdatedText.textContent = monthlyLabel;
-    }
-    if (this.elements.lastUpdatedTextDaily) {
-      this.elements.lastUpdatedTextDaily.textContent = dailyLabel;
-    }
-
     if (this.uiStore.getViewMode() === "daily") {
       this.updateContractTitleDate(dailyDateLabel);
     } else {
