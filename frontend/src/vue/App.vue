@@ -1,29 +1,27 @@
 <template>
-  <section class="summary-grid layout-grid monthly-only" id="summary-grid">
-    <SummaryCard
-      label="План, ₽"
-      sub="Сметная стоимость"
-      :value="summaryState.planned"
-    />
-    <SummaryCard
-      label="Факт, ₽"
-      sub="Сумма принятых работ"
-      :value="summaryState.fact"
-      :progress="summaryState.completion"
-      :progress-label="summaryState.completionLabel"
-    />
-    <SummaryCard
-      label="Отклонение, ₽"
-      sub="Факт − План"
-      :value="summaryState.delta"
-      :delta="true"
-    />
-    <DailyAverageCard
-      :average-value="dailyAverageState.averageValue"
-      :days-with-data="dailyAverageState.daysWithData"
-      :is-current-month="dailyAverageState.isCurrentMonth"
-    />
-  </section>
+  <SummaryCard
+    label="План, ₽"
+    sub="Сметная стоимость"
+    :value="summaryState.planned"
+  />
+  <SummaryCard
+    label="Факт, ₽"
+    sub="Сумма принятых работ"
+    :value="summaryState.fact"
+    :progress="summaryState.completion"
+    :progress-label="summaryState.completionLabel"
+  />
+  <SummaryCard
+    label="Отклонение, ₽"
+    sub="Факт − План"
+    :value="summaryState.delta"
+    :delta="true"
+  />
+  <DailyAverageCard
+    :average-value="dailyAverageState.averageValue"
+    :days-with-data="dailyAverageState.daysWithData"
+    :is-current-month="dailyAverageState.isCurrentMonth"
+  />
 </template>
 
 <script setup>
