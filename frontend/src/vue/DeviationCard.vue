@@ -8,7 +8,7 @@
     @click="handleClick"
   >
     <div class="summary-label">ОТКЛОНЕНИЕ, ₽</div>
-    <div class="summary-value">{{ formattedValue }}</div>
+    <div class="summary-value" :class="valueClass">{{ formattedValue }}</div>
     <span class="sr-only">Нажмите, чтобы посмотреть детализацию по отклонению</span>
   </button>
 </template>
@@ -25,6 +25,15 @@ const formattedValue = computed(() => {
     return '–';
   }
   return props.value.toLocaleString('ru-RU', { maximumFractionDigits: 0 });
+});
+
+const valueClass = computed(() => {
+  if (props.value === null || props.value === undefined || Number.isNaN(props.value)) {
+    return null;
+  }
+  if (props.value > 0) return 'positive';
+  if (props.value < 0) return 'negative';
+  return null;
 });
 
 function handleClick() {
