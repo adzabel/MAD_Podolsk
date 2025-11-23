@@ -24,21 +24,32 @@
 </template>
 
 <script setup>
-import { onMounted, reactive, ref, computed, toRefs } from "vue";
+import { ref, computed, watch, onMounted } from "vue";
 
 const props = defineProps({
-  initialMonth: { type: String, default: null },
+  months: {
+    type: Array,
+    default: () => [], // [{ iso: 'YYYY-MM-DD', label: 'Месяц ГГГГ' }]
+  },
+  initialMonth: {
+    type: String,
+    default: null,
+  },
+  loading: {
+    type: Boolean,
+    default: false,
+  },
+  error: {
+    type: Boolean,
+    default: false,
+  },
 });
 
-const state = reactive({
-  options: [],
-  isLoading: false,
-  loadError: false,
-});
+const emit = defineEmits(["monthChange"]);
 
 const selected = ref("");
 
-const isDisabled = computed(() => state.isLoading);
+const isDisabled = computed(() => props.loading);
 
 function getCurrentMonthIso() {
   const now = new Date();
@@ -47,85 +58,31 @@ function getCurrentMonthIso() {
   return `${year}-${month}`;
 }
 
-async function fetchAvailableMonths() {
-  if (typeof window === "undefined" || typeof window.__fetchAvailableMonths !== "function") {
-    return [];
-  }
-  return window.__fetchAvailableMonths();
-}
-
-async function loadInitial() {
-  state.isLoading = true;
-  state.loadError = false;
-  state.options = [];
-
-  try {
-    const availableMonths = await fetchAvailableMonths();
-    const months = (availableMonths || [])
-      .map((iso) => {
-        if (!iso) return null;
-        // Бэкенд отдаёт YYYY-MM-DD; храним полный ISO, но
-        // ключ месяца строим так же, как в старой логике.
-        const date = new Date(iso);
-        if (Number.isNaN(date.getTime())) return null;
-        return {
-          iso,
-          label: date.toLocaleDateString("ru-RU", {
-            month: "long",
-            year: "numeric",
-          }),
-        };
-      })
-      .filter(Boolean);
-
-    state.options = months;
-
-    if (!months.length) {
-      // Нет списка месяцев: используем текущий календарный месяц в формате YYYY-MM-01,
-      // как в старой реализации UIManager.getCurrentMonthIso.
-      const fallback = props.initialMonth || getCurrentMonthIso() + "-01";
-      if (fallback && typeof window !== "undefined" && typeof window.__onMonthChange === "function") {
-        window.__onMonthChange(fallback);
-      }
-      return;
-    }
-
-    // Пытаемся найти месяц, совпадающий по году и месяцу с initialMonth
-    // (учитываем форматы YYYY-MM и YYYY-MM-DD).
-    const normalizeMonth = (iso) => {
-      if (!iso) return null;
-      const m = /^(\d{4})-(\d{2})/.exec(iso);
-      return m ? `${m[1]}-${m[2]}` : null;
-    };
-
-    const initialNorm = normalizeMonth(props.initialMonth);
-    const initialFromList =
-      initialNorm && months.find((m) => normalizeMonth(m.iso) === initialNorm)?.iso;
-
-    const initialIso = initialFromList || months[0].iso;
-    selected.value = initialIso;
-    if (typeof window !== "undefined" && typeof window.__onMonthChange === "function") {
-      window.__onMonthChange(initialIso);
-    }
-  } catch (e) {
-    console.error("MonthSelect: failed to load months", e);
-    state.loadError = true;
-  } finally {
-    state.isLoading = false;
-  }
-}
-
-function handleChange() {
-  const iso = selected.value;
-  if (!iso) return;
-  if (typeof window !== "undefined" && typeof window.__onMonthChange === "function") {
-    window.__onMonthChange(iso);
-  }
+function normalizeMonth(iso) {
+  if (!iso) return null;
+  const m = /^\d{4}-\d{2}/.exec(iso);
+  return m ? m[0] : null;
 }
 
 onMounted(() => {
-  loadInitial();
+  let initialIso = "";
+  if (props.months.length) {
+    const initialNorm = normalizeMonth(props.initialMonth);
+    const initialFromList =
+      initialNorm && props.months.find((m) => normalizeMonth(m.iso) === initialNorm)?.iso;
+    initialIso = initialFromList || props.months[0].iso;
+  } else {
+    initialIso = props.initialMonth || getCurrentMonthIso() + "-01";
+  }
+  selected.value = initialIso;
+  emit("monthChange", initialIso);
 });
 
-const { options, isLoading, loadError } = toRefs(state);
+watch(selected, (val) => {
+  emit("monthChange", val);
+});
+
+function handleChange() {
+  // emit уже срабатывает через watch
+}
 </script>
