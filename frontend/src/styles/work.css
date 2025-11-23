@@ -460,11 +460,12 @@
   }
 
   .work-list-mobile-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    gap: var(--gap-md);
-    padding: 14px var(--gap-md) 4px;
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(140px, 40vw);
+    align-items: flex-start;
+    column-gap: clamp(12px, 4vw, 20px);
+    row-gap: 6px;
+    padding: 14px var(--gap-md) 8px;
   }
 
   .work-list-mobile-title {
@@ -493,7 +494,7 @@
   .work-mobile-sort {
     display: flex;
     flex-direction: column;
-    width: min(40vw, 180px);
+    width: 100%;
     flex-shrink: 0;
   }
 
