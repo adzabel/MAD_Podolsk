@@ -39,6 +39,7 @@
   max-height: calc(100vh - 32px);
   display: flex;
   flex-direction: column;
+  position: relative;
 }
 
 .modal-header {
@@ -52,6 +53,7 @@
 .modal-title {
   font-size: var(--font-size-h2);
   font-weight: 700;
+  padding-right: calc(var(--control-height-sm) + var(--gap-md));
 }
 
 .modal-subtitle {
@@ -71,6 +73,10 @@
   justify-content: center;
   cursor: pointer;
   transition: background 0.2s ease, transform 0.15s ease;
+  position: absolute;
+  top: var(--gap-md);
+  right: var(--gap-md);
+  line-height: 1;
 }
 
 .modal-close:hover {

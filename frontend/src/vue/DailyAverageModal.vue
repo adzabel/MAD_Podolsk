@@ -4,6 +4,7 @@
     :class="['modal-backdrop', { visible: visible }]"
     id="daily-modal"
     :aria-hidden="!visible"
+    @click.self="$emit('close')"
   >
     <div class="modal" role="dialog" aria-modal="true" aria-labelledby="daily-modal-title">
       <div class="modal-title" id="daily-modal-title">Среднедневная выручка</div>
