@@ -46,10 +46,6 @@ import { ref } from 'vue';
 const isDailyModalOpen = ref(false);
 
 function openDailyModal() {
-  console.log('[DEBUG] openDailyModal called');
   isDailyModalOpen.value = true;
-  console.log('[DEBUG] isDailyModalOpen:', isDailyModalOpen.value);
-  console.log('[DEBUG] summaryDailyRevenue:', props.summaryDailyRevenue);
-  console.log('[DEBUG] selectedMonthLabel:', props.selectedMonthLabel);
 }
 </script>

@@ -30,14 +30,10 @@
 </template>
 
 <script setup>
-import { watch } from 'vue';
 const props = defineProps({
   visible: Boolean,
   summaryDailyRevenue: { type: Array, default: () => [] },
   selectedMonthLabel: { type: String, default: '' },
-});
-watch(() => props.visible, (val) => {
-  console.log('[DEBUG] DailyAverageModal visible:', val);
 });
 function formatDate(date) {
   if (!date) return '';
