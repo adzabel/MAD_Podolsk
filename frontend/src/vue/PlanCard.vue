@@ -1,7 +1,7 @@
 
 <template>
   <button
-    class="summary-card plan-card"
+    class="summary-card"
     type="button"
     :class="{ 'is-disabled': !isInteractive }"
     :aria-disabled="String(!isInteractive)"
@@ -34,12 +34,3 @@ function handleClick() {
   }
 }
 </script>
-
-<style scoped>
-.plan-card {
-  background: #e3f2fd;
-  border-radius: 8px;
-  padding: 16px;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.05);
-}
-</style>
