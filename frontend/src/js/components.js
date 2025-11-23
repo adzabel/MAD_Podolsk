@@ -80,6 +80,9 @@ export class UIManager {
     this.workSort = { column: "planned" };
     this.initialMonth = new URLSearchParams(window.location.search).get("month");
     this.uiStore.setViewMode("monthly");
+    if (this.elements.page) {
+      this.elements.page.dataset.viewMode = "monthly";
+    }
     this.dayOptionsLoaded = false;
     this.currentDailyData = null;
     if (this.elements.workSortSelect) {
