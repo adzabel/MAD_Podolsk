@@ -1,24 +1,8 @@
 // Фасад дневного модального UI для постепенной миграции в Vue-компонент.
 
 import { formatDate } from "@shared/utils.js";
-import { openAverageDailyModal, openWorkBreakdownModal, closeDailyModalView, renderDailyModalListView } from "@js/ui/dailyModalView.js";
+import { openWorkBreakdownModal } from "@js/ui/dailyModalView.js";
 
-export function openAverageDailyModalView({
-	elements,
-	summaryDailyRevenue,
-	selectedMonthLabel,
-	isCurrentMonth,
-}) {
-	if (!summaryDailyRevenue.length || !isCurrentMonth) {
-		return;
-	}
-	openAverageDailyModal({
-		elements,
-		summaryDailyRevenue,
-		selectedMonthLabel,
-		isCurrentMonth,
-	});
-}
 
 export function openWorkModalView({
 	elements,
@@ -69,18 +53,7 @@ export function openWorkModalView({
 	})();
 }
 
-export function closeDailyModalViewFacade({ elements }) {
-	closeDailyModalView({ elements });
-}
 
-export function renderDailyModalListViewFacade({ elements, dailyRevenue, dailyModalMode, selectedMonthLabel }) {
-	renderDailyModalListView({
-		elements,
-		dailyRevenue,
-		dailyModalMode,
-		selectedMonthLabel,
-	});
-}
 
 export function formatDailyDateLabel(dayIso) {
 	return formatDate(dayIso, { day: "2-digit", month: "long" });

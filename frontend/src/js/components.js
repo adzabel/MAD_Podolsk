@@ -649,18 +649,6 @@ export class UIManager {
   }
   }
 
-  closeDailyModal() {
-  closeDailyModalViewFacade({ elements: this.elements });
-  }
-
-  renderDailyModalList() {
-  renderDailyModalListViewFacade({
-    elements: this.elements,
-    dailyRevenue: this.dailyRevenue,
-    dailyModalMode: this.dailyModalMode,
-    selectedMonthLabel: this.getSelectedMonthLabel(),
-  });
-  }
 
   renderCategories() {
   renderCategoriesFacade({
