@@ -1,11 +1,11 @@
 <template>
-  <div class="pill" :class="{ 'pill--loading': isLoading, 'pill--error': isError }">
+  <span class="pill" :class="{ 'pill--loading': isLoading, 'pill--error': isError }">
     <span class="pill-dot" aria-hidden="true"></span>
-    <div class="pill-info">
+    <span class="pill-info">
       <span class="pill-label">ДАННЫЕ ОБНОВЛЕНЫ</span>
       <span class="pill-value">{{ label }}</span>
-    </div>
-  </div>
+    </span>
+  </span>
 </template>
 
 <script setup>
