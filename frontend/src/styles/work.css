@@ -81,6 +81,20 @@
   margin-top: 8px;
 }
 
+.work-list-panel {
+  padding: var(--card-padding);
+}
+
+.work-list-header {
+  margin-bottom: var(--gap-sm);
+}
+
+.work-row-name-link {
+  cursor: pointer;
+  color: var(--brand-accent);
+  text-decoration: underline;
+}
+
 .work-list-scroller {
   width: 100%;
 }
