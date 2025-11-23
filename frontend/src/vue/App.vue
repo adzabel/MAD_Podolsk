@@ -12,6 +12,7 @@
     :summaryDailyRevenue="dailyAverageState.summaryDailyRevenue"
     :selectedMonthLabel="dailyAverageState.selectedMonthLabel"
   />
+  <WorkBreakdownList v-if="viewMode === 'monthly'" />
   <WorkBreakdownModal
     :visible="isWorkModalOpen"
     :workName="workModalData.workName"
@@ -26,6 +27,7 @@ import { reactive, ref, onMounted } from "vue";
 import SummaryCards from "./SummaryCards.vue";
 import MonthSelect from "./MonthSelect.vue";
 import WorkBreakdownModal from "./WorkBreakdownModal.vue";
+import WorkBreakdownList from "./WorkBreakdownList.vue";
 
 const months = ref([]);
 const loading = ref(true);
