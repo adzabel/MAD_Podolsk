@@ -91,8 +91,14 @@
 
 .work-row-name-link {
   cursor: pointer;
-  color: var(--brand-accent);
-  text-decoration: underline;
+  color: var(--text-main);
+  text-decoration: none;
+  font-weight: 500;
+}
+
+.work-row-name-link:hover {
+  color: var(--text-main);
+  text-decoration: none;
 }
 
 .work-list-scroller {
@@ -130,6 +136,14 @@
   background: var(--bg-card);
   font-variant-numeric: tabular-nums;
   contain: layout style paint;
+}
+
+.work-list-table .work-row:not(.work-row-header):nth-of-type(odd) {
+  background: var(--bg-card);
+}
+
+.work-list-table .work-row:not(.work-row-header):nth-of-type(even) {
+  background: linear-gradient(90deg, rgba(47, 111, 237, 0.02) 0%, rgba(47, 111, 237, 0.04) 100%);
 }
 
 .work-row-last {
