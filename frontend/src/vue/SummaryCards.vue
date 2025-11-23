@@ -6,7 +6,18 @@
     <PlanCard :value="plan" :isInteractive="isInteractive" />
     <FactCard :value="fact" :isInteractive="isInteractive" :progress="factProgress" :progressLabel="factProgressLabel" />
     <DeviationCard :value="deviation" :isInteractive="isInteractive" />
-    <DailyAverageCard :averageValue="dailyAverage" :daysWithData="daysWithData" :isCurrentMonth="isCurrentMonth" />
+    <DailyAverageCard
+      :averageValue="dailyAverage"
+      :daysWithData="daysWithData"
+      :isCurrentMonth="isCurrentMonth"
+      @open-modal="openDailyModal"
+    />
+    <DailyAverageModal
+      :visible="isDailyModalOpen"
+      :summaryDailyRevenue="summaryDailyRevenue"
+      :selectedMonthLabel="selectedMonthLabel"
+      @close="isDailyModalOpen = false"
+    />
   </div>
 </template>
 
@@ -15,6 +26,7 @@ import PlanCard from './PlanCard.vue';
 import FactCard from './FactCard.vue';
 import DeviationCard from './DeviationCard.vue';
 import DailyAverageCard from './DailyAverageCard.vue';
+import DailyAverageModal from './DailyAverageModal.vue';
 
 const props = defineProps({
   plan: { type: Number, default: null },
@@ -25,6 +37,15 @@ const props = defineProps({
   daysWithData: { type: Number, default: 0 },
   isCurrentMonth: { type: Boolean, default: false },
   factProgress: { type: Number, default: null },
-  factProgressLabel: { type: String, default: "–" }
+  factProgressLabel: { type: String, default: "–" },
+  summaryDailyRevenue: { type: Array, default: () => [] },
+  selectedMonthLabel: { type: String, default: '' }
 });
+
+import { ref } from 'vue';
+const isDailyModalOpen = ref(false);
+
+function openDailyModal() {
+  isDailyModalOpen.value = true;
+}
 </script>

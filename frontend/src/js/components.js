@@ -27,11 +27,7 @@ import {
   renderDailyModalListViewFacade,
   formatDailyDateLabel,
 } from "@js/views/daily-modal-view.js";
-
-// Цветовая схема и отрисовка категорий вынесены в отдельный фасад
-// views/categories-view, чтобы UIManager занимался только логикой.
-
-// Вспомогательные pure-функции, не завязанные на состояние UIManager.
+// Removed imports related to openAverageDailyModalView
 
 function isValidPercent(value) {
   return value !== null && value !== undefined && !Number.isNaN(value);
@@ -208,10 +204,6 @@ export class UIManager {
       });
     }
     this.elements.pdfButton.addEventListener("click", (event) => this.downloadPdfReport(event));
-    // Открытие модального окна среднедневной выручки теперь делается через Vue.
-    if (typeof window !== "undefined") {
-      window.__openDailyAverageModal = () => this.openDailyModal();
-    }
     if (this.elements.dailyModalClose) {
       this.elements.dailyModalClose.addEventListener("click", () => this.closeDailyModal());
     }
@@ -651,22 +643,6 @@ export class UIManager {
     }
   }
 
-  openDailyModal() {
-    const monthIso = this.uiStore.getSelectedMonth();
-    if (!this.summaryDailyRevenue.length || !this.isCurrentMonth(monthIso)) {
-      return;
-    }
-    this.selectedMonthIso = monthIso;
-    this.dailyRevenue = [...this.summaryDailyRevenue];
-    this.dailyModalMode = "average";
-    this.renderDailyModalList();
-    openAverageDailyModalView({
-      elements: this.elements,
-      summaryDailyRevenue: this.summaryDailyRevenue,
-      selectedMonthLabel: this.getSelectedMonthLabel(),
-      isCurrentMonth: this.isCurrentMonth(monthIso),
-    });
-  }
 
   async openWorkModal(item) {
     const monthIso = this.uiStore.getSelectedMonth();

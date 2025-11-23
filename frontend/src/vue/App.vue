@@ -10,6 +10,8 @@
     :isCurrentMonth="dailyAverageState.isCurrentMonth"
     :factProgress="summaryState.completion"
     :factProgressLabel="summaryState.completionLabel"
+    :summaryDailyRevenue="dailyAverageState.summaryDailyRevenue"
+    :selectedMonthLabel="dailyAverageState.selectedMonthLabel"
   />
 </template>
 
@@ -83,6 +85,8 @@ const dailyAverageState = reactive({
   averageValue: null,
   daysWithData: 0,
   isCurrentMonth: false,
+  summaryDailyRevenue: [],
+  selectedMonthLabel: '',
 });
 
 const viewMode = ref("monthly");
@@ -101,6 +105,8 @@ if (typeof window !== "undefined") {
     dailyAverageState.averageValue = payload?.averageValue ?? null;
     dailyAverageState.daysWithData = payload?.daysWithData ?? 0;
     dailyAverageState.isCurrentMonth = Boolean(payload?.isCurrentMonth);
+    dailyAverageState.summaryDailyRevenue = payload?.summaryDailyRevenue ?? [];
+    dailyAverageState.selectedMonthLabel = payload?.selectedMonthLabel ?? '';
   };
 
   window.__vueSetViewMode = (mode) => {

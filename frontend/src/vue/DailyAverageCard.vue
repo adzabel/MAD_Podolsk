@@ -70,10 +70,10 @@ const isInteractive = computed(() => {
   return Number.isFinite(props.daysWithData) && props.daysWithData > 0 && props.isCurrentMonth;
 });
 
+const emit = defineEmits(["open-modal"]);
+
 function handleClick() {
   if (!isInteractive.value) return;
-  if (typeof window !== "undefined" && typeof window.__openDailyAverageModal === "function") {
-    window.__openDailyAverageModal();
-  }
+  emit("open-modal");
 }
 </script>
