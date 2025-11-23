@@ -220,12 +220,12 @@ def _aggregate_items_streaming(cursor) -> list[DashboardItem]:
     Cursor должен быть RealDictCursor и находиться в контексте транзакции.
     """
 
-    items_map: dict[str, dict[str, Any]] = {}
+    items_map: dict[tuple[str | None, str], dict[str, Any]] = {}
 
     for row in cursor:
         smeta_code, work_name, unit = extract_dict_strings(row)
         description = work_name or unit or UNTITLED_WORK_LABEL
-        key = description
+        key = (smeta_code, description)
 
         item = items_map.get(key)
         if item is None:
