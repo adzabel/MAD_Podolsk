@@ -108,6 +108,18 @@ export function updateContractCardView({ contractMetrics, elements, formatMoneyF
       ? formatPercentFn(completion)
       : "–";
 
+  // Если доступен Vue-сеттер, отдаём данные напрямую во Vue-карточку
+  if (typeof window !== "undefined" && typeof window.__vueSetContractMetrics === "function") {
+    window.__vueSetContractMetrics({
+      contractAmount: hasData ? contractMetrics.contractAmount : null,
+      executed: hasData ? contractMetrics.executed : null,
+      completion: hasData ? contractMetrics.completion : null,
+      percentLabel,
+      titleDate: contractMetrics && contractMetrics.titleDate ? contractMetrics.titleDate : null,
+      titleDateLabel: contractMetrics && contractMetrics.titleDateLabel ? contractMetrics.titleDateLabel : null,
+    });
+  }
+
   if (elements.contractAmount) {
     elements.contractAmount.textContent = hasData
       ? formatMoneyFn(contractMetrics.contractAmount)

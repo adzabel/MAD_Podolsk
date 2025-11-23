@@ -724,6 +724,9 @@ export class UIManager {
   }
 
   updateContractCard(contractMetrics) {
+    // Храним метрики для Vue-карточки и старого DOM-фолбэка
+    this.contractMetrics = contractMetrics || null;
+
     updateContractCardExternal({
       contractMetrics,
       elements: this.elements,

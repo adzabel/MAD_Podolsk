@@ -124,6 +124,22 @@ const progressStyle = computed(() => {
 
 const titleDateLabel = computed(() => {
   const m = contractMetrics.value;
-  return m?.titleDateLabel || "";
+  const raw = m?.titleDate || m?.titleDateLabel || "";
+  if (!raw) return "";
+
+  if (typeof raw === "string" && /[а-яА-Я]/.test(raw)) {
+    return raw;
+  }
+
+  const date = new Date(raw);
+  if (Number.isNaN(date.getTime())) {
+    return "";
+  }
+
+  return date.toLocaleDateString("ru-RU", {
+    day: "2-digit",
+    month: "long",
+    year: "numeric",
+  });
 });
 </script>
