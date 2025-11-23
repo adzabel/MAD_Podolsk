@@ -24,7 +24,7 @@
 </template>
 
 <script setup>
-import { onMounted, reactive, ref, computed } from "vue";
+import { onMounted, reactive, ref, computed, toRefs } from "vue";
 
 const props = defineProps({
   initialMonth: { type: String, default: null },
@@ -127,5 +127,5 @@ onMounted(() => {
   loadInitial();
 });
 
-const { options, isLoading, loadError } = state;
+const { options, isLoading, loadError } = toRefs(state);
 </script>
