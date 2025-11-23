@@ -176,6 +176,13 @@ async function fetchDailyReport(dayIso) {
     state.hasData = false;
     state.items = [];
 
+    if (typeof window !== "undefined" && typeof window.__vueSetLastUpdated === "function") {
+      window.__vueSetLastUpdated({
+        dailyLabel: "Загрузка данных…",
+        dailyStatus: "loading",
+      });
+    }
+
     const url = new URL(API_DAILY_URL, window.location.origin);
     url.searchParams.set("day", dayIso);
     url.searchParams.set("_", Date.now().toString());
@@ -206,10 +213,27 @@ async function fetchDailyReport(dayIso) {
     state.hasData = hasData;
     state.selectedDateIso = data?.date || dayIso;
     state.source = "day-select";
+
+    if (typeof window !== "undefined" && typeof window.__vueSetLastUpdated === "function") {
+      const labelDate = state.selectedDateIso || dayIso;
+      const label = labelDate
+        ? `Данные за ${new Date(labelDate).toLocaleDateString("ru-RU", { day: "2-digit", month: "long" })}`
+        : "Данные обновлены";
+      window.__vueSetLastUpdated({
+        dailyLabel: label,
+        dailyStatus: "idle",
+      });
+    }
   } catch (error) {
     console.error("DailyReport: failed to load daily report", error);
     state.items = [];
     state.hasData = false;
+    if (typeof window !== "undefined" && typeof window.__vueSetLastUpdated === "function") {
+      window.__vueSetLastUpdated({
+        dailyLabel: "Ошибка загрузки данных",
+        dailyStatus: "error",
+      });
+    }
   } finally {
     state.isLoading = false;
   }

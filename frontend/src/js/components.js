@@ -616,12 +616,6 @@ export class UIManager {
         this.lastUpdatedDailyLabel = label;
         this.lastUpdatedDailyDateLabel = dateLabel;
         this.updateLastUpdatedPills();
-        if (typeof window !== "undefined" && typeof window.__vueSetLastUpdated === "function") {
-          window.__vueSetLastUpdated({
-            dailyLabel: label,
-            dailyStatus: "loading",
-          });
-        }
       },
     });
   }
@@ -636,12 +630,6 @@ export class UIManager {
       },
       updateLastUpdatedPills: () => this.updateLastUpdatedPills(),
     });
-    if (typeof window !== "undefined" && typeof window.__vueSetLastUpdated === "function") {
-      window.__vueSetLastUpdated({
-        dailyLabel: this.lastUpdatedDailyLabel || "Ошибка загрузки данных",
-        dailyStatus: "error",
-      });
-    }
   }
 
   showDailyEmptyState(message) {
@@ -682,15 +670,6 @@ export class UIManager {
       const { data } = await this.dataManager.fetchDailyReport(dayIso, { force: Boolean(cached) });
       this.applyDailyData(data);
       this.announce(`Данные за ${formatDailyDateLabel(dayIso)} обновлены.`);
-      if (typeof window !== "undefined" && typeof window.__vueSetLastUpdated === "function") {
-        const label =
-          this.lastUpdatedDailyLabel ||
-          `Данные за ${formatDailyDateLabel(dayIso)}`;
-        window.__vueSetLastUpdated({
-          dailyLabel: label,
-          dailyStatus: "idle",
-        });
-      }
     } catch (error) {
       console.error(error);
       if (!cached) {
