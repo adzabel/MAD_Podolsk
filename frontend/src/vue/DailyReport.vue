@@ -271,9 +271,11 @@ const workModalData = reactive({
   selectedMonthLabel: ''
 });
 function openWorkModal(item) {
+  console.log('Открытие модального окна по работе', item);
   workModalData.workName = item.description || 'Без названия';
   workModalData.selectedMonthLabel = formatDateLabel(state.selectedDateIso) || '';
   workModalData.workBreakdown = Array.isArray(item.breakdown) ? item.breakdown : [];
   isWorkModalOpen.value = true;
+  console.log('isWorkModalOpen:', isWorkModalOpen.value, 'workModalData:', JSON.stringify(workModalData));
 }
 </script>
