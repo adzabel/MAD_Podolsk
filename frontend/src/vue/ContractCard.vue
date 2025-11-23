@@ -57,18 +57,20 @@ const PROGRESS_MAX_ARIA = 120;
 const PROGRESS_OVERFLOW_COLOR = "#16a34a";
 const PROGRESS_BASE_ACCENT = "var(--accent)";
 
-const contractMetrics = computed(() => props.dashboardState.contractMetrics || null);
+const contractMetrics = computed(() => props.dashboardState?.contractMetrics || null);
 
 const hasData = computed(() => {
-  if (!contractMetrics.value) return false;
-  const hasAmount = contractMetrics.value.contractAmount != null;
-  const hasExecuted = contractMetrics.value.executed != null;
-  const hasCompletion = contractMetrics.value.completion != null;
+  const m = contractMetrics.value;
+  if (!m) return false;
+  const hasAmount = m.contractAmount != null;
+  const hasExecuted = m.executed != null;
+  const hasCompletion = m.completion != null;
   return hasAmount || hasExecuted || hasCompletion;
 });
 
 const contractAmountLabel = computed(() => {
-  if (!hasData.value || contractMetrics.value.contractAmount == null) return "–";
+  const m = contractMetrics.value;
+  if (!hasData.value || !m || m.contractAmount == null) return "–";
   return new Intl.NumberFormat("ru-RU", {
     style: "currency",
     currency: "RUB",
@@ -77,7 +79,8 @@ const contractAmountLabel = computed(() => {
 });
 
 const executedLabel = computed(() => {
-  if (!hasData.value || contractMetrics.value.executed == null) return "–";
+  const m = contractMetrics.value;
+  if (!hasData.value || !m || m.executed == null) return "–";
   return new Intl.NumberFormat("ru-RU", {
     style: "currency",
     currency: "RUB",
@@ -86,8 +89,9 @@ const executedLabel = computed(() => {
 });
 
 const completion = computed(() => {
-  if (!hasData.value) return null;
-  const value = contractMetrics.value.completion;
+  const m = contractMetrics.value;
+  if (!hasData.value || !m) return null;
+  const value = m.completion;
   if (value == null || Number.isNaN(value)) return null;
   return Math.max(0, value * 100);
 });
@@ -119,6 +123,7 @@ const progressStyle = computed(() => {
 });
 
 const titleDateLabel = computed(() => {
-  return contractMetrics.value?.titleDateLabel || "";
+  const m = contractMetrics.value;
+  return m?.titleDateLabel || "";
 });
 </script>
