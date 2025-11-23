@@ -1,25 +1,23 @@
 <template>
-  <div class="month-select">
-    <label for="month-select-vue">Месяц</label>
-    <div class="month-select-control">
-      <select
-        id="month-select-vue"
-        :disabled="isDisabled"
-        v-model="selected"
-        @change="handleChange"
+  <label for="month-select-vue">Месяц</label>
+  <div class="month-select-control">
+    <select
+      id="month-select-vue"
+      :disabled="isDisabled"
+      v-model="selected"
+      @change="handleChange"
+    >
+      <option v-if="isLoading" disabled value="">Загрузка…</option>
+      <option v-else-if="loadError" disabled value="">Ошибка загрузки</option>
+      <option v-else-if="!options.length" disabled value="">Нет данных</option>
+      <option
+        v-for="option in options"
+        :key="option.iso"
+        :value="option.iso"
       >
-        <option v-if="isLoading" disabled value="">Загрузка…</option>
-        <option v-else-if="loadError" disabled value="">Ошибка загрузки</option>
-        <option v-else-if="!options.length" disabled value="">Нет данных</option>
-        <option
-          v-for="option in options"
-          :key="option.iso"
-          :value="option.iso"
-        >
-          {{ option.label }}
-        </option>
-      </select>
-    </div>
+        {{ option.label }}
+      </option>
+    </select>
   </div>
 </template>
 
