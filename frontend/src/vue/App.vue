@@ -40,12 +40,38 @@ const activeCategoryKey = ref('');
 function onCategorySelect(key) {
   activeCategoryKey.value = key;
 }
+const CATEGORY_META = [
+  { key: 'лето', normalized: 'лето' },
+  { key: 'зима', normalized: 'зима' },
+  { key: 'внерегл_ч_1', normalized: 'внерегл_ч_1' },
+  { key: 'внерегл_ч_2', normalized: 'внерегл_ч_2' },
+];
+
+function normalizeCategoryKey(value) {
+  return (value || '')
+    .toString()
+    .trim()
+    .toLowerCase()
+    .replace(/\s+/g, '');
+}
+
+function resolveCategory(rawValue) {
+  const normalized = normalizeCategoryKey(rawValue);
+  if (!normalized) return null;
+  return CATEGORY_META.find((item) => item.normalized === normalized) || null;
+}
+
 // Пример загрузки категорий (группировка по сметам)
 function groupCategories(items) {
   // Группируем по category/smeta, аналогично старой логике
   const groups = {};
-  items.forEach(item => {
-    const key = item.category || item.smeta || 'Без категории';
+  items.forEach((item) => {
+    const rawKey = item.category || item.smeta || '';
+    const resolvedCategory = resolveCategory(rawKey);
+    if (!resolvedCategory) {
+      return;
+    }
+    const key = resolvedCategory.key;
     if (!groups[key]) {
       groups[key] = {
         key,
@@ -53,7 +79,7 @@ function groupCategories(items) {
         planned: 0,
         fact: 0,
         delta: 0,
-        works: []
+        works: [],
       };
     }
     groups[key].works.push(item);
