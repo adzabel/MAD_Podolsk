@@ -7,12 +7,8 @@
     @monthChange="onMonthChange"
   />
   <SummaryCards
-    :plan="summaryState.planned"
-    :fact="summaryState.fact"
-    :deviation="summaryState.delta"
+    :summary="summaryState"
     :isInteractive="true"
-    :dailyAverage="dailyAverageState.averageValue"
-    :daysWithData="dailyAverageState.daysWithData"
     :isCurrentMonth="dailyAverageState.isCurrentMonth"
     :factProgress="summaryState.completion"
     :factProgressLabel="summaryState.completionLabel"
