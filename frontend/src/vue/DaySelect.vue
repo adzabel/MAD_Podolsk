@@ -68,8 +68,12 @@ async function loadInitial() {
 
   try {
     const availableDays = await fetchAvailableDays();
+
+    // Приводим ответы к единому виду: массив строк ISO YYYY-MM-DD.
     const normalized = (availableDays || [])
-      .map((iso) => {
+      .map((item) => {
+        const iso = typeof item === "string" ? item : item && typeof item === "object" ? item.iso : null;
+        if (!iso) return null;
         const date = new Date(iso);
         if (Number.isNaN(date.getTime())) return null;
         return date.toISOString().slice(0, 10);
