@@ -77,9 +77,9 @@ function deltaClass(item) {
   return delta > 0 ? 'delta-positive' : delta < 0 ? 'delta-negative' : '';
 }
 function openWorkModal(item) {
-  if (!item.work_name && !item.description) return;
-  workModalData.workName = item.work_name || item.description || 'Без названия';
-  workModalData.selectedMonthLabel = item.selectedMonthLabel || '';
+  if (!item || (!item.work_name && !item.description)) return;
+  workModalData.workName = typeof item.work_name === 'string' ? item.work_name : (item.description || 'Без названия');
+  workModalData.selectedMonthLabel = typeof item.selectedMonthLabel === 'string' ? item.selectedMonthLabel : '';
   workModalData.workBreakdown = Array.isArray(item.breakdown) ? item.breakdown : [];
   isWorkModalOpen.value = true;
 }

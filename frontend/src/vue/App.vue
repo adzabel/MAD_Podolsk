@@ -98,6 +98,15 @@ const dailyAverageState = reactive({
   selectedMonthLabel: '',
 });
 
+
+const workModalData = reactive({
+  workName: '',
+  workBreakdown: [],
+  selectedMonthLabel: ''
+});
+
+const isWorkModalOpen = ref(false);
+
 const viewMode = ref("monthly");
 
 if (typeof window !== "undefined") {
@@ -125,10 +134,10 @@ if (typeof window !== "undefined") {
   };
 
   window.__openWorkBreakdownModal = (payload) => {
-    if (!payload?.workName && !payload?.description) return;
-    workModalData.workName = payload?.workName || payload?.description || 'Без названия';
-    workModalData.selectedMonthLabel = payload?.selectedMonthLabel || '';
-    workModalData.workBreakdown = Array.isArray(payload?.breakdown) ? payload.breakdown : [];
+    if (!payload || (!payload.workName && !payload.description)) return;
+    workModalData.workName = typeof payload.workName === 'string' ? payload.workName : (payload.description || 'Без названия');
+    workModalData.selectedMonthLabel = typeof payload.selectedMonthLabel === 'string' ? payload.selectedMonthLabel : '';
+    workModalData.workBreakdown = Array.isArray(payload.breakdown) ? payload.breakdown : [];
     isWorkModalOpen.value = true;
   };
 }

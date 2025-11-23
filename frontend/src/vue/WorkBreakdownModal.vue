@@ -32,8 +32,8 @@
 <script setup>
 import { computed } from 'vue';
 const props = defineProps({
-  visible: Boolean,
-  workName: { type: [String, null, undefined], default: '' },
+  visible: { type: Boolean, default: false },
+  workName: { type: String, default: '' },
   workBreakdown: { type: Array, default: () => [] },
   selectedMonthLabel: { type: String, default: '' },
 });
