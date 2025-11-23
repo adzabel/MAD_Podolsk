@@ -47,28 +47,23 @@ export function mountMonthSelect(selector = "#month-select-vue-root", initialMon
   if (!el) return null;
 
   // Реактивные данные для месяцев
-  const state = reactive({
-    months: [],
-    loading: true,
-    error: false,
-  });
+  const months = ref([]);
+  const loading = ref(true);
+  const error = ref(false);
 
-  // Функция загрузки месяцев (пример: через window или fetch)
   async function fetchAvailableMonths() {
-    // Можно заменить на реальный API
     if (typeof window !== "undefined" && typeof window.__fetchAvailableMonths === "function") {
-      return window.__fetchAvailableMonths();
+      return await window.__fetchAvailableMonths();
     }
-    // Пример заглушки
     return [];
   }
 
   async function loadMonths() {
-    state.loading = true;
-    state.error = false;
+    loading.value = true;
+    error.value = false;
     try {
       const availableMonths = await fetchAvailableMonths();
-      state.months = (availableMonths || [])
+      months.value = (availableMonths || [])
         .map((iso) => {
           if (!iso) return null;
           const date = new Date(iso);
@@ -83,10 +78,17 @@ export function mountMonthSelect(selector = "#month-select-vue-root", initialMon
         })
         .filter(Boolean);
     } catch (e) {
-      state.error = true;
-      state.months = [];
+      error.value = true;
+      months.value = [];
     } finally {
-      state.loading = false;
+      loading.value = false;
+    }
+  }
+
+  // Для передачи выбранного месяца в старый JS
+  function onMonthChange(iso) {
+    if (typeof window !== "undefined" && typeof window.__onMonthChange === "function") {
+      window.__onMonthChange(iso);
     }
   }
 
@@ -94,13 +96,27 @@ export function mountMonthSelect(selector = "#month-select-vue-root", initialMon
 
   const app = createApp(MonthSelect, {
     initialMonth,
-    months: state.months,
-    loading: computed(() => state.loading),
-    error: computed(() => state.error),
+    months: months.value,
+    loading: loading.value,
+    error: error.value,
+    onMonthChange,
   });
   const vm = app.mount(el);
 
-  return { app, vm, state };
+  // Обновлять пропсы при изменении
+  if (vm && vm.$props) {
+    Object.defineProperty(vm.$props, 'months', {
+      get: () => months.value,
+    });
+    Object.defineProperty(vm.$props, 'loading', {
+      get: () => loading.value,
+    });
+    Object.defineProperty(vm.$props, 'error', {
+      get: () => error.value,
+    });
+  }
+
+  return { app, vm, months, loading, error };
 }
 
 export function mountDaySelect(selector = "#day-select-vue-root", initialDay = null) {

@@ -1,13 +1,4 @@
 <template>
-  <div class="month-select-block">
-    <MonthSelect
-      :months="months"
-      :initial-month="initialMonth"
-      :loading="loading"
-      :error="error"
-      @monthChange="onMonthChange"
-    />
-  </div>
   <SummaryCard
     label="План, ₽"
     sub="Сметная стоимость"
