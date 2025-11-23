@@ -574,9 +574,17 @@ export class UIManager {
     this.lastUpdatedMonthlyLabel = "Загрузка данных…";
     this.lastUpdatedMonthlyDateLabel = "Загрузка данных…";
     this.updateLastUpdatedPills();
-    this.elements.sumPlanned.textContent = "…";
-    this.elements.sumFact.textContent = "…";
-    this.elements.sumDelta.textContent = "…";
+    // Сводка теперь рендерится Vue: уведомляем её о состоянии загрузки,
+    // а прямой доступ к DOM-элементам sumPlanned/sumFact/sumDelta убираем.
+    if (typeof window !== "undefined" && typeof window.__vueSetSummaryMetrics === "function") {
+      window.__vueSetSummaryMetrics({
+        planned: null,
+        fact: null,
+        delta: null,
+        completion: null,
+        completionLabel: "…",
+      });
+    }
     this.updateSummaryProgress(null, "…");
     this.updateDailyAverage(null, 0);
     this.setActiveCategoryTitle("Загрузка...");
@@ -596,10 +604,17 @@ export class UIManager {
     this.lastUpdatedMonthlyLabel = "Ошибка загрузки данных";
     this.lastUpdatedMonthlyDateLabel = "";
     this.updateLastUpdatedPills();
-    this.elements.sumPlanned.textContent = "–";
-    this.elements.sumFact.textContent = "–";
-    this.elements.sumDelta.textContent = "–";
-    this.elements.sumDelta.classList.remove("positive", "negative");
+    // Сводка теперь управляется Vue, поэтому обновляем её через глобальный хук,
+    // а прямые манипуляции с DOM-элементами sum* убираем.
+    if (typeof window !== "undefined" && typeof window.__vueSetSummaryMetrics === "function") {
+      window.__vueSetSummaryMetrics({
+        planned: null,
+        fact: null,
+        delta: null,
+        completion: null,
+        completionLabel: "–",
+      });
+    }
     this.summaryDailyRevenue = [];
     this.dailyRevenue = [];
     this.updateSummaryProgress(null, "–");
