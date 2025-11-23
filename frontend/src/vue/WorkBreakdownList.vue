@@ -163,30 +163,12 @@ const updateIsMobile = (event) => {
   isMobile.value = Boolean(matches);
 };
 
-const VNR_CODES = ['внерегл_ч_1', 'внерегл_ч_2'];
 
-// Фильтрация работ по выбранной смете
+// Новая фильтрация: используем category из API
 const filteredWorks = computed(() => {
-  const worksList = works.value.filter((item) => Boolean(item.work_name));
-  if (!props.activeCategoryKey) return worksList;
+  if (!props.activeCategoryKey) return works.value;
   const key = props.activeCategoryKey.toLowerCase();
-
-  const subset = worksList.filter((item) => {
-    const smetaKey = (item.smeta || '').toString().trim().toLowerCase();
-    if (key === 'внерегламент') {
-      return VNR_CODES.includes(smetaKey);
-    }
-    return smetaKey === key;
-  });
-
-  if (key === 'внерегламент') {
-    return subset.map((item) => ({
-      ...item,
-      planned_amount: 0,
-    }));
-  }
-
-  return subset;
+  return works.value.filter(item => (item.category || '').toLowerCase() === key);
 });
 
 const sortedWorks = computed(() => {

@@ -399,87 +399,123 @@ def fetch_plan_vs_fact_for_month(
     Возвращает: (items, summary, last_updated)
     """
     items: list[DashboardItem]
-    summary: DashboardSummary | None = None
-    last_updated: datetime | None = None
 
-    with get_connection() as conn:
-        with conn.cursor(cursor_factory=RealDictCursor) as cur:
-            cur.execute(ITEMS_SQL, (month_start,))
-            items = _aggregate_items_streaming(cur)
+        summary = None
+        last_updated = None
+        with get_connection() as conn:
+            with conn.cursor(cursor_factory=RealDictCursor) as cur:
+                cur.execute(ITEMS_SQL, (month_start,))
+                items_raw = cur.fetchall()
 
-        base_plan_total = Decimal(0)
-        vnr_fact_total = Decimal(0)
-        for item in items:
-            smeta_code = normalize_string(item.smeta, default="")
-            if smeta_code in _PLAN_BASE_CATEGORIES and item.planned_amount is not None:
-                base_plan_total += Decimal(str(item.planned_amount))
-            if smeta_code in _VNR_CATEGORY_CODES and item.fact_amount is not None:
-                vnr_fact_total += Decimal(str(item.fact_amount))
-
-        vnr_plan_amount = float(base_plan_total * _VNR_PLAN_SHARE) if base_plan_total > 0 else 0.0
-        items.append(
-            DashboardItem(
-                month_start=month_start,
-                smeta=CATEGORY_VNR_LABEL,
-                work_name=None,
-                planned_amount=vnr_plan_amount,
-                fact_amount=float(vnr_fact_total),
+            # Агрегация по категориям
+            plan_leto = sum(
+                to_float(row["planned_amount"]) or 0.0
+                for row in items_raw
+                if normalize_string(row["smeta_code"], "") == CATEGORY_SUMMER
             )
-        )
-
-        month_fact_total = sum(
-            item.fact_amount or 0.0 for item in items if item.fact_amount is not None and item.smeta != CATEGORY_VNR_LABEL
-        )
-
-        daily_revenue = _fetch_daily_fact_totals(conn, month_start)
-        average_daily_revenue = _calculate_daily_average(
-            month_start,
-            daily_revenue,
-            month_fact_total,
-        )
-
-        contract_progress = _fetch_contract_progress(conn, month_start)
-
-        last_updated = _fetch_last_updated(conn)
-
-        with conn.cursor(cursor_factory=RealDictCursor) as cur:
-            cur.execute(SUMMARY_SQL, (month_start,))
-            summary_row = cur.fetchone() or {}
-            has_financial_data = (
-                summary_row.get("planned_total") is not None
-                or summary_row.get("fact_total") is not None
-                or bool(daily_revenue)
+            plan_zima = sum(
+                to_float(row["planned_amount"]) or 0.0
+                for row in items_raw
+                if normalize_string(row["smeta_code"], "") == CATEGORY_WINTER
             )
-            if has_financial_data:
-                summary = DashboardSummary(
-                    planned_amount=to_float(summary_row.get("planned_total")) or 0.0,
-                    fact_amount=to_float(summary_row.get("fact_total")) or 0.0,
-                    completion_pct=to_float(summary_row.get("completion_pct")),
-                    delta_amount=to_float(summary_row.get("delta_amount")) or 0.0,
-                    average_daily_revenue=average_daily_revenue,
-                    daily_revenue=daily_revenue,
-                )
+            plan_vnereglament = (plan_leto + plan_zima) * float(_VNR_PLAN_SHARE)
+            plan_total = plan_leto + plan_zima + plan_vnereglament
 
-        if summary is None and contract_progress is not None:
-            summary = DashboardSummary(
-                planned_amount=0.0,
-                fact_amount=0.0,
-                completion_pct=None,
-                delta_amount=0.0,
-                contract_amount=contract_progress.get("contract_total"),
-                contract_executed=contract_progress.get("executed_total"),
-                contract_completion_pct=None,
-                average_daily_revenue=average_daily_revenue,
-                daily_revenue=daily_revenue,
+            fact_leto = sum(
+                to_float(row["fact_amount_done"]) or 0.0
+                for row in items_raw
+                if normalize_string(row["smeta_code"], "") == CATEGORY_SUMMER
             )
+            fact_zima = sum(
+                to_float(row["fact_amount_done"]) or 0.0
+                for row in items_raw
+                if normalize_string(row["smeta_code"], "") == CATEGORY_WINTER
+            )
+            fact_vnereglament = sum(
+                to_float(row["fact_amount_done"]) or 0.0
+                for row in items_raw
+                if normalize_string(row["smeta_code"], "") in CATEGORY_VNR_CODES
+            )
+            fact_total = fact_leto + fact_zima + fact_vnereglament
 
-        if summary and contract_progress is not None:
-            summary.contract_amount = contract_progress.get("contract_total")
-            summary.contract_executed = contract_progress.get("executed_total")
-            if summary.contract_amount:
-                summary.contract_completion_pct = summary.contract_executed / summary.contract_amount
+            # Для SummaryCards
+            summary = {
+                "plan_total": plan_total,
+                "fact_total": fact_total,
+                "deviation": plan_total - fact_total,
+            }
 
-    return items, summary, last_updated
+            # Среднедневное значение
+            today = date.today()
+            days_in_month = calendar.monthrange(month_start.year, month_start.month)[1]
+            if month_start.year == today.year and month_start.month == today.month:
+                days_with_data = today.day - 1
+            else:
+                days_with_data = days_in_month
+            summary["average_daily"] = fact_total / days_with_data if days_with_data > 0 else 0.0
+            summary["days_with_data"] = days_with_data
+
+            # Для SmetaCategories
+            smeta_categories = [
+                {
+                    "key": "лето",
+                    "title": "Лето",
+                    "planned": plan_leto,
+                    "fact": fact_leto,
+                    "delta": plan_leto - fact_leto,
+                },
+                {
+                    "key": "зима",
+                    "title": "Зима",
+                    "planned": plan_zima,
+                    "fact": fact_zima,
+                    "delta": plan_zima - fact_zima,
+                },
+                {
+                    "key": "внерегламент",
+                    "title": "Внерегламент",
+                    "planned": plan_vnereglament,
+                    "fact": fact_vnereglament,
+                    "delta": plan_vnereglament - fact_vnereglament,
+                },
+            ]
+
+            # Для WorkBreakdownList
+            work_items = []
+            for desc in set(row["description"] for row in items_raw):
+                for cat in ["лето", "зима", "внерегламент"]:
+                    if cat == "внерегламент":
+                        planned = 0
+                        fact = sum(
+                            to_float(row["fact_amount_done"]) or 0.0
+                            for row in items_raw
+                            if normalize_string(row["smeta_code"], "") in CATEGORY_VNR_CODES and row["description"] == desc
+                        )
+                    else:
+                        planned = sum(
+                            to_float(row["planned_amount"]) or 0.0
+                            for row in items_raw
+                            if normalize_string(row["smeta_code"], "") == cat and row["description"] == desc
+                        )
+                        fact = sum(
+                            to_float(row["fact_amount_done"]) or 0.0
+                            for row in items_raw
+                            if normalize_string(row["smeta_code"], "") == cat and row["description"] == desc
+                        )
+                    if planned > 1 or fact > 1:
+                        work_items.append({
+                            "category": cat,
+                            "description": desc,
+                            "planned_amount": planned,
+                            "fact_amount": fact,
+                            "delta": planned - fact,
+                        })
+
+            # last_updated
+            last_updated = _fetch_last_updated(conn)
+
+        # Возвращаем все агрегаты для фронта
+        return work_items, summary, last_updated, smeta_categories
 
 
 @db_retry(

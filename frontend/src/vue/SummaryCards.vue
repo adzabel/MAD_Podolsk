@@ -28,19 +28,21 @@ import DeviationCard from './DeviationCard.vue';
 import DailyAverageCard from './DailyAverageCard.vue';
 import DailyAverageModal from './DailyAverageModal.vue';
 
-const props = defineProps({
-  plan: { type: Number, default: null },
-  fact: { type: Number, default: null },
-  deviation: { type: Number, default: null },
-  isInteractive: { type: Boolean, default: false },
-  dailyAverage: { type: Number, default: null },
-  daysWithData: { type: Number, default: 0 },
-  isCurrentMonth: { type: Boolean, default: false },
-  factProgress: { type: Number, default: null },
-  factProgressLabel: { type: String, default: "–" },
-  summaryDailyRevenue: { type: Array, default: () => [] },
-  selectedMonthLabel: { type: String, default: '' }
-});
+    const props = defineProps({
+      summary: { type: Object, required: true },
+      isInteractive: { type: Boolean, default: false },
+      isCurrentMonth: { type: Boolean, default: false },
+      factProgress: { type: Number, default: null },
+      factProgressLabel: { type: String, default: "–" },
+      summaryDailyRevenue: { type: Array, default: () => [] },
+      selectedMonthLabel: { type: String, default: '' }
+    });
+
+    const plan = computed(() => props.summary?.plan_total ?? 0);
+    const fact = computed(() => props.summary?.fact_total ?? 0);
+    const deviation = computed(() => props.summary?.deviation ?? 0);
+    const dailyAverage = computed(() => props.summary?.average_daily ?? 0);
+    const daysWithData = computed(() => props.summary?.days_with_data ?? 0);
 
 import { ref } from 'vue';
 const isDailyModalOpen = ref(false);

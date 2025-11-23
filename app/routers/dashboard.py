@@ -34,17 +34,19 @@ DayQuery = Annotated[
 def get_dashboard(month: MonthQuery, request: Request) -> DashboardResponse:
     """Основной эндпоинт для дашборда."""
 
-    items, summary, last_updated = fetch_plan_vs_fact_for_month(month)
+
+    work_items, summary, last_updated, smeta_categories = fetch_plan_vs_fact_for_month(month)
 
     log_dashboard_visit(request=request, endpoint=str(request.url.path))
 
-    return DashboardResponse(
-        month=month,
-        last_updated=last_updated,
-        summary=summary,
-        items=items,
-        has_data=bool(items),
-    )
+    return {
+        "month": month,
+        "last_updated": last_updated,
+        "summary": summary,
+        "items": work_items,
+        "smeta_categories": smeta_categories,
+        "has_data": bool(work_items),
+    }
 
 
 @router.get("/dashboard/pdf")

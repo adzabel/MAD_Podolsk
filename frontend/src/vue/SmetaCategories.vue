@@ -46,8 +46,9 @@
 <script setup>
 import { formatMoney, formatPercent } from '@/shared/utils.js';
 
+
 const props = defineProps({
-  categories: { type: Array, required: true },
+  categories: { type: Array, required: true }, // теперь приходит напрямую из API
   activeCategoryKey: { type: String, default: '' },
   colors: { type: Array, default: () => [
     { accent: '#2f6fed', soft: 'rgba(47,111,237,0.12)' },
