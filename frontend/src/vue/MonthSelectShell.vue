@@ -12,10 +12,17 @@
 import { ref, onMounted } from "vue";
 import MonthSelect from "./MonthSelect.vue";
 
+const props = defineProps({
+  initialMonth: {
+    type: String,
+    default: null,
+  },
+});
+
 const months = ref([]);
 const loading = ref(true);
 const error = ref(false);
-const initialMonth = ref(null);
+const initialMonth = ref(props.initialMonth);
 
 async function fetchAvailableMonths() {
   if (typeof window !== "undefined" && typeof window.__fetchAvailableMonths === "function") {
@@ -58,7 +65,8 @@ function onMonthChange(iso) {
 }
 
 onMounted(() => {
-  if (typeof window !== "undefined" && window.uiManager && window.uiManager.initialMonth) {
+  // fallback к глобальному состоянию только если initialMonth не передан
+  if (!initialMonth.value && typeof window !== "undefined" && window.uiManager && window.uiManager.initialMonth) {
     initialMonth.value = window.uiManager.initialMonth;
   }
   loadMonths();
