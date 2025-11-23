@@ -115,6 +115,10 @@
   box-shadow: var(--shadow-soft);
 }
 
+.work-list-panel .work-list-surface {
+  margin-top: var(--grid-gap);
+}
+
 @media (min-width: 768px) {
   .work-list.has-data .work-list-scroller .work-row:nth-child(odd) {
     background: var(--bg-card);
