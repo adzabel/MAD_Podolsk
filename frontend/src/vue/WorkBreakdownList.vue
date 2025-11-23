@@ -120,11 +120,8 @@ async function fetchWorks() {
   isLoading.value = true;
   error.value = false;
   try {
-    // Получаем месяц из window или из глобального состояния
-    let monthIso = null;
-    if (typeof window !== 'undefined' && window.uiManager && window.uiManager.initialMonth) {
-      monthIso = window.uiManager.initialMonth;
-    }
+    // Получаем месяц из props или текущий
+    let monthIso = selectedMonth.value;
     if (!monthIso) {
       // fallback: текущий месяц
       const now = new Date();
