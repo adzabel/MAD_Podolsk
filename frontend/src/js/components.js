@@ -324,44 +324,7 @@ export class UIManager {
   }
 
   showLoadingState() {
-    this.groupedCategories = [];
-    this.activeCategoryKey = null;
-    this.summaryDailyRevenue = [];
-    this.dailyRevenue = [];
-    this.toggleSkeletons(true);
-    this.elements.categoryGrid.innerHTML = "";
-    this.lastUpdatedMonthlyLabel = null;
-    this.lastUpdatedMonthlyDateLabel = null;
-    this.updateLastUpdatedPills();
-    if (typeof window !== "undefined" && typeof window.__vueSetMonthlyLastUpdatedStatus === "function") {
-      window.__vueSetMonthlyLastUpdatedStatus("loading");
-    }
-    // Сводка теперь рендерится Vue: уведомляем её о состоянии загрузки,
-    // а прямой доступ к DOM-элементам sumPlanned/sumFact/sumDelta убираем.
-    if (typeof window !== "undefined" && typeof window.__vueSetSummaryMetrics === "function") {
-      window.__vueSetSummaryMetrics({
-        planned: null,
-        fact: null,
-        delta: null,
-        completion: null,
-        completionLabel: "…",
-      });
-    }
-    if (typeof window !== "undefined" && typeof window.__vueSetDailyAverage === "function") {
-      window.__vueSetDailyAverage({
-        averageValue: null,
-        daysWithData: 0,
-        isCurrentMonth: false,
-      });
-    }
-    this.setActiveCategoryTitle("Загрузка...");
-    this.elements.workEmptyState.style.display = "none";
-    this.elements.workList.classList.remove("has-data");
-    this.workHeaderEl.hidden = true;
-    this.elements.workListScroller.style.display = "none";
-    this.clearWorkRows();
-    this.elements.pdfButton.disabled = true;
-    this.updateContractCard(null);
+    // Отключено для Vue-дашборда
   }
 
   handleLoadError() {

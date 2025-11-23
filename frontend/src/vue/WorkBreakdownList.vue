@@ -60,6 +60,7 @@ import '@/styles/work.css';
 const isLoading = ref(true);
 const error = ref(false);
 const works = ref([]);
+const selectedMonth = ref(null);
 
 const isWorkModalOpen = ref(false);
 const workModalData = reactive({
@@ -76,11 +77,19 @@ function deltaClass(item) {
   const delta = item.fact_amount - item.planned_amount;
   return delta > 0 ? 'delta-positive' : delta < 0 ? 'delta-negative' : '';
 }
-function openWorkModal(item) {
+async function openWorkModal(item) {
   if (!item || (!item.work_name && !item.description)) return;
   workModalData.workName = typeof item.work_name === 'string' ? item.work_name : (item.description || 'Без названия');
-  workModalData.selectedMonthLabel = typeof item.selectedMonthLabel === 'string' ? item.selectedMonthLabel : '';
-  workModalData.workBreakdown = Array.isArray(item.breakdown) ? item.breakdown : [];
+  workModalData.selectedMonthLabel = selectedMonth.value || '';
+  // Загружаем детализацию работы через API
+  try {
+    const response = await fetch(`/api/dashboard/work-breakdown?month=${selectedMonth.value}&work=${encodeURIComponent(workModalData.workName)}`, { cache: 'no-store' });
+    if (!response.ok) throw new Error('HTTP ' + response.status);
+    const breakdown = await response.json();
+    workModalData.workBreakdown = Array.isArray(breakdown) ? breakdown : [];
+  } catch (e) {
+    workModalData.workBreakdown = [];
+  }
   isWorkModalOpen.value = true;
 }
 
@@ -88,8 +97,23 @@ async function fetchWorks() {
   isLoading.value = true;
   error.value = false;
   try {
-    // Прямое подключение к backend
-    const response = await fetch('/api/works-breakdown', { cache: 'no-store' });
+    // Получаем месяц из window или из глобального состояния
+    let monthIso = null;
+    if (typeof window !== 'undefined' && window.uiManager && window.uiManager.initialMonth) {
+      monthIso = window.uiManager.initialMonth;
+    }
+    if (!monthIso) {
+      // fallback: текущий месяц
+      const now = new Date();
+      monthIso = `${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}-01`;
+    }
+    selectedMonth.value = monthIso;
+    const response = await fetch(`/api/dashboard?month=${monthIso}`, { cache: 'no-store' });
+    if (response.status === 404) {
+      error.value = true;
+      works.value = [];
+      return;
+    }
     if (!response.ok) throw new Error('HTTP ' + response.status);
     const data = await response.json();
     works.value = Array.isArray(data?.items) ? data.items : [];
