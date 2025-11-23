@@ -442,9 +442,9 @@ def fetch_plan_vs_fact_for_month(
 
             # Для SummaryCards
             summary = {
-                "plan_total": plan_total,
-                "fact_total": fact_total,
-                "deviation": plan_total - fact_total,
+                "planned_amount": plan_total,
+                "fact_amount": fact_total,
+                "delta_amount": plan_total - fact_total,
             }
 
             # Среднедневное значение
