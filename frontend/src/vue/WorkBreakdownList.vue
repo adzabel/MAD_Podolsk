@@ -77,6 +77,7 @@ function deltaClass(item) {
   return delta > 0 ? 'delta-positive' : delta < 0 ? 'delta-negative' : '';
 }
 function openWorkModal(item) {
+  if (!item.work_name && !item.description) return;
   workModalData.workName = item.work_name || item.description || 'Без названия';
   workModalData.selectedMonthLabel = item.selectedMonthLabel || '';
   workModalData.workBreakdown = Array.isArray(item.breakdown) ? item.breakdown : [];

@@ -125,6 +125,7 @@ if (typeof window !== "undefined") {
   };
 
   window.__openWorkBreakdownModal = (payload) => {
+    if (!payload?.workName && !payload?.description) return;
     workModalData.workName = payload?.workName || payload?.description || 'Без названия';
     workModalData.selectedMonthLabel = payload?.selectedMonthLabel || '';
     workModalData.workBreakdown = Array.isArray(payload?.breakdown) ? payload.breakdown : [];
