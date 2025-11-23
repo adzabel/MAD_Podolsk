@@ -83,7 +83,14 @@ async function openWorkModal(item) {
   workModalData.selectedMonthLabel = selectedMonth.value || '';
   // Загружаем детализацию работы через API
   try {
-    const response = await fetch(`/api/dashboard/work-breakdown?month=${selectedMonth.value}&work=${encodeURIComponent(workModalData.workName)}`, { cache: 'no-store' });
+    let apiBase = '/api/dashboard';
+    if (typeof document !== 'undefined') {
+      const metaApiUrl = document.querySelector('meta[name="mad-api-url"]');
+      if (metaApiUrl && metaApiUrl.content) {
+        apiBase = metaApiUrl.content;
+      }
+    }
+    const response = await fetch(`${apiBase}/work-breakdown?month=${selectedMonth.value}&work=${encodeURIComponent(workModalData.workName)}`, { cache: 'no-store' });
     if (!response.ok) throw new Error('HTTP ' + response.status);
     const breakdown = await response.json();
     workModalData.workBreakdown = Array.isArray(breakdown) ? breakdown : [];
@@ -108,7 +115,14 @@ async function fetchWorks() {
       monthIso = `${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}-01`;
     }
     selectedMonth.value = monthIso;
-    const response = await fetch(`/api/dashboard?month=${monthIso}`, { cache: 'no-store' });
+    let apiBase = '/api/dashboard';
+    if (typeof document !== 'undefined') {
+      const metaApiUrl = document.querySelector('meta[name="mad-api-url"]');
+      if (metaApiUrl && metaApiUrl.content) {
+        apiBase = metaApiUrl.content;
+      }
+    }
+    const response = await fetch(`${apiBase}?month=${monthIso}`, { cache: 'no-store' });
     if (response.status === 404) {
       error.value = true;
       works.value = [];
