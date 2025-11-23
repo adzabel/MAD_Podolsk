@@ -1,7 +1,7 @@
 <template>
   <MonthSelect
     :months="months"
-    :initial-month="initialMonth"
+    :initialMonth="initialMonth"
     :loading="loading"
     :error="error"
     @monthChange="onMonthChange"
