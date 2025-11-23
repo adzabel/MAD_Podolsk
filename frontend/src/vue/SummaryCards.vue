@@ -28,9 +28,21 @@ const props = defineProps({
 </script>
 
 <style scoped>
+
 .summary-cards {
   display: flex;
-  gap: 16px;
+  flex-direction: row;
+  gap: 24px;
   flex-wrap: wrap;
+  width: 100%;
+  justify-content: flex-start;
+  align-items: stretch;
+}
+
+.summary-card {
+  min-width: 220px;
+  max-width: 320px;
+  flex: 1 1 220px;
+  box-sizing: border-box;
 }
 </style>
