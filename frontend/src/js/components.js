@@ -724,21 +724,6 @@ export class UIManager {
   }
 
   updateContractCard(contractMetrics) {
-    const payload = {
-      ...(contractMetrics || {}),
-      titleDateLabel:
-        this.uiStore.getViewMode() === "daily"
-          ? this.lastUpdatedDailyDateLabel || ""
-          : this.lastUpdatedMonthlyDateLabel || "",
-    };
-
-    // Если Vue-карточка смонтирована — обновляем её проп напрямую.
-    if (typeof window !== "undefined" && window.__contractCardVm) {
-      window.__contractCardVm.contractMetrics = payload;
-      return;
-    }
-
-    // Фолбэк: старый DOM-рендер карточки.
     updateContractCardExternal({
       contractMetrics,
       elements: this.elements,

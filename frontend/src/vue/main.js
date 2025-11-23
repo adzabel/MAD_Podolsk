@@ -1,20 +1,10 @@
 import { createApp } from "vue";
 import App from "./App.vue";
-import ContractCard from "./ContractCard.vue";
 
-export function mountContractCard(selector = "#contract-card") {
-  const el = document.querySelector(selector);
-  if (!el) return null;
-
-  const app = createApp(ContractCard, { contractMetrics: null });
-  const vm = app.mount(el);
-
-  if (typeof window !== "undefined") {
-    window.__contractCardApp = app;
-    window.__contractCardVm = vm;
-  }
-
-  return { app, vm };
+// Временная стратегия: используем Vue только для сводки, а
+// карточка исполнения контракта продолжает рендериться старым DOM-кодом.
+export function mountContractCard() {
+  return null;
 }
 
 export function mountSummary(selector = "#summary-grid") {
