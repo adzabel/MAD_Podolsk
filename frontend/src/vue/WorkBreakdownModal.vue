@@ -1,7 +1,7 @@
 <template>
-  <div v-if="visible" :class="['modal-backdrop', { visible: visible }]" id="work-modal" :aria-hidden="!visible">
+  <div v-if="visible && workNameSafe" :class="['modal-backdrop', { visible: visible }]" id="work-modal" :aria-hidden="!visible">
     <div class="modal" role="dialog" aria-modal="true" aria-labelledby="work-modal-title">
-      <div class="modal-title" id="work-modal-title">Расшифровка: {{ workName }}</div>
+      <div class="modal-title" id="work-modal-title">Расшифровка: {{ workNameSafe }}</div>
       <div class="modal-subtitle" id="work-modal-subtitle">{{ selectedMonthLabel }}</div>
       <button class="modal-close" type="button" @click="$emit('close')" aria-label="Закрыть">×</button>
       <div class="modal-body" id="work-modal-body">
@@ -33,10 +33,11 @@
 import { computed } from 'vue';
 const props = defineProps({
   visible: Boolean,
-  workName: { type: String, default: '' },
+  workName: { type: [String, null, undefined], default: '' },
   workBreakdown: { type: Array, default: () => [] },
   selectedMonthLabel: { type: String, default: '' },
 });
+const workNameSafe = computed(() => typeof props.workName === 'string' ? props.workName : (props.workName ?? '').toString());
 const safeWorkBreakdown = computed(() => Array.isArray(props.workBreakdown) ? props.workBreakdown : []);
 function formatDate(date) {
   if (!date) return '';
