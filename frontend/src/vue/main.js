@@ -46,10 +46,61 @@ export function mountMonthSelect(selector = "#month-select-vue-root", initialMon
   const el = document.querySelector(selector);
   if (!el) return null;
 
-  const app = createApp(MonthSelect, { initialMonth });
+  // Реактивные данные для месяцев
+  const state = reactive({
+    months: [],
+    loading: true,
+    error: false,
+  });
+
+  // Функция загрузки месяцев (пример: через window или fetch)
+  async function fetchAvailableMonths() {
+    // Можно заменить на реальный API
+    if (typeof window !== "undefined" && typeof window.__fetchAvailableMonths === "function") {
+      return window.__fetchAvailableMonths();
+    }
+    // Пример заглушки
+    return [];
+  }
+
+  async function loadMonths() {
+    state.loading = true;
+    state.error = false;
+    try {
+      const availableMonths = await fetchAvailableMonths();
+      state.months = (availableMonths || [])
+        .map((iso) => {
+          if (!iso) return null;
+          const date = new Date(iso);
+          if (Number.isNaN(date.getTime())) return null;
+          return {
+            iso,
+            label: date.toLocaleDateString("ru-RU", {
+              month: "long",
+              year: "numeric",
+            }),
+          };
+        })
+        .filter(Boolean);
+    } catch (e) {
+      state.error = true;
+      state.months = [];
+    } finally {
+      state.loading = false;
+    }
+  }
+
+  loadMonths();
+
+  const app = createApp(MonthSelect, {
+    initialMonth,
+    months: state.months,
+    loading: computed(() => state.loading),
+    error: computed(() => state.error),
+  });
   const vm = app.mount(el);
 
-  return { app, vm };
+  return { app, vm, state };
 }
 
 export function mountDaySelect(selector = "#day-select-vue-root", initialDay = null) {
