@@ -13,7 +13,7 @@
       <span class="summary-note-line">Расчет без выручки</span>
       <span class="summary-note-line">за сегодня</span>
     </div>
-    <span class="summary-card-hint" aria-hidden="true">
+    <span v-if="isCurrentMonth" class="summary-card-hint" aria-hidden="true">
       <svg
         viewBox="0 0 24 24"
         aria-hidden="true"
