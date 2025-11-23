@@ -34,9 +34,21 @@
   }
 }
 
-.summary-card {
+
+.summary-card,
+.summary-card-interactive {
+  background: var(--bg-card);
+  border: 1px solid var(--border-soft);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-card);
+  padding: var(--card-padding);
   min-height: clamp(92px, 11vw, 120px);
   height: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  box-sizing: border-box;
+  transition: var(--transition-lift), var(--transition-border);
 }
 
 .summary-card-interactive {
