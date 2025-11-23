@@ -4,7 +4,7 @@
     <div class="month-select-control">
       <select
         id="month-select-vue"
-        :disabled="isDisabled || !options.length"
+        :disabled="isDisabled"
         v-model="selected"
         @change="handleChange"
       >
@@ -38,13 +38,7 @@ const state = reactive({
 
 const selected = ref("");
 
-const isDisabled = computed(() => {
-  // Блокируем селектор только во время загрузки
-  // или при ошибке, когда вообще нет опций.
-  if (state.isLoading) return true;
-  if (state.loadError && !state.options.length) return true;
-  return false;
-});
+const isDisabled = computed(() => state.isLoading);
 
 function getCurrentMonthIso() {
   const now = new Date();
