@@ -18,7 +18,11 @@
       >
         <div class="category-title">
           <span>{{ category.title }}</span>
-          <span class="category-pill">{{ category.works.length }} работ</span>
+          <span v-if="!isVnereglament(category)" class="category-pill">{{ category.works.length }} работ</span>
+          <span v-else class="category-pill category-pill--virtual">
+            <span>30% от</span>
+            <span>общего плана</span>
+          </span>
         </div>
         <div class="category-values">
           <span><span class="label">План</span><strong>{{ formatMoney(category.planned) }}</strong></span>
@@ -60,6 +64,9 @@ function selectCategory(key) {
 
 function deltaClass(category) {
   return category.delta > 0 ? 'delta-positive' : category.delta < 0 ? 'delta-negative' : '';
+}
+function isVnereglament(category) {
+  return typeof category.key === 'string' && category.key.toLowerCase() === 'внерегламент';
 }
 function completionLabel(category) {
   const completion = category.planned ? (category.fact ?? 0) / category.planned : null;
