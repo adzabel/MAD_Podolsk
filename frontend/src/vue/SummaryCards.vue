@@ -29,20 +29,18 @@ const props = defineProps({
 
 <style scoped>
 
+
 .summary-cards {
-  display: flex;
-  flex-direction: row;
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
   gap: 24px;
-  flex-wrap: wrap;
   width: 100%;
-  justify-content: flex-start;
-  align-items: stretch;
+  margin-bottom: 32px;
 }
 
-.summary-card {
-  min-width: 220px;
-  max-width: 320px;
-  flex: 1 1 220px;
-  box-sizing: border-box;
+@media (min-width: 900px) {
+  .summary-cards {
+    grid-template-columns: repeat(4, 1fr);
+  }
 }
 </style>

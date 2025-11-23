@@ -1,7 +1,7 @@
 
 <template>
   <button
-    class="summary-card card card--interactive card--stacked deviation-card"
+    class="summary-card deviation-card"
     type="button"
     :class="{ 'is-disabled': !isInteractive }"
     :aria-disabled="String(!isInteractive)"

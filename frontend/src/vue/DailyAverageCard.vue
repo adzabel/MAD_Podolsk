@@ -1,6 +1,6 @@
 <template>
   <button
-    class="summary-card card card--interactive card--stacked summary-card-interactive"
+    class="summary-card summary-card-interactive"
     id="daily-average-card"
     type="button"
     :class="{ 'is-disabled': !isInteractive }"
