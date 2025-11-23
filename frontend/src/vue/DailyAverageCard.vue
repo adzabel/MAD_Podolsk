@@ -74,6 +74,7 @@ const emit = defineEmits(["open-modal"]);
 
 function handleClick() {
   if (!isInteractive.value) return;
+  console.log('[DEBUG] Click on DailyAverageCard, isInteractive:', isInteractive.value);
   emit("open-modal");
 }
 </script>
