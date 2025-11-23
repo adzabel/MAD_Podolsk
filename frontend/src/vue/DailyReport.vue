@@ -11,7 +11,7 @@
       </div>
     </div>
 
-    <div class="work-list-surface">
+    <div class="work-list-surface" v-if="isLoading || rows.length">
       <div
         class="work-list work-list-skeleton daily-skeleton"
         aria-hidden="true"
@@ -24,10 +24,6 @@
           <div class="skeleton skeleton-line"></div>
           <div class="skeleton skeleton-line"></div>
         </div>
-      </div>
-
-      <div class="empty-state" v-if="!isLoading && emptyMessage">
-        {{ emptyMessage }}
       </div>
 
       <div class="work-list daily-table" v-if="!isLoading && rows.length">
@@ -73,6 +69,10 @@
           <div class="daily-cell daily-cell-total-amount"><strong>{{ totalAmountLabel }}</strong></div>
         </div>
       </div>
+    </div>
+
+    <div class="empty-state" v-else-if="!isLoading && emptyMessage">
+      {{ emptyMessage }}
     </div>
 
   </section>
