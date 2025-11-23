@@ -52,14 +52,13 @@ function getTodayIso() {
 
 function pickClosestToToday(days) {
   if (!days.length) return null;
-  const today = getTodayIso();
-  const toTime = (iso) => new Date(iso).getTime();
-  const todayTime = toTime(today);
+  const todayTime = new Date(getTodayIso()).getTime();
   return days.reduce((best, iso) => {
-    const diffBest = Math.abs(toTime(best) - todayTime);
-    const diffCur = Math.abs(toTime(iso) - todayTime);
-    if (diffCur < diffBest) return iso;
-    return best;
+    const bestTime = new Date(best).getTime();
+    const curTime = new Date(iso).getTime();
+    const diffBest = Math.abs(bestTime - todayTime);
+    const diffCur = Math.abs(curTime - todayTime);
+    return diffCur < diffBest ? iso : best;
   }, days[0]);
 }
 
@@ -79,11 +78,8 @@ async function loadInitial() {
       .sort((a, b) => (a < b ? 1 : -1));
 
     if (!normalized.length) {
-      const todayIso = getTodayIso();
-      state.selected = todayIso;
-      if (typeof window !== "undefined" && typeof window.__onDayChange === "function") {
-        window.__onDayChange(todayIso);
-      }
+      // Нет доступных дней из БД — оставляем инпут пустым и не дергаем загрузку.
+      state.selected = "";
       return;
     }
 
@@ -93,13 +89,14 @@ async function loadInitial() {
     state.min = minDayIso || "";
     state.max = maxDayIso || "";
 
-    // Выбираем initialDay: сначала ближайший к сегодняшнему, если есть;
-    // если передан props.initialDay и он в списке — используем его.
+    // Выбираем initialDay:
+    // 1) если передан initialDay и он в списке — берём его;
+    // 2) иначе ближайший к сегодняшней дате из доступных дней.
     const initialFromProps = props.initialDay && normalized.includes(props.initialDay)
       ? props.initialDay
       : null;
     const closestToToday = pickClosestToToday(normalized);
-    const initialIso = initialFromProps || closestToToday || normalized[0];
+    const initialIso = initialFromProps || closestToToday;
 
     state.selected = initialIso;
     if (typeof window !== "undefined" && typeof window.__onDayChange === "function") {
