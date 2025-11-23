@@ -1,9 +1,16 @@
 <template>
   <section class="panel work-list-panel">
     <div class="panel-header work-list-header">
-      <div class="panel-title">{{ headerTitle }}</div>
+      <div class="panel-title panel-title-desktop">{{ headerTitle }}</div>
     </div>
     <div class="work-list-surface">
+      <div v-if="isMobile" class="work-list-mobile-header">
+        <div class="work-list-mobile-title">
+          <span class="work-list-mobile-title-line">Работы по смете</span>
+          <span class="work-list-mobile-title-line work-list-mobile-title-sub">{{ mobileCategoryTitle }}</span>
+        </div>
+        <WorkSortMobile :model-value="sortKey" @update:model-value="changeSort" />
+      </div>
       <div v-if="isLoading" class="work-list-skeleton">
         <div class="work-row-skeleton" v-for="n in 4" :key="n">
           <div class="skeleton skeleton-line" v-for="i in 5" :key="i"></div>
@@ -99,8 +106,9 @@
 </template>
 
 <script setup>
-import { ref, reactive, onMounted, computed, watch, nextTick } from 'vue';
+import { ref, reactive, onMounted, computed, watch, nextTick, onBeforeUnmount } from 'vue';
 import WorkBreakdownModal from './WorkBreakdownModal.vue';
+import WorkSortMobile from './WorkSortMobile.vue';
 import '@/styles/work.css';
 
 const props = defineProps({
@@ -119,6 +127,9 @@ const headerTitle = computed(() => {
   return title ? `Расшифровка работ по смете ${title}` : 'Расшифровка работ по смете';
 });
 
+const mobileCategoryTitle = computed(() => props.activeCategoryTitle?.trim() || '—');
+
+const isMobile = ref(false);
 const isLoading = ref(true);
 const error = ref(false);
 const works = ref([]);
@@ -128,6 +139,13 @@ const sortDirection = ref('desc');
 const expandedRows = reactive({});
 const collapsibleRows = reactive({});
 const nameRefs = ref(new Map());
+let mobileMediaQuery = null;
+
+const updateIsMobile = (event) => {
+  if (typeof window === 'undefined') return;
+  const matches = event?.matches ?? mobileMediaQuery?.matches;
+  isMobile.value = Boolean(matches);
+};
 
 // Фильтрация работ по выбранной смете/категории
 const filteredWorks = computed(() => {
@@ -224,10 +242,6 @@ const workModalData = reactive({
 });
 
 function changeSort(key) {
-  if (sortKey.value === key) {
-    sortDirection.value = sortDirection.value === 'desc' ? 'asc' : 'desc';
-    return;
-  }
   sortKey.value = key;
   sortDirection.value = 'desc';
 }
@@ -306,6 +320,18 @@ async function fetchWorks() {
 
 onMounted(fetchWorks);
 onMounted(evaluateCollapsibleRows);
+onMounted(() => {
+  if (typeof window === 'undefined') return;
+  mobileMediaQuery = window.matchMedia('(max-width: 767px)');
+  updateIsMobile({ matches: mobileMediaQuery.matches });
+  mobileMediaQuery.addEventListener('change', updateIsMobile);
+});
+
+onBeforeUnmount(() => {
+  if (mobileMediaQuery) {
+    mobileMediaQuery.removeEventListener('change', updateIsMobile);
+  }
+});
 </script>
 
 <style scoped>
