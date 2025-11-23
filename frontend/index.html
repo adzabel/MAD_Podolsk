@@ -63,29 +63,20 @@
       </div>
     </header>
 
-    <section class="contract-card monthly-only" id="contract-card">
-      <!-- Карточка исполняется через Vue-компонент ContractCard.vue -->
+    <section class="panel monthly-only">
+      <div class="panel-body">
+        <section class="contract-card" id="contract-card">
+          <!-- Карточка исполняется через Vue-компонент ContractCard.vue -->
+        </section>
+      </div>
     </section>
 
     <!-- Сводка (рендерится через Vue в App.vue) -->
-    <section class="summary-grid layout-grid monthly-only" id="summary-grid">
-    </section>
-      <button class="summary-card card card--interactive card--stacked summary-card-interactive" id="daily-average-card" type="button">
-        <div class="summary-label">Среднедневная выручка, ₽</div>
-        <div class="summary-value" id="sum-daily-average">–</div>
-        <div class="summary-sub summary-note" id="daily-average-note">
-          <span class="summary-note-line">Расчет без выручки</span>
-          <span class="summary-note-line">за сегодня</span>
-        </div>
-        <span class="summary-card-hint" id="daily-average-hint" aria-hidden="true">
-          <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false" stroke="currentColor">
-            <circle cx="12" cy="12" r="9" fill="none" stroke-linecap="round" stroke-linejoin="round"></circle>
-            <path d="M12 10v6" fill="none" stroke-linecap="round" stroke-linejoin="round"></path>
-            <path d="M12 8h.01" fill="none" stroke-linecap="round" stroke-linejoin="round"></path>
-          </svg>
-        </span>
-        <span class="sr-only">Нажмите, чтобы посмотреть детализацию по дням</span>
-      </button>
+    <section class="panel monthly-only">
+      <div class="panel-body">
+        <section class="summary-grid layout-grid" id="summary-grid">
+        </section>
+      </div>
     </section>
     <section class="summary-grid layout-grid skeleton-grid monthly-only" id="summary-skeleton" aria-hidden="true">
       <div class="summary-card card card--stacked summary-card-skeleton">
