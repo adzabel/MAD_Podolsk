@@ -1,4 +1,11 @@
 <template>
+  <MonthSelect
+    :months="months"
+    :initialMonth="initialMonth"
+    :loading="monthLoading"
+    :error="monthError"
+    @monthChange="onMonthChange"
+  />
   <SummaryCards
     :plan="summaryState.planned"
     :fact="summaryState.fact"
@@ -22,6 +29,10 @@
     v-if="viewMode === 'monthly'"
     :activeCategoryKey="activeCategoryKey"
     :activeCategoryTitle="activeCategoryTitle"
+    :items="dashboardItems"
+    :loading="isDashboardLoading"
+    :error="dashboardError"
+    :selectedMonth="selectedMonth"
   />
   <WorkBreakdownModal
     :visible="isWorkModalOpen"
@@ -43,6 +54,12 @@ const groupedCategories = ref([]);
 const activeCategoryKey = ref('');
 const VNR_CODES = ['внерегл_ч_1', 'внерегл_ч_2'];
 const CATEGORY_KEYS = ['лето', 'зима', 'внерегламент'];
+const SEASONAL_KEYS = ['лето', 'зима'];
+const VNR_PLAN_SHARE = 0.43;
+const dashboardItems = ref([]);
+const isDashboardLoading = ref(true);
+const dashboardError = ref(false);
+const selectedMonth = ref('');
 
 const activeCategoryTitle = computed(() => {
   const activeCategory = groupedCategories.value.find((category) => category.key === activeCategoryKey.value);
@@ -63,8 +80,6 @@ function normalizeSmeta(value) {
 
 function groupCategories(items) {
   const groups = {};
-  let virtualPlan = 0;
-
   CATEGORY_KEYS.forEach((key) => {
     groups[key] = {
       key,
@@ -76,33 +91,40 @@ function groupCategories(items) {
     };
   });
 
+  let basePlanTotal = 0;
+  let vnrFactTotal = 0;
+
   items.forEach((item) => {
     const smetaKey = normalizeSmeta(item.smeta);
-    const categoryKey =
-      smetaKey === 'внерегламент'
-        ? 'внерегламент'
-        : VNR_CODES.includes(smetaKey)
-        ? 'внерегламент'
-        : CATEGORY_KEYS.includes(smetaKey)
-        ? smetaKey
-        : null;
+    const isVnr = VNR_CODES.includes(smetaKey);
+    const isKnownCategory = CATEGORY_KEYS.includes(smetaKey) || isVnr;
+    if (!isKnownCategory) return;
 
-    if (!categoryKey) return;
-
-    if (smetaKey === 'внерегламент') {
-      virtualPlan = Number(item.planned_amount) || 0;
-      return;
-    }
-
-    const planned = Number(item.planned_amount) || 0;
+    const categoryKey = isVnr ? 'внерегламент' : smetaKey;
+    const planned = isVnr ? 0 : Number(item.planned_amount) || 0;
     const fact = Number(item.fact_amount) || 0;
-    groups[categoryKey].works.push(item);
+
+    groups[categoryKey].works.push({
+      ...item,
+      planned_amount: planned,
+      fact_amount: fact,
+    });
     groups[categoryKey].planned += planned;
     groups[categoryKey].fact += fact;
+
+    if (SEASONAL_KEYS.includes(smetaKey)) {
+      basePlanTotal += planned;
+    }
+
+    if (isVnr) {
+      vnrFactTotal += fact;
+    }
   });
 
+  const virtualPlan = basePlanTotal * VNR_PLAN_SHARE;
   if (groups['внерегламент']) {
     groups['внерегламент'].planned = virtualPlan;
+    groups['внерегламент'].fact = vnrFactTotal;
   }
 
   return Object.values(groups)
@@ -122,33 +144,39 @@ async function loadDashboardItems() {
     }
   }
   // Получаем месяц из initialMonth или текущий
-  let monthIso = initialMonth.value;
+  let monthIso = selectedMonth.value || initialMonth.value;
   if (!monthIso) {
     const now = new Date();
     monthIso = `${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}-01`;
   }
+  selectedMonth.value = monthIso;
+  isDashboardLoading.value = true;
+  dashboardError.value = false;
   try {
     const response = await fetch(`${apiBase}?month=${monthIso}`, { cache: 'no-store' });
     if (!response.ok) throw new Error('HTTP ' + response.status);
     const data = await response.json();
     const items = Array.isArray(data?.items) ? data.items : [];
+    dashboardItems.value = items;
     groupedCategories.value = groupCategories(items);
     if (groupedCategories.value.length) {
       activeCategoryKey.value = groupedCategories.value[0].key;
+    } else {
+      activeCategoryKey.value = '';
     }
   } catch (e) {
+    dashboardItems.value = [];
     groupedCategories.value = [];
     activeCategoryKey.value = '';
+    dashboardError.value = true;
+  } finally {
+    isDashboardLoading.value = false;
   }
 }
 
-onMounted(() => {
-  loadDashboardItems();
-});
-
 const months = ref([]);
-const loading = ref(true);
-const error = ref(false);
+const monthLoading = ref(true);
+const monthError = ref(false);
 const initialMonth = ref(null);
 
 async function fetchAvailableMonths() {
@@ -159,11 +187,16 @@ async function fetchAvailableMonths() {
 }
 
 async function loadMonths() {
-  loading.value = true;
-  error.value = false;
+  monthLoading.value = true;
+  monthError.value = false;
   try {
     const availableMonths = await fetchAvailableMonths();
-    months.value = (availableMonths || [])
+    const monthList = Array.isArray(availableMonths)
+      ? availableMonths
+      : Array.isArray(availableMonths?.months)
+      ? availableMonths.months
+      : [];
+    months.value = (monthList || [])
       .map((iso) => {
         if (!iso) return null;
         const date = new Date(iso);
@@ -178,15 +211,16 @@ async function loadMonths() {
       })
       .filter(Boolean);
   } catch (e) {
-    error.value = true;
+    monthError.value = true;
     months.value = [];
   } finally {
-    loading.value = false;
+    monthLoading.value = false;
   }
 }
 
 function onMonthChange(iso) {
-  // Здесь можно вызвать загрузку данных для выбранного месяца
+  selectedMonth.value = iso;
+  loadDashboardItems();
   if (typeof window !== "undefined" && typeof window.__onMonthChange === "function") {
     window.__onMonthChange(iso);
   }
@@ -202,6 +236,7 @@ onMounted(() => {
       const now = new Date();
       initialMonth.value = `${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}-01`;
     }
+    selectedMonth.value = initialMonth.value;
     loadDashboardItems();
   });
 });
