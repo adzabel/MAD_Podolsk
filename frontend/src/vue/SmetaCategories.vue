@@ -28,7 +28,7 @@
         </div>
         <div class="category-progress">
           <div class="category-progress-labels">
-            <span>Исполнение плана</span>
+            <span>Исполнение</span>
             <strong>{{ completionLabel(category) }}</strong>
           </div>
           <div class="category-progress-bar" role="progressbar" aria-valuemin="0" aria-valuemax="120" :aria-valuenow="progressPercent(category)">
