@@ -73,9 +73,9 @@ export function mountDailyReport(selector = "#daily-panel") {
 
 // Состояние индикатора "Данные обновлены" для обоих режимов.
 const lastUpdatedState = reactive({
-  monthlyLabel: "Обновление данных…",
+  monthlyLabel: "Нет данных",
   monthlyStatus: "loading",
-  dailyLabel: "Обновление данных…",
+  dailyLabel: "Нет данных",
   dailyStatus: "loading",
 });
 
