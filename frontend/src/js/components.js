@@ -9,10 +9,7 @@ import {
   calculateDelta,
   debounce,
 } from "@shared/utils.js";
-import {
-  updateContractCard as updateContractCardExternal,
-  updateContractProgress as updateContractProgressExternal,
-} from "@js/views/summary-view.js";
+// ...existing code...
 import { UiStore } from "@js/store/index.js";
 import { renderCategoriesFacade } from "@js/views/categories-view.js";
 import { initWorkListView, renderWorkRowsView } from "@js/ui/workListView.js";
