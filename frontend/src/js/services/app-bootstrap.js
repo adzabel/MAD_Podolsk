@@ -1,7 +1,7 @@
 import { cacheDomElements, setElementsDisabled } from "@shared/utils.js";
 import { DataManager } from "@js/services/data-service.js";
 import { VisitorTracker } from "@js/services/visitor-service.js";
-import { UIManager } from "@js/views/ui-manager.js";
+import { UIManager } from "@js/components.js";
 import {
   API_URL,
   API_BASE,
