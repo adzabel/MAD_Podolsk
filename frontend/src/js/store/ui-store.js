@@ -27,6 +27,9 @@ export class UiStore {
     if (typeof window !== "undefined" && typeof window.__vueSetViewMode === "function") {
       window.__vueSetViewMode(this.viewMode);
     }
+    if (typeof window !== "undefined" && typeof window.__setViewMode === "function") {
+      window.__setViewMode(this.viewMode);
+    }
   }
 
   setSelectedMonth(monthIso) {
