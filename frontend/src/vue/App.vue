@@ -265,12 +265,14 @@ const viewMode = ref("monthly");
 
 if (typeof window !== "undefined") {
   window.__vueSetSummaryMetrics = (payload) => {
+    console.log('[window.__vueSetSummaryMetrics] payload:', payload);
     summaryState.planned = payload?.planned ?? null;
     summaryState.fact = payload?.fact ?? null;
     summaryState.delta = payload?.delta ?? null;
     summaryState.completion =
       payload?.completion !== undefined ? payload.completion : null;
     summaryState.completionLabel = payload?.completionLabel || "–";
+    console.log('[window.__vueSetSummaryMetrics] summaryState:', JSON.parse(JSON.stringify(summaryState)));
   };
 
   window.__vueSetDailyAverage = (payload) => {
