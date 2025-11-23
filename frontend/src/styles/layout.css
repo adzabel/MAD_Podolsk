@@ -141,9 +141,9 @@ header {
 }
 
 .day-info {
-	display: flex;
-	gap: var(--gap-sm);
-	align-items: stretch;
+        display: flex;
+        gap: var(--gap-md);
+        align-items: stretch;
 }
 
 .day-select {
@@ -313,10 +313,10 @@ header {
 }
 
 .month-info {
-	display: flex;
-	align-items: center;
-	gap: var(--gap-sm);
-	flex-wrap: nowrap;
+        display: flex;
+        align-items: center;
+        gap: var(--gap-md);
+        flex-wrap: nowrap;
 }
 
 .month-select {
