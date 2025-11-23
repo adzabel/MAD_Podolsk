@@ -10,7 +10,7 @@
     </div>
     <div v-else-if="error" class="work-list-error">Ошибка загрузки данных</div>
     <div v-else>
-      <div v-if="!works.length" class="work-list-empty">Нет работ по смете</div>
+      <div v-if="!filteredWorks.length" class="work-list-empty">Нет работ по смете</div>
       <div class="work-list-table" v-else>
         <div class="work-row work-row-header">
           <div>Работа</div>
@@ -19,10 +19,10 @@
           <div>Отклонение</div>
         </div>
         <div
-          v-for="(item, index) in works"
+          v-for="(item, index) in filteredWorks"
           :key="item.id || index"
           class="work-row"
-          :class="{ 'work-row-last': index === works.length - 1 }"
+          :class="{ 'work-row-last': index === filteredWorks.length - 1 }"
         >
           <div class="work-row-name work-row-name--collapsed" data-expanded="false">
             <span class="work-row-name-text" @click="openWorkModal(item)" style="cursor:pointer; color:#0077cc; text-decoration:underline;">{{ item.work_name || item.description || 'Без названия' }}</span>
@@ -53,14 +53,30 @@
 </template>
 
 <script setup>
-import { ref, reactive, onMounted } from 'vue';
+import { ref, reactive, onMounted, computed } from 'vue';
 import WorkBreakdownModal from './WorkBreakdownModal.vue';
 import '@/styles/work.css';
+
+const props = defineProps({
+  activeCategoryKey: {
+    type: String,
+    default: ''
+  }
+});
 
 const isLoading = ref(true);
 const error = ref(false);
 const works = ref([]);
 const selectedMonth = ref(null);
+
+// Фильтрация работ по выбранной смете/категории
+const filteredWorks = computed(() => {
+  if (!props.activeCategoryKey) return works.value;
+  return works.value.filter(item => {
+    const key = item.category || item.smeta || 'Без категории';
+    return key === props.activeCategoryKey;
+  });
+});
 
 const isWorkModalOpen = ref(false);
 const workModalData = reactive({

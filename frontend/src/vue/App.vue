@@ -12,7 +12,13 @@
     :summaryDailyRevenue="dailyAverageState.summaryDailyRevenue"
     :selectedMonthLabel="dailyAverageState.selectedMonthLabel"
   />
-  <WorkBreakdownList v-if="viewMode === 'monthly'" />
+  <SmetaCategories
+    v-if="viewMode === 'monthly'"
+    :categories="groupedCategories"
+    :activeCategoryKey="activeCategoryKey"
+    @select="onCategorySelect"
+  />
+  <WorkBreakdownList v-if="viewMode === 'monthly'" :activeCategoryKey="activeCategoryKey" />
   <WorkBreakdownModal
     :visible="isWorkModalOpen"
     :workName="workModalData.workName"
@@ -28,6 +34,50 @@ import SummaryCards from "./SummaryCards.vue";
 import MonthSelect from "./MonthSelect.vue";
 import WorkBreakdownModal from "./WorkBreakdownModal.vue";
 import WorkBreakdownList from "./WorkBreakdownList.vue";
+import SmetaCategories from "./SmetaCategories.vue";
+const groupedCategories = ref([]);
+const activeCategoryKey = ref('');
+function onCategorySelect(key) {
+  activeCategoryKey.value = key;
+}
+// Пример загрузки категорий (группировка по сметам)
+function groupCategories(items) {
+  // Группируем по category/smeta, аналогично старой логике
+  const groups = {};
+  items.forEach(item => {
+    const key = item.category || item.smeta || 'Без категории';
+    if (!groups[key]) {
+      groups[key] = {
+        key,
+        title: key,
+        planned: 0,
+        fact: 0,
+        delta: 0,
+        works: []
+      };
+    }
+    groups[key].works.push(item);
+    groups[key].planned += item.planned_amount || 0;
+    groups[key].fact += item.fact_amount || 0;
+    groups[key].delta += item.delta_amount || ((item.fact_amount || 0) - (item.planned_amount || 0));
+  });
+  return Object.values(groups);
+}
+// Пример загрузки данных для категорий при инициализации
+onMounted(() => {
+  // ...existing code...
+  // После загрузки данных дашборда
+  // Здесь предполагается, что window.__vueSetDashboardItems вызывается с items
+  if (typeof window !== "undefined") {
+    window.__vueSetDashboardItems = (items) => {
+      groupedCategories.value = groupCategories(items);
+      // По умолчанию активная категория — первая
+      if (groupedCategories.value.length) {
+        activeCategoryKey.value = groupedCategories.value[0].key;
+      }
+    };
+  }
+});
 
 const months = ref([]);
 const loading = ref(true);
