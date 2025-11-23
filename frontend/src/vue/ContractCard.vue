@@ -46,9 +46,9 @@
 import { computed } from "vue";
 
 const props = defineProps({
-  contractMetrics: {
+  contractState: {
     type: Object,
-    default: null,
+    required: true,
   },
 });
 
@@ -57,7 +57,7 @@ const PROGRESS_MAX_ARIA = 120;
 const PROGRESS_OVERFLOW_COLOR = "#16a34a";
 const PROGRESS_BASE_ACCENT = "var(--accent)";
 
-const contractMetrics = computed(() => props.contractMetrics || null);
+const contractMetrics = computed(() => props.contractState.contractMetrics || null);
 
 const hasData = computed(() => {
   const m = contractMetrics.value;
@@ -75,7 +75,7 @@ const contractAmountLabel = computed(() => {
     style: "currency",
     currency: "RUB",
     maximumFractionDigits: 0,
-  }).format(props.contractMetrics.contractAmount || 0);
+  }).format(m.contractAmount || 0);
 });
 
 const executedLabel = computed(() => {
@@ -85,7 +85,7 @@ const executedLabel = computed(() => {
     style: "currency",
     currency: "RUB",
     maximumFractionDigits: 0,
-  }).format(props.contractMetrics.executed || 0);
+  }).format(m.executed || 0);
 });
 
 const completion = computed(() => {
