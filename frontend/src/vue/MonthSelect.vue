@@ -54,7 +54,6 @@ const isDisabled = computed(() => props.loading);
 const options = computed(() => {
   if (!Array.isArray(props.months)) return [];
   // Диагностика: логируем приходящие месяцы
-  console.log('[MonthSelect] options:', props.months);
   return props.months;
 });
 

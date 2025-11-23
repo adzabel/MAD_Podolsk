@@ -21,9 +21,6 @@ const props = defineProps({
 
 const months = ref([]);
 // Диагностика: логируем приходящие месяцы
-watch(months, (val) => {
-  console.log('[MonthSelectShell] months:', val);
-});
 const loading = ref(true);
 const error = ref(false);
 const initialMonth = ref(props.initialMonth);
