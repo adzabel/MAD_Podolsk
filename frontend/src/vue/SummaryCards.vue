@@ -38,9 +38,9 @@ import DailyAverageModal from './DailyAverageModal.vue';
       selectedMonthLabel: { type: String, default: '' }
     });
 
-    const plan = computed(() => props.summary?.plan_total ?? 0);
-    const fact = computed(() => props.summary?.fact_total ?? 0);
-    const deviation = computed(() => props.summary?.deviation ?? 0);
+    const plan = computed(() => props.summary?.planned_amount ?? 0);
+    const fact = computed(() => props.summary?.fact_amount ?? 0);
+    const deviation = computed(() => props.summary?.delta_amount ?? 0);
     const dailyAverage = computed(() => props.summary?.average_daily ?? 0);
     const daysWithData = computed(() => props.summary?.days_with_data ?? 0);
 
