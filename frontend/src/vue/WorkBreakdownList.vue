@@ -1,7 +1,7 @@
 <template>
-  <section class="work-list-panel">
-    <div class="work-list-header">
-      <h2>Расшифровка работ по смете</h2>
+  <section class="panel work-list-panel">
+    <div class="panel-header work-list-header">
+      <div class="panel-title">Расшифровка работ по смете</div>
     </div>
     <div class="work-list-surface">
       <div v-if="isLoading" class="work-list-skeleton">
@@ -26,7 +26,7 @@
             :class="{ 'work-row-last': index === filteredWorks.length - 1 }"
           >
             <div class="work-row-name work-row-name--collapsed" data-expanded="false">
-              <span class="work-row-name-text" @click="openWorkModal(item)" style="cursor:pointer; color:#0077cc; text-decoration:underline;">{{ item.work_name || item.description || 'Без названия' }}</span>
+              <span class="work-row-name-text work-row-name-link" @click="openWorkModal(item)">{{ item.work_name || item.description || 'Без названия' }}</span>
             </div>
             <div class="work-row-money work-row-plan">
               <span class="work-row-label">План</span>
