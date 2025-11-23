@@ -116,6 +116,7 @@ export class UIManager {
     }
     this.updateViewModeLayout();
     this.initMonthSelect();
+    this.initDaySelect();
     window.addEventListener("resize", this.handleResize);
 
     if (typeof window !== "undefined" && typeof window.__onUiReady === "function") {
@@ -230,11 +231,6 @@ export class UIManager {
     }
     if (this.elements.viewModeDaily) {
       this.elements.viewModeDaily.addEventListener("click", () => this.switchViewMode("daily"));
-    }
-    if (this.elements.daySelect) {
-      this.elements.daySelect.addEventListener("change", () => {
-        this.loadDailyData(this.elements.daySelect.value);
-      });
     }
   }
 
