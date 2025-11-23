@@ -400,6 +400,12 @@ export class UIManager {
     this.lastUpdatedMonthlyLabel = "Загрузка данных…";
     this.lastUpdatedMonthlyDateLabel = "Загрузка данных…";
     this.updateLastUpdatedPills();
+    if (typeof window !== "undefined" && typeof window.__vueSetLastUpdated === "function") {
+      window.__vueSetLastUpdated({
+        monthlyLabel: "Загрузка данных…",
+        monthlyStatus: "loading",
+      });
+    }
     // Сводка теперь рендерится Vue: уведомляем её о состоянии загрузки,
     // а прямой доступ к DOM-элементам sumPlanned/sumFact/sumDelta убираем.
     if (typeof window !== "undefined" && typeof window.__vueSetSummaryMetrics === "function") {
@@ -430,6 +436,12 @@ export class UIManager {
     this.lastUpdatedMonthlyLabel = "Ошибка загрузки данных";
     this.lastUpdatedMonthlyDateLabel = "";
     this.updateLastUpdatedPills();
+    if (typeof window !== "undefined" && typeof window.__vueSetLastUpdated === "function") {
+      window.__vueSetLastUpdated({
+        monthlyLabel: "Ошибка загрузки данных",
+        monthlyStatus: "error",
+      });
+    }
     // Сводка теперь управляется Vue, поэтому обновляем её через глобальный хук,
     // а прямые манипуляции с DOM-элементами sum* убираем.
     if (typeof window !== "undefined" && typeof window.__vueSetSummaryMetrics === "function") {
@@ -461,15 +473,22 @@ export class UIManager {
     const items = Array.isArray(data.items) ? data.items : [];
     this.groupedCategories = this.dataManager.buildCategories(items);
     this.ensureActiveCategory();
-    const lastUpdatedLabel = data.has_data
+    const hasData = data.has_data;
+    const lastUpdatedLabel = hasData
       ? formatDateTime(data.last_updated)
       : "Нет данных";
-    const lastUpdatedDateLabel = data.has_data
+    const lastUpdatedDateLabel = hasData
       ? formatDate(data.last_updated, { day: "2-digit", month: "2-digit", year: "numeric" })
       : "Нет данных";
     this.lastUpdatedMonthlyLabel = lastUpdatedLabel;
     this.lastUpdatedMonthlyDateLabel = lastUpdatedDateLabel;
     this.updateLastUpdatedPills();
+    if (typeof window !== "undefined" && typeof window.__vueSetLastUpdated === "function") {
+      window.__vueSetLastUpdated({
+        monthlyLabel: lastUpdatedLabel,
+        monthlyStatus: hasData ? "idle" : "idle",
+      });
+    }
     const hasAnyData = data.has_data && items.length > 0;
     this.elements.pdfButton.disabled = !hasAnyData;
     this.renderSummary();
@@ -538,6 +557,13 @@ export class UIManager {
       this.updateContractTitleDate(dailyDateLabel);
     } else {
       this.updateContractTitleDate(monthlyDateLabel);
+    }
+
+    if (typeof window !== "undefined" && typeof window.__vueSetLastUpdated === "function") {
+      window.__vueSetLastUpdated({
+        monthlyLabel,
+        dailyLabel,
+      });
     }
   }
 

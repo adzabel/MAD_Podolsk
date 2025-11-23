@@ -4,6 +4,7 @@ import ContractCard from "./ContractCard.vue";
 import MonthSelect from "./MonthSelect.vue";
 import DaySelect from "./DaySelect.vue";
 import DailyReport from "./DailyReport.vue";
+import LastUpdatedPill from "./LastUpdatedPill.vue";
 
 // Единое реактивное состояние для карточки контракта, чтобы сеттер из
 // старого JS-кода и Vue-компонент делили одни и те же данные.
@@ -67,5 +68,65 @@ export function mountDailyReport(selector = "#daily-panel") {
   const app = createApp(DailyReport);
   const vm = app.mount(el);
 
+  return { app, vm };
+}
+
+// Состояние индикатора "Данные обновлены" для обоих режимов.
+const lastUpdatedState = reactive({
+  monthlyLabel: "Обновление данных…",
+  monthlyStatus: "loading",
+  dailyLabel: "Обновление данных…",
+  dailyStatus: "loading",
+});
+
+if (typeof window !== "undefined") {
+  window.__vueSetLastUpdated = (payload) => {
+    if (!payload || typeof payload !== "object") return;
+    if (payload.monthlyLabel !== undefined) {
+      lastUpdatedState.monthlyLabel = payload.monthlyLabel;
+    }
+    if (payload.monthlyStatus !== undefined) {
+      lastUpdatedState.monthlyStatus = payload.monthlyStatus;
+    }
+    if (payload.dailyLabel !== undefined) {
+      lastUpdatedState.dailyLabel = payload.dailyLabel;
+    }
+    if (payload.dailyStatus !== undefined) {
+      lastUpdatedState.dailyStatus = payload.dailyStatus;
+    }
+  };
+}
+
+export function mountLastUpdatedPillMonthly(selector = "#last-updated-pill") {
+  const el = document.querySelector(selector);
+  if (!el) return null;
+
+  const app = createApp(LastUpdatedPill, {
+    get label() {
+      return lastUpdatedState.monthlyLabel;
+    },
+    get status() {
+      return lastUpdatedState.monthlyStatus;
+    },
+  });
+
+  const vm = app.mount(el);
+  return { app, vm };
+}
+
+export function mountLastUpdatedPillDaily(selector = "#last-updated-pill-daily") {
+  const el = document.querySelector(selector);
+  if (!el) return null;
+
+  const app = createApp(LastUpdatedPill, {
+    get label() {
+      return lastUpdatedState.dailyLabel;
+    },
+    get status() {
+      return lastUpdatedState.dailyStatus;
+    },
+  });
+
+  const vm = app.mount(el);
   return { app, vm };
 }

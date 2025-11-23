@@ -9,7 +9,7 @@ import "@styles/work.css";
 import "@styles/modal.css";
 
 import { initApp } from "@js/app.js";
-import { mountSummary, mountContractCard, mountMonthSelect, mountDaySelect, mountDailyReport } from "./vue/main.js";
+import { mountSummary, mountContractCard, mountMonthSelect, mountDaySelect, mountDailyReport, mountLastUpdatedPillMonthly, mountLastUpdatedPillDaily } from "./vue/main.js";
 
 document.addEventListener("DOMContentLoaded", () => {
   if (typeof window !== "undefined") {
@@ -26,6 +26,9 @@ document.addEventListener("DOMContentLoaded", () => {
       mountDaySelect("#day-select-vue-root", initialDay);
       // Монтируем Vue-блок расшифровки дневных данных.
       mountDailyReport("#daily-panel");
+      // Монтируем Vue-индикаторы "Данные обновлены".
+      mountLastUpdatedPillMonthly("#last-updated-pill");
+      mountLastUpdatedPillDaily("#last-updated-pill-daily");
     };
   }
 
