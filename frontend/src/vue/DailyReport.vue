@@ -150,6 +150,7 @@ const rows = computed(() => {
     ...item,
     volumeLabel: formatNumber(item.total_volume, 3),
     amountLabel: formatMoneyRub(item.total_amount),
+    breakdown: Array.isArray(item.breakdown) ? item.breakdown : [], // гарантируем массив
   }));
 });
 
