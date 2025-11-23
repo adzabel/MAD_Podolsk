@@ -48,14 +48,22 @@ const announce = (message) => {
 
 const handleDownload = async () => {
   if (isDisabled.value) return;
+  if (!pdfStore.state.apiPdfUrl) {
+    showToast("Не указан адрес сервера для PDF. Попробуйте обновить страницу.", "error");
+    announce("Ошибка формирования PDF");
+    return;
+  }
+  if (!pdfStore.state.selectedMonthIso) {
+    showToast("Сначала выберите месяц для отчёта.", "error");
+    announce("Ошибка формирования PDF");
+    return;
+  }
   const fileName = buildFileName();
   pdfStore.startDownloading();
   announce("");
   try {
     const pdfUrl = new URL(pdfStore.state.apiPdfUrl, window.location.origin);
-    if (pdfStore.state.selectedMonthIso) {
-      pdfUrl.searchParams.set("month", pdfStore.state.selectedMonthIso);
-    }
+    pdfUrl.searchParams.set("month", pdfStore.state.selectedMonthIso);
     const headers = {
       Accept: "application/pdf",
       ...(pdfStore.state.visitorTracker ? pdfStore.state.visitorTracker.buildHeaders() : {}),

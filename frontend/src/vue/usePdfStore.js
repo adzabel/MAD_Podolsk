@@ -1,4 +1,5 @@
 import { reactive } from "vue";
+import { API_PDF_URL } from "@config/config.frontend.js";
 
 let pdfStoreInstance = null;
 
@@ -14,7 +15,7 @@ export function usePdfStore() {
   if (pdfStoreInstance) return pdfStoreInstance;
 
   const state = reactive({
-    apiPdfUrl: "",
+    apiPdfUrl: API_PDF_URL || "",
     defaultLabel: "PDF",
     viewMode: "monthly",
     hasAnyData: false,
