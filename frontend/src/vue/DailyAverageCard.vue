@@ -3,7 +3,7 @@
     class="summary-card summary-card-interactive"
     id="daily-average-card"
     type="button"
-    :class="{ 'is-disabled': !isInteractive }"
+    :class="[{ 'is-disabled': !isInteractive }, { 'daily-average': true }, { 'current-month': isCurrentMonth }]"
     :aria-disabled="String(!isInteractive)"
     @click="handleClick"
   >
