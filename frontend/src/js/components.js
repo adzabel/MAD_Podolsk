@@ -749,12 +749,21 @@ export class UIManager {
 
   updateDailyAverage(averageValue, daysWithData) {
     const isCurrentMonth = this.isCurrentMonth(this.uiStore.getSelectedMonth());
-    updateDailyAverageExternal({
-      averageValue,
-      daysWithData,
-      isCurrentMonth,
-      elements: this.elements,
-    });
+    // Пробрасываем среднедневную выручку во Vue-компонент, если он активен.
+    if (typeof window !== "undefined" && typeof window.__vueSetDailyAverage === "function") {
+      window.__vueSetDailyAverage({
+        averageValue,
+        daysWithData,
+        isCurrentMonth,
+      });
+    } else {
+      updateDailyAverageExternal({
+        averageValue,
+        daysWithData,
+        isCurrentMonth,
+        elements: this.elements,
+      });
+    }
   }
 
   setDaySelectValue(dayIso) {
