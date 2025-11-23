@@ -49,6 +49,7 @@ export function mountSummary(selector = "#summary-grid") {
 export function mountMonthSelect(selector = "#month-select-vue-root", initialMonth = null) {
   const el = document.querySelector(selector);
   if (!el) return null;
+  el.classList.add("month-select");
   const app = createApp(MonthSelectShell, { initialMonth });
   const vm = app.mount(el);
   return { app, vm };
