@@ -12,9 +12,16 @@
       <div class="modal-body" id="daily-modal-body">
         <div v-if="!summaryDailyRevenue.length" class="modal-empty" id="daily-modal-empty">Нет данных по дням</div>
         <div v-else class="modal-list" id="daily-modal-list">
-          <div v-for="(item, idx) in summaryDailyRevenue" :key="idx" class="modal-list-item">
-            <span>{{ formatDate(item.date) }}</span>
-            <span>{{ item.amount.toLocaleString('ru-RU', { maximumFractionDigits: 0 }) }} ₽</span>
+          <div class="modal-row modal-row-header">
+            <div class="modal-row-date">Дата</div>
+            <div class="modal-row-value">Сумма</div>
+          </div>
+          <div v-for="(item, idx) in summaryDailyRevenue" :key="idx" class="modal-row">
+            <div class="modal-row-date">{{ formatDate(item.date) }}</div>
+            <div class="modal-row-value">
+              <span class="modal-value-number">{{ item.amount.toLocaleString('ru-RU', { maximumFractionDigits: 0 }) }}</span>
+              <span class="modal-value-unit">₽</span>
+            </div>
           </div>
         </div>
       </div>
