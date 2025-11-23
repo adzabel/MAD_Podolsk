@@ -63,6 +63,7 @@
   transition: var(--transition-lift), var(--transition-border);
   align-items: stretch;
   gap: 2px;
+  position: relative; /* закрепляем иконку внутри карточки */
 }
 
 .summary-card-interactive {
