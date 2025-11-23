@@ -18,7 +18,11 @@
     :activeCategoryKey="activeCategoryKey"
     @select="onCategorySelect"
   />
-  <WorkBreakdownList v-if="viewMode === 'monthly'" :activeCategoryKey="activeCategoryKey" />
+  <WorkBreakdownList
+    v-if="viewMode === 'monthly'"
+    :activeCategoryKey="activeCategoryKey"
+    :activeCategoryTitle="activeCategoryTitle"
+  />
   <WorkBreakdownModal
     :visible="isWorkModalOpen"
     :workName="workModalData.workName"
@@ -29,7 +33,7 @@
 </template>
 
 <script setup>
-import { reactive, ref, onMounted } from "vue";
+import { reactive, ref, onMounted, computed } from "vue";
 import SummaryCards from "./SummaryCards.vue";
 import MonthSelect from "./MonthSelect.vue";
 import WorkBreakdownModal from "./WorkBreakdownModal.vue";
@@ -37,6 +41,10 @@ import WorkBreakdownList from "./WorkBreakdownList.vue";
 import SmetaCategories from "./SmetaCategories.vue";
 const groupedCategories = ref([]);
 const activeCategoryKey = ref('');
+const activeCategoryTitle = computed(() => {
+  const activeCategory = groupedCategories.value.find((category) => category.key === activeCategoryKey.value);
+  return activeCategory ? activeCategory.title || '' : '';
+});
 function onCategorySelect(key) {
   activeCategoryKey.value = key;
 }
