@@ -443,13 +443,12 @@ export class UIManager {
         selectedMonthLabel: this.getSelectedMonthLabel ? this.getSelectedMonthLabel() : '',
       });
     }
-    // Обновляем Vue-компонент ContractCard
-    const contractMetrics = this.dataManager.calculateContractMetrics(data);
+    // Обновляем Vue-компонент ContractCard напрямую из data.summary
     if (typeof window !== "undefined" && typeof window.__vueSetContractMetrics === "function") {
       window.__vueSetContractMetrics({
-        contractAmount: contractMetrics?.contractAmount ?? null,
-        executed: contractMetrics?.executed ?? null,
-        completion: contractMetrics?.completion ?? null,
+        contractAmount: data.summary?.contract_amount ?? null,
+        executed: data.summary?.contract_executed ?? null,
+        completion: data.summary?.contract_completion_pct ?? null,
         // Можно добавить titleDate, если нужно
       });
     }
