@@ -5,6 +5,7 @@
   width: 100%;
   margin-bottom: 32px;
   align-items: stretch;
+  grid-auto-rows: 1fr;
 }
 
 @media (min-width: 900px) {
@@ -50,13 +51,14 @@
 
 
  .summary-card,
+ .summary-card,
  .summary-card-interactive {
   background: var(--bg-card);
   border: 1px solid var(--border-soft);
-  border-radius: var(--radius-lg);
+  border-radius: var(--radius-xl); /* как в mockup-card и эталоне */
   box-shadow: var(--shadow-card);
-  padding: var(--card-padding);
-  min-height: clamp(92px, 11vw, 120px);
+  padding: clamp(var(--gap-md), 2vw, var(--gap-lg)); /* как в mockup-card */
+  min-height: 141px; /* как в category-card */
   height: 100%;
   display: flex;
   flex-direction: column;
