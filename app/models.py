@@ -8,6 +8,7 @@ from pydantic import BaseModel
 class DashboardItem(BaseModel):
     """Запись дашборда с минимальным набором полей."""
 
+    month_start: date | None = None
     smeta: str | None = None
     work_name: str | None = None
     planned_amount: float | None = None

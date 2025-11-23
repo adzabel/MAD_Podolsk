@@ -119,6 +119,22 @@ const props = defineProps({
   activeCategoryTitle: {
     type: String,
     default: ''
+  },
+  items: {
+    type: Array,
+    default: () => []
+  },
+  loading: {
+    type: Boolean,
+    default: false
+  },
+  error: {
+    type: Boolean,
+    default: false
+  },
+  selectedMonth: {
+    type: String,
+    default: ''
   }
 });
 
@@ -130,10 +146,10 @@ const headerTitle = computed(() => {
 const mobileCategoryTitle = computed(() => props.activeCategoryTitle?.trim() || '—');
 
 const isMobile = ref(false);
-const isLoading = ref(true);
-const error = ref(false);
-const works = ref([]);
-const selectedMonth = ref(null);
+const isLoading = computed(() => props.loading);
+const error = computed(() => props.error);
+const works = computed(() => (Array.isArray(props.items) ? props.items : []));
+const selectedMonth = computed(() => props.selectedMonth || null);
 const sortKey = ref('plan');
 const sortDirection = ref('desc');
 const expandedRows = reactive({});
@@ -151,17 +167,26 @@ const VNR_CODES = ['внерегл_ч_1', 'внерегл_ч_2'];
 
 // Фильтрация работ по выбранной смете
 const filteredWorks = computed(() => {
-  if (!props.activeCategoryKey) return works.value.filter((item) => Boolean(item.work_name));
+  const worksList = works.value.filter((item) => Boolean(item.work_name));
+  if (!props.activeCategoryKey) return worksList;
   const key = props.activeCategoryKey.toLowerCase();
 
-  return works.value.filter((item) => {
+  const subset = worksList.filter((item) => {
     const smetaKey = (item.smeta || '').toString().trim().toLowerCase();
-    if (!item.work_name) return false;
     if (key === 'внерегламент') {
       return VNR_CODES.includes(smetaKey);
     }
     return smetaKey === key;
   });
+
+  if (key === 'внерегламент') {
+    return subset.map((item) => ({
+      ...item,
+      planned_amount: 0,
+    }));
+  }
+
+  return subset;
 });
 
 const sortedWorks = computed(() => {
@@ -290,43 +315,6 @@ async function openWorkModal(item) {
   isWorkModalOpen.value = true;
 }
 
-async function fetchWorks() {
-  isLoading.value = true;
-  error.value = false;
-  try {
-    // Получаем месяц из props или текущий
-    let monthIso = selectedMonth.value;
-    if (!monthIso) {
-      // fallback: текущий месяц
-      const now = new Date();
-      monthIso = `${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}-01`;
-    }
-    selectedMonth.value = monthIso;
-    let apiBase = '/api/dashboard';
-    if (typeof document !== 'undefined') {
-      const metaApiUrl = document.querySelector('meta[name="mad-api-url"]');
-      if (metaApiUrl && metaApiUrl.content) {
-        apiBase = metaApiUrl.content;
-      }
-    }
-    const response = await fetch(`${apiBase}?month=${monthIso}`, { cache: 'no-store' });
-    if (response.status === 404) {
-      error.value = true;
-      works.value = [];
-      return;
-    }
-    if (!response.ok) throw new Error('HTTP ' + response.status);
-    const data = await response.json();
-    works.value = Array.isArray(data?.items) ? data.items : [];
-  } catch (e) {
-    error.value = true;
-    works.value = [];
-  } finally {
-    isLoading.value = false;
-  }
-}
-
-onMounted(fetchWorks);
 onMounted(evaluateCollapsibleRows);
 onMounted(() => {
   if (typeof window === 'undefined') return;

@@ -137,16 +137,21 @@ def _aggregate_items_streaming(cursor) -> list[DashboardItem]:
         smeta_code, work_name, unit = extract_dict_strings(row)
         description = work_name or unit or UNTITLED_WORK_LABEL
         key = (smeta_code, description)
+        month_start = row.get("month_start")
 
         item = items_map.get(key)
         if item is None:
             item = {
+                "month_start": month_start,
                 "smeta": smeta_code,
                 "work_name": description,
                 "planned_amount": None,
                 "fact_amount": None,
             }
             items_map[key] = item
+        else:
+            if item.get("month_start") is None:
+                item["month_start"] = month_start
 
         planned_value = to_float(row.get("planned_amount"))
         smeta_normalized = normalize_string(smeta_code, default="")
@@ -166,6 +171,7 @@ def _aggregate_items_streaming(cursor) -> list[DashboardItem]:
 
         aggregated_items.append(
             DashboardItem(
+                month_start=item.get("month_start"),
                 smeta=item.get("smeta"),
                 work_name=item.get("work_name"),
                 planned_amount=planned_value,
@@ -413,6 +419,7 @@ def fetch_plan_vs_fact_for_month(
         vnr_plan_amount = float(base_plan_total * _VNR_PLAN_SHARE) if base_plan_total > 0 else 0.0
         items.append(
             DashboardItem(
+                month_start=month_start,
                 smeta=CATEGORY_VNR_LABEL,
                 work_name=None,
                 planned_amount=vnr_plan_amount,
