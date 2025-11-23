@@ -9,7 +9,7 @@
 </template>
 
 <script setup>
-import { ref, onMounted } from "vue";
+import { ref, onMounted, watch } from "vue";
 import MonthSelect from "./MonthSelect.vue";
 
 const props = defineProps({
@@ -20,6 +20,10 @@ const props = defineProps({
 });
 
 const months = ref([]);
+// Диагностика: логируем приходящие месяцы
+watch(months, (val) => {
+  console.log('[MonthSelectShell] months:', val);
+});
 const loading = ref(true);
 const error = ref(false);
 const initialMonth = ref(props.initialMonth);
@@ -36,7 +40,8 @@ async function loadMonths() {
   error.value = false;
   try {
     const availableMonths = await fetchAvailableMonths();
-    months.value = (availableMonths || [])
+    const arr = Array.isArray(availableMonths) ? availableMonths : [];
+    months.value = arr
       .map((iso) => {
         if (!iso) return null;
         const date = new Date(iso);
