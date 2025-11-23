@@ -11,19 +11,49 @@
       </div>
       <div v-else-if="error" class="work-list-error">Ошибка загрузки данных</div>
       <div v-else>
-        <div v-if="!filteredWorks.length" class="work-list-empty">Нет работ по смете</div>
+        <div v-if="!sortedWorks.length" class="work-list-empty">Нет работ по смете</div>
         <div class="work-list-table" v-else>
           <div class="work-row work-row-header">
             <div>Работа</div>
-            <div>План, ₽</div>
-            <div>Факт, ₽</div>
-            <div>Отклонение</div>
+            <div>
+              <button
+                class="work-sort-button"
+                :class="{ active: sortKey === 'plan' }"
+                type="button"
+                @click="changeSort('plan')"
+              >
+                <span>План, ₽</span>
+                <span class="sort-indicator" :class="{ desc: sortDirection === 'desc' && sortKey === 'plan' }"></span>
+              </button>
+            </div>
+            <div>
+              <button
+                class="work-sort-button"
+                :class="{ active: sortKey === 'fact' }"
+                type="button"
+                @click="changeSort('fact')"
+              >
+                <span>Факт, ₽</span>
+                <span class="sort-indicator" :class="{ desc: sortDirection === 'desc' && sortKey === 'fact' }"></span>
+              </button>
+            </div>
+            <div>
+              <button
+                class="work-sort-button"
+                :class="{ active: sortKey === 'delta' }"
+                type="button"
+                @click="changeSort('delta')"
+              >
+                <span>Отклонение</span>
+                <span class="sort-indicator" :class="{ desc: sortDirection === 'desc' && sortKey === 'delta' }"></span>
+              </button>
+            </div>
           </div>
           <div
-            v-for="(item, index) in filteredWorks"
+            v-for="(item, index) in sortedWorks"
             :key="item.id || index"
             class="work-row"
-            :class="{ 'work-row-last': index === filteredWorks.length - 1 }"
+            :class="{ 'work-row-last': index === sortedWorks.length - 1 }"
           >
             <div class="work-row-name work-row-name--collapsed" data-expanded="false">
               <span class="work-row-name-text work-row-name-link" @click="openWorkModal(item)">{{ item.work_name || item.description || 'Без названия' }}</span>
@@ -70,6 +100,8 @@ const isLoading = ref(true);
 const error = ref(false);
 const works = ref([]);
 const selectedMonth = ref(null);
+const sortKey = ref('plan');
+const sortDirection = ref('desc');
 
 // Фильтрация работ по выбранной смете/категории
 const filteredWorks = computed(() => {
@@ -80,12 +112,42 @@ const filteredWorks = computed(() => {
   });
 });
 
+const sortedWorks = computed(() => {
+  const list = filteredWorks.value || [];
+  const key = sortKey.value;
+  const direction = sortDirection.value === 'asc' ? 1 : -1;
+
+  const getValue = (item) => {
+    const planned = Number(item.planned_amount) || 0;
+    const fact = Number(item.fact_amount) || 0;
+    if (key === 'fact') return fact;
+    if (key === 'delta') return fact - planned;
+    return planned;
+  };
+
+  return [...list].sort((a, b) => {
+    const aValue = getValue(a);
+    const bValue = getValue(b);
+    if (aValue === bValue) return 0;
+    return aValue > bValue ? direction : -direction;
+  });
+});
+
 const isWorkModalOpen = ref(false);
 const workModalData = reactive({
   workName: '',
   workBreakdown: [],
   selectedMonthLabel: ''
 });
+
+function changeSort(key) {
+  if (sortKey.value === key) {
+    sortDirection.value = sortDirection.value === 'desc' ? 'asc' : 'desc';
+    return;
+  }
+  sortKey.value = key;
+  sortDirection.value = 'desc';
+}
 
 function formatMoney(value) {
   const num = Number(value);
