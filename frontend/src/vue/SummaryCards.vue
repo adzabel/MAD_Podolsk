@@ -40,6 +40,11 @@ const props = defineProps({
   margin-bottom: 32px;
 }
 
+.summary-cards > * {
+  width: 100%;
+  min-width: 0;
+}
+
 @media (min-width: 900px) {
   .summary-cards {
     grid-template-columns: repeat(4, 1fr);
