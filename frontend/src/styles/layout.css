@@ -60,18 +60,18 @@ header {
 }
 
 @media (min-width: 880px) {
-	.page {
-		padding: 32px 32px 72px;
-	}
-	header {
-		flex-direction: row;
-		justify-content: space-between;
-		align-items: flex-end;
-	}
-	.controls {
-		flex-wrap: nowrap;
-		align-items: stretch;
-	}
+        .page {
+                padding: 32px 32px 72px;
+        }
+        header {
+                flex-direction: row;
+                justify-content: space-between;
+                align-items: flex-end;
+        }
+        .controls {
+                flex-wrap: nowrap;
+                align-items: center;
+        }
 }
 
 .title-block {
@@ -592,7 +592,7 @@ input[type="date"] {
 .page-header.compact .month-select,
 .page-header.compact .day-select { padding: 6px 12px; }
 .page-header.compact .pill { padding: 6px 12px; }
-.page-header.compact .pdf-action-desktop .btn-airy.btn-pdf-compact { padding: 0 14px; }
+.page-header.compact .pdf-action-desktop .btn-airy.btn-pdf-compact { padding: 0 12px; }
 .btn-airy.btn-pdf-compact span { font-size: 0.85rem; letter-spacing: 0.04em; font-weight: 700; }
 .btn-airy.btn-pdf-compact { gap: 6px; }
 @media (min-width: 880px) {

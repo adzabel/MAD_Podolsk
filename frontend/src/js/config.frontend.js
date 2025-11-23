@@ -21,7 +21,7 @@ export const API_DAYS_URL = `${API_BASE}${API_DAYS_SUFFIX}`;
 export const API_DAILY_URL = `${API_BASE}${API_DAILY_SUFFIX}`;
 
 export const MOBILE_MEDIA_QUERY = "(max-width: 767px)";
-export const DEFAULT_PDF_LABEL = "Скачать PDF";
+export const DEFAULT_PDF_LABEL = "PDF";
 
 export const SELECTORS = {
   page: ".page",
