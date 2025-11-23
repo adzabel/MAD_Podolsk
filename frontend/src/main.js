@@ -9,7 +9,7 @@ import "@styles/work.css";
 import "@styles/modal.css";
 
 import { initApp } from "@js/app.js";
-import { mountSummary, mountContractCard, mountMonthSelect } from "./vue/main.js";
+import { mountSummary, mountContractCard, mountMonthSelect, mountDaySelect } from "./vue/main.js";
 
 document.addEventListener("DOMContentLoaded", () => {
   if (typeof window !== "undefined") {
@@ -21,6 +21,9 @@ document.addEventListener("DOMContentLoaded", () => {
       // Монтируем селектор месяца в шапке, передавая начальный месяц.
       const initialMonth = uiManager && uiManager.initialMonth ? uiManager.initialMonth : null;
       mountMonthSelect("#month-select-vue-root", initialMonth);
+      // Монтируем селектор дня в шапке, передавая выбранный день (если есть).
+      const initialDay = uiManager && uiManager.uiStore ? uiManager.uiStore.getSelectedDay() : null;
+      mountDaySelect("#day-select-vue-root", initialDay);
     };
   }
 

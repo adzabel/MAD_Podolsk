@@ -265,75 +265,16 @@ export class UIManager {
   }
 
   async initDaySelect() {
-    if (!this.elements.daySelect) {
-      return;
-    }
+    if (typeof window !== "undefined") {
+      window.__fetchAvailableDays = async () => {
+        const availableDays = await this.dataManager.fetchAvailableDays();
+        return availableDays || [];
+      };
 
-    const inputEl = this.elements.daySelect;
-    inputEl.value = "";
-    inputEl.disabled = true;
-    inputEl.min = "";
-    inputEl.max = "";
-    this.uiStore.setSelectedDay(null);
-
-    try {
-      const availableDays = await this.dataManager.fetchAvailableDays();
-      const availableDaysNormalized = (availableDays || [])
-        .map((iso) => {
-          const date = new Date(iso);
-          if (Number.isNaN(date.getTime())) return null;
-          return {
-            iso: date.toISOString().slice(0, 10),
-            label: formatDate(date, { day: "2-digit", month: "long" }),
-          };
-        })
-        .filter(Boolean)
-        .sort((a, b) => (a.iso < b.iso ? 1 : -1));
-
-      this.uiStore.setAvailableDays(availableDaysNormalized);
-
-      if (!availableDaysNormalized.length) {
-        const todayIso = this.getCurrentDayIso();
-        const fallbackDays = todayIso ? [{ iso: todayIso, label: formatDate(todayIso, { day: "2-digit", month: "long" }) }] : [];
-        this.uiStore.setAvailableDays(fallbackDays);
-      }
-
-      const uiAvailableDays = this.uiStore.getAvailableDays();
-
-      const minDayIso = uiAvailableDays.reduce(
-        (min, item) => (!min || item.iso < min ? item.iso : min),
-        null,
-      );
-      const maxDayIso = uiAvailableDays.reduce(
-        (max, item) => (!max || item.iso > max ? item.iso : max),
-        null,
-      );
-
-      if (minDayIso) {
-        inputEl.min = minDayIso;
-      }
-      if (maxDayIso) {
-        inputEl.max = maxDayIso;
-      }
-
-      const selectedDayFromStore = this.uiStore.getSelectedDay();
-      const initialDayIso = (selectedDayFromStore && uiAvailableDays.some((item) => item.iso === selectedDayFromStore))
-        ? selectedDayFromStore
-        : uiAvailableDays[0]?.iso;
-
-      if (initialDayIso) {
-        inputEl.value = initialDayIso;
-        this.uiStore.setSelectedDay(initialDayIso);
-      }
-
-      this.dayOptionsLoaded = true;
-      inputEl.disabled = false;
-    } catch (error) {
-      console.error("Не удалось загрузить список дней", error);
-      inputEl.value = "";
-      inputEl.placeholder = "Ошибка загрузки";
-      inputEl.setAttribute("aria-invalid", "true");
-      this.dayOptionsLoaded = false;
+      window.__onDayChange = (iso) => {
+        if (!iso) return;
+        this.loadDailyData(iso);
+      };
     }
   }
 
