@@ -204,7 +204,4 @@ export class DataManager {
     return domainStore.calculateContractMetrics(data);
   }
 
-  buildCategories(items = []) {
-    return domainStore.buildCategories(items);
-  }
 }

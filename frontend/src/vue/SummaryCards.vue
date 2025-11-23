@@ -44,7 +44,7 @@ import DailyAverageModal from './DailyAverageModal.vue';
     const dailyAverage = computed(() => props.summary?.average_daily ?? 0);
     const daysWithData = computed(() => props.summary?.days_with_data ?? 0);
 
-import { ref } from 'vue';
+import { ref, computed } from 'vue';
 const isDailyModalOpen = ref(false);
 
 function openDailyModal() {

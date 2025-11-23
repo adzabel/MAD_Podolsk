@@ -398,7 +398,7 @@ export class UIManager {
     this.dataManager.setCurrentData(data);
     this.toggleSkeletons(false);
     const items = Array.isArray(data.items) ? data.items : [];
-    this.groupedCategories = this.dataManager.buildCategories(items);
+    this.groupedCategories = items; // Используем массив категорий напрямую
     this.ensureActiveCategory();
     this.pdfStore.setGroupedCategoriesCount(this.groupedCategories.length);
     const hasData = data.has_data;
