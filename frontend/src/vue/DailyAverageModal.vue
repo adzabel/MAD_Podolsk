@@ -12,7 +12,7 @@
       <button class="modal-close" type="button" @click="$emit('close')" aria-label="Закрыть">×</button>
       <div class="modal-body" id="daily-modal-body">
         <div v-if="!summaryDailyRevenue.length" class="modal-empty" id="daily-modal-empty">Нет данных по дням</div>
-        <div v-else class="modal-list" id="daily-modal-list">
+        <div v-else class="modal-list" id="daily-modal-list" data-columns="2">
           <div class="modal-row modal-row-header">
             <div class="modal-row-date">Дата</div>
             <div class="modal-row-value">Сумма</div>

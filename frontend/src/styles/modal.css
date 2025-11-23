@@ -125,18 +125,36 @@
   grid-template-columns: 1fr;
   row-gap: 6px;
   padding: var(--gap-xs) 0;
+  --modal-columns-gap: var(--gap-md);
 }
 
 .modal-row {
   display: grid;
-  grid-template-columns: 1fr minmax(140px, 220px) minmax(100px, 160px);
   align-items: center;
-  column-gap: var(--gap-md);
+  column-gap: var(--modal-columns-gap);
   padding: 6px var(--gap-xs);
   border-bottom: 1px solid var(--border-soft);
   box-sizing: border-box;
   font-size: var(--font-size-body);
   line-height: 1.15;
+}
+
+.modal-row > div {
+  padding: var(--gap-xs) var(--gap-sm);
+  box-sizing: border-box;
+  border-right: 1px solid var(--border-soft);
+}
+
+.modal-row > div:last-child {
+  border-right: none;
+}
+
+.modal-list[data-columns="3"] .modal-row {
+  grid-template-columns: 1fr minmax(140px, 220px) minmax(100px, 160px);
+}
+
+.modal-list[data-columns="2"] .modal-row {
+  grid-template-columns: minmax(120px, 160px) minmax(140px, 1fr);
 }
 
 .modal-row:last-child {
@@ -188,23 +206,13 @@
 }
 
 /* Выравнивание заголовков в шапке модального списка */
-.modal-row.modal-row-header > div:nth-child(2) {
+.modal-row.modal-row-header > div {
   display: flex;
   align-items: center;
   justify-content: center;
   text-align: center;
   font-weight: 700;
-  padding: var(--gap-xs) var(--gap-sm);
-  box-sizing: border-box;
   font-size: var(--font-size-body);
-}
-
-.modal-row.modal-row-header > div:nth-child(3) {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  text-align: center;
-  font-weight: 700;
 }
 
 @media (max-width: 767px) {
@@ -214,7 +222,6 @@
   }
 
   .modal-row {
-    grid-template-columns: 70px minmax(140px, 220px) minmax(70px, 110px);
     column-gap: 8px;
     padding: 4px 6px;
     font-size: 0.92rem;
@@ -226,15 +233,13 @@
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
+    padding: 6px 6px;
   }
 
   .modal-row-date {
     text-align: center;
     font-weight: 400;
-    padding: 6px 6px;
     font-size: 0.86rem;
-    box-sizing: border-box;
-    border-right: 1px solid var(--border-soft);
   }
 
   .modal-row-value {
@@ -242,10 +247,7 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    padding: 6px 8px;
     font-weight: 400;
-    box-sizing: border-box;
-    border-right: 1px solid var(--border-soft);
   }
 
   .modal-value-number {
@@ -269,34 +271,26 @@
   }
 
   .modal-row.modal-row-header {
-    grid-template-columns: 70px minmax(140px, 220px) minmax(70px, 110px);
     column-gap: 8px;
     padding: 4px 6px;
     border-bottom: 1px solid var(--border-soft);
   }
 
-  .modal-row.modal-row-header > div:nth-child(1) {
+  .modal-row.modal-row-header > div {
     text-align: center;
     font-weight: 700;
     font-size: 0.86rem;
     padding: 6px 6px;
-    box-sizing: border-box;
-    border-right: 1px solid var(--border-soft);
   }
 
-  .modal-row.modal-row-header > div:nth-child(2) {
-    font-weight: 700;
-    text-align: center;
-    padding: 6px 8px;
-    box-sizing: border-box;
-    border-right: 1px solid var(--border-soft);
+  .modal-list[data-columns="3"] .modal-row,
+  .modal-list[data-columns="3"] .modal-row.modal-row-header {
+    grid-template-columns: 70px minmax(140px, 220px) minmax(70px, 110px);
   }
 
-  .modal-row.modal-row-header > div:nth-child(3) {
-    font-weight: 700;
-    text-align: center;
-    padding: 6px 6px;
-    box-sizing: border-box;
+  .modal-list[data-columns="2"] .modal-row,
+  .modal-list[data-columns="2"] .modal-row.modal-row-header {
+    grid-template-columns: 90px minmax(140px, 1fr);
   }
 
   .modal {
