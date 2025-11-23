@@ -18,6 +18,7 @@
 </template>
 
 <script setup>
+import { watch } from 'vue';
 const props = defineProps({
   visible: Boolean,
   summaryDailyRevenue: { type: Array, default: () => [] },
