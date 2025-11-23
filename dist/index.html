@@ -14,7 +14,7 @@
       href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap"
       rel="stylesheet"
     />
-    <script type="module" crossorigin src="/assets/index-B0_Y1ce6.js"></script>
+    <script type="module" crossorigin src="/assets/index-CPOS1Hli.js"></script>
     <link rel="stylesheet" crossorigin href="/assets/index-CwD7E22g.css">
   </head>
   <body>
@@ -32,11 +32,8 @@
           <button class="view-tab" role="tab" aria-selected="false" data-view="daily" id="tab-daily"><span class="view-tab-line1">По</span><span class="view-tab-line2">дням</span></button>
         </nav>
         <div class="month-info monthly-only" id="month-controls">
-          <div class="month-select">
-            <label for="month">Месяц</label>
-            <div class="month-select-control">
-              <select id="month"><!-- заполним в JS --></select>
-            </div>
+          <div id="month-select-vue-root" class="month-select-root">
+            <!-- Vue month select -->
           </div>
           <div class="pill" id="last-updated-pill">
             <span class="pill-dot" aria-hidden="true"></span>
@@ -47,11 +44,8 @@
           </div>
         </div>
         <div class="day-info daily-only" id="day-controls">
-          <div class="day-select">
-            <label for="day">День</label>
-            <div class="day-select-control">
-              <input id="day" type="date" name="day" placeholder="Выберите дату" />
-            </div>
+          <div id="day-select-vue-root" class="day-select-root">
+            <!-- Vue day select -->
           </div>
           <div class="pill" id="last-updated-pill-daily">
             <span class="pill-dot" aria-hidden="true"></span>
@@ -66,7 +60,7 @@
     </header>
 
     <section class="contract-card monthly-only" id="contract-card">
-      <!-- Карточка исполняется через Vue-компонент ContractCard.vue -->
+      <!-- Карточка исполнения контракта рендерится старым JS-кодом (updateContractCardExternal) -->
     </section>
 
     <!-- Сводка (рендерится через Vue в App.vue) -->

@@ -76,7 +76,7 @@
 </template>
 
 <script setup>
-import { computed, reactive } from "vue";
+import { computed, reactive, watchEffect } from "vue";
 
 const state = reactive({
   isLoading: true,
@@ -158,7 +158,58 @@ const totalAmountLabel = computed(() => {
   return formatMoneyRub(total);
 });
 
+async function fetchDailyReport(dayIso) {
+  if (!dayIso || typeof window === "undefined") {
+    state.items = [];
+    state.hasData = false;
+    state.isLoading = false;
+    return;
+  }
+
+  try {
+    state.isLoading = true;
+    state.hasData = false;
+    state.items = [];
+
+    const url = new URL("/api/dashboard/daily", window.location.origin);
+    url.searchParams.set("day", dayIso);
+    url.searchParams.set("_", Date.now().toString());
+
+    const response = await fetch(url.toString(), {
+      cache: "no-store",
+      headers: {
+        "Cache-Control": "no-cache",
+        Pragma: "no-cache",
+      },
+    });
+
+    if (!response.ok) {
+      throw new Error("HTTP " + response.status);
+    }
+
+    const data = await response.json();
+    const items = Array.isArray(data?.items) ? data.items : [];
+    const hasData = Boolean(data?.has_data);
+
+    state.items = items;
+    state.hasData = hasData;
+    state.selectedDateIso = data?.date || dayIso;
+  } catch (error) {
+    console.error("DailyReport: failed to load daily report", error);
+    state.items = [];
+    state.hasData = false;
+  } finally {
+    state.isLoading = false;
+  }
+}
+
 if (typeof window !== "undefined") {
+  // Основной канал: выбор дня из DaySelect.vue вызывает этот обработчик.
+  window.__onDayChange = (iso) => {
+    state.selectedDateIso = iso || null;
+  };
+
+  // Фолбэк для старого кода, если где-то ещё вызывается __vueSetDailyReport.
   window.__vueSetDailyReport = (payload) => {
     state.isLoading = Boolean(payload?.isLoading);
     state.hasData = Boolean(payload?.hasData);
@@ -166,6 +217,13 @@ if (typeof window !== "undefined") {
     state.items = Array.isArray(payload?.items) ? payload.items : [];
   };
 }
+
+watchEffect(() => {
+  const dayIso = state.selectedDateIso;
+  if (dayIso) {
+    fetchDailyReport(dayIso);
+  }
+});
 
 const isLoading = computed(() => state.isLoading);
 </script>

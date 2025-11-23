@@ -25,7 +25,7 @@ import {
   closeDailyModalView,
   renderDailyModalListView,
 } from "@js/ui/dailyModalView.js";
-import { showDailyLoadingState, showDailyEmptyState, handleDailyLoadError, applyDailyDataView } from "@js/views/daily-view.js";
+import { showDailyLoadingState, showDailyEmptyState, handleDailyLoadError } from "@js/views/daily-view.js";
 import {
   openAverageDailyModalView,
   openWorkModalView,
@@ -90,7 +90,6 @@ export class UIManager {
       this.updateDailyNameCollapsers();
     }, 150);
     this.monthOptionsLoaded = false;
-    this.dailyModule = null;
     this.pdfModule = null;
   }
 
@@ -234,12 +233,6 @@ export class UIManager {
     }
   }
 
-  async loadDailyModule() {
-    if (this.dailyModule) return this.dailyModule;
-    this.dailyModule = await import("@js/daily-report.js");
-    return this.dailyModule;
-  }
-
   async loadPdfModule() {
     if (this.pdfModule) return this.pdfModule;
     this.pdfModule = await import("@js/pdf-client.js").catch(() => null);
@@ -266,11 +259,7 @@ export class UIManager {
         const availableDays = await this.dataManager.fetchAvailableDays();
         return availableDays || [];
       };
-
-      window.__onDayChange = (iso) => {
-        if (!iso) return;
-        this.loadDailyData(iso);
-      };
+      // Выбор дня теперь обрабатывается Vue-компонентом DaySelect + DailyReport.
     }
   }
 
@@ -347,69 +336,8 @@ export class UIManager {
     }
   }
 
-  async loadDailyData(dayIso) {
-    if (!dayIso) return;
-    this.uiStore.setSelectedDay(dayIso);
-    if (this.elements.dailySkeleton) {
-      this.elements.dailySkeleton.style.display = "block";
-    }
-
-    try {
-      const { applyDailyData } = await this.loadDailyModule();
-      const { data } = await this.dataManager.fetchDailyReport(dayIso, { force: true });
-      this.currentDailyData = data;
-      applyDailyData({
-        // Жёстко привязываем отображаемую дату к выбранной в селекторе,
-        // чтобы заголовок и подзаголовок совпадали с выбором пользователя,
-        // даже если backend вернёт другое значение в поле date.
-        data: { ...data, date: dayIso },
-        elements: this.elements,
-        onAfterRender: () => this.updateDailyNameCollapsers(),
-      });
-    } catch (error) {
-      console.error("Не удалось загрузить дневной отчёт", error);
-      if (this.elements.dailyEmptyState) {
-        this.elements.dailyEmptyState.textContent = "Ошибка загрузки данных";
-        this.elements.dailyEmptyState.style.display = "block";
-      }
-    } finally {
-      if (this.elements.dailySkeleton) {
-        this.elements.dailySkeleton.style.display = "none";
-      }
-    }
-  }
-
-  async downloadPdfReport(event) {
-    if (!this.elements.pdfButton || this.elements.pdfButton.disabled) return;
-    event.preventDefault();
-
-    const button = this.elements.pdfButton;
-    const originalLabel = button.innerHTML;
-    button.disabled = true;
-    button.innerHTML = "Скачивание…";
-
-    try {
-      const pdfModule = await this.loadPdfModule();
-      if (pdfModule && typeof pdfModule.downloadPdf === "function") {
-        await pdfModule.downloadPdf({
-          apiPdfUrl: this.apiPdfUrl,
-            selectedMonthIso: this.uiStore.getSelectedMonth(),
-        });
-      } else {
-        const url = new URL(this.apiPdfUrl, window.location.origin);
-          const currentMonthIso = this.uiStore.getSelectedMonth();
-          if (currentMonthIso) {
-            url.searchParams.set("month", currentMonthIso);
-        }
-        window.open(url.toString(), "_blank");
-      }
-    } catch (error) {
-      console.error("Не удалось скачать PDF", error);
-    } finally {
-      button.disabled = false;
-      button.innerHTML = originalLabel;
-    }
-  }
+  // downloadPdfReport определён ниже; здесь раньше был дублирующий фрагмент,
+  // оставшийся от старой реализации. Он удалён как мёртвый код.
 
   updateDailyAverageVisibility(monthIso = this.uiStore.getSelectedMonth()) {
     const isCurrentMonth = this.isCurrentMonth(monthIso);
@@ -663,69 +591,46 @@ export class UIManager {
   }
 
   showDailyLoadingState() {
-  showDailyLoadingState({
-    elements: this.elements,
-    setLastUpdated: ({ label, dateLabel }) => {
-    this.lastUpdatedDailyLabel = label;
-    this.lastUpdatedDailyDateLabel = dateLabel;
-    this.updateLastUpdatedPills();
-    },
-  });
+    showDailyLoadingState({
+      elements: this.elements,
+      setLastUpdated: ({ label, dateLabel }) => {
+        this.lastUpdatedDailyLabel = label;
+        this.lastUpdatedDailyDateLabel = dateLabel;
+        this.updateLastUpdatedPills();
+      },
+    });
   }
 
   handleDailyLoadError(message = "Ошибка загрузки данных") {
-  handleDailyLoadError({
-    elements: this.elements,
-    message,
-    setLastUpdated: ({ label, dateLabel }) => {
-    this.lastUpdatedDailyLabel = label;
-    this.lastUpdatedDailyDateLabel = dateLabel;
-    },
-    updateLastUpdatedPills: () => this.updateLastUpdatedPills(),
-  });
+    handleDailyLoadError({
+      elements: this.elements,
+      message,
+      setLastUpdated: ({ label, dateLabel }) => {
+        this.lastUpdatedDailyLabel = label;
+        this.lastUpdatedDailyDateLabel = dateLabel;
+      },
+      updateLastUpdatedPills: () => this.updateLastUpdatedPills(),
+    });
   }
 
   showDailyEmptyState(message) {
-  showDailyEmptyState({ elements: this.elements, message });
+    showDailyEmptyState({ elements: this.elements, message });
   }
 
   applyDailyData(data) {
     this.currentDailyData = data;
-  const { apply } = applyDailyDataView({
-    data,
-    elements: this.elements,
-    formatDateTime,
-    formatDate,
-    updateLastUpdatedPills: ({ label, dateLabel }) => {
-    this.lastUpdatedDailyLabel = label;
-    this.lastUpdatedDailyDateLabel = dateLabel;
-    this.updateLastUpdatedPills();
-    },
-    updateDailyNameCollapsers: () => this.updateDailyNameCollapsers(),
-  });
+    // Vue-компонент DailyReport теперь сам отвечает за отрисовку дневных данных.
+    if (typeof window !== "undefined" && typeof window.__vueSetDailyReport === "function") {
+      const items = Array.isArray(data?.items) ? data.items : [];
+      const hasData = Boolean(data?.has_data);
 
-  if (this.dailyModule && typeof this.dailyModule.applyDailyData === "function") {
-    apply({ applyFn: this.dailyModule.applyDailyData });
-    return;
-  }
-
-  // Если модуль ещё не загружен — подгружаем динамически и затем вызываем функцию
-  this.loadDailyModule()
-    .then((mod) => {
-    const fn = mod && (mod.applyDailyData || (mod.default && mod.default.applyDailyData));
-    if (typeof fn === "function") {
-      // Сохраняем ссылку на модуль для последующих вызовов
-      this.dailyModule = mod;
-      apply({ applyFn: fn });
-    } else {
-      console.error("Модуль daily-report не экспортирует applyDailyData");
-      this.handleDailyLoadError();
+      window.__vueSetDailyReport({
+        isLoading: false,
+        hasData,
+        selectedDateIso: data?.date || null,
+        items,
+      });
     }
-    })
-    .catch((err) => {
-    console.error("Не удалось загрузить модуль daily-report:", err);
-    this.handleDailyLoadError();
-    });
   }
 
   async loadDailyData(dayIso) {
