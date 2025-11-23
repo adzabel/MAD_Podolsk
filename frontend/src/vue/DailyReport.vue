@@ -84,6 +84,8 @@ const state = reactive({
   hasData: false,
   selectedDateIso: null,
   items: [],
+  source: "none", // "day-select" | "external" | "none"
+  requestToken: 0,
 });
 
 function formatDateLabel(iso) {
@@ -167,6 +169,8 @@ async function fetchDailyReport(dayIso) {
     return;
   }
 
+  const token = ++state.requestToken;
+
   try {
     state.isLoading = true;
     state.hasData = false;
@@ -189,12 +193,19 @@ async function fetchDailyReport(dayIso) {
     }
 
     const data = await response.json();
+
+    // Если за время запроса пользователь успел выбрать другой день,
+    // игнорируем устаревший ответ.
+    if (token !== state.requestToken) {
+      return;
+    }
     const items = Array.isArray(data?.items) ? data.items : [];
     const hasData = Boolean(data?.has_data);
 
     state.items = items;
     state.hasData = hasData;
     state.selectedDateIso = data?.date || dayIso;
+    state.source = "day-select";
   } catch (error) {
     console.error("DailyReport: failed to load daily report", error);
     state.items = [];
@@ -208,6 +219,7 @@ if (typeof window !== "undefined") {
   // Основной канал: выбор дня из DaySelect.vue вызывает этот обработчик.
   window.__onDayChange = (iso) => {
     state.selectedDateIso = iso || null;
+    state.source = "day-select";
   };
 
   // Фолбэк для старого кода, если где-то ещё вызывается __vueSetDailyReport.
@@ -216,12 +228,13 @@ if (typeof window !== "undefined") {
     state.hasData = Boolean(payload?.hasData);
     state.selectedDateIso = payload?.selectedDateIso || null;
     state.items = Array.isArray(payload?.items) ? payload.items : [];
+    state.source = "external";
   };
 }
 
 watchEffect(() => {
   const dayIso = state.selectedDateIso;
-  if (dayIso) {
+  if (dayIso && state.source === "day-select") {
     fetchDailyReport(dayIso);
   }
 });
