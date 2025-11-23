@@ -400,14 +400,14 @@ def fetch_plan_vs_fact_for_month(
     """
     items: list[DashboardItem]
 
-        summary = None
-        last_updated = None
-        with get_connection() as conn:
-            with conn.cursor(cursor_factory=RealDictCursor) as cur:
-                cur.execute(ITEMS_SQL, (month_start,))
-                items_raw = cur.fetchall()
+    summary = None
+    last_updated = None
+    with get_connection() as conn:
+        with conn.cursor(cursor_factory=RealDictCursor) as cur:
+            cur.execute(ITEMS_SQL, (month_start,))
+            items_raw = cur.fetchall()
 
-            # Агрегация по категориям
+        # Агрегация по категориям
             plan_leto = sum(
                 to_float(row["planned_amount"]) or 0.0
                 for row in items_raw
