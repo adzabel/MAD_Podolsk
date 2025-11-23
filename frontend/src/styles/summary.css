@@ -55,10 +55,11 @@
  .summary-card-interactive {
   background: var(--bg-card);
   border: 1px solid var(--border-soft);
-  border-radius: var(--radius-xl); /* как в mockup-card и эталоне */
+  border-radius: var(--radius-xl);
   box-shadow: var(--shadow-card);
-  padding: clamp(var(--gap-md), 2vw, var(--gap-lg)); /* как в mockup-card */
-  min-height: 141px; /* как в category-card */
+  padding: clamp(var(--gap-md), 2vw, var(--gap-lg));
+  padding-bottom: clamp(var(--gap-sm), 1.2vw, 16px); /* как у .category-card */
+  min-height: 141px;
   height: 100%;
   display: flex;
   flex-direction: column;
@@ -68,6 +69,7 @@
   box-sizing: border-box;
   transition: var(--transition-lift), var(--transition-border);
   align-items: stretch;
+  gap: 2px;
 }
 
 .summary-card-interactive {
