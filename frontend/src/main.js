@@ -29,6 +29,25 @@ document.addEventListener("DOMContentLoaded", () => {
       // Монтируем Vue-индикаторы "Данные обновлены".
       mountLastUpdatedPillMonthly("#last-updated-pill");
       mountLastUpdatedPillDaily("#last-updated-pill-daily");
+
+      // Тестовая инициализация данных для модального окна среднедневной выручки
+      setTimeout(() => {
+        if (typeof window.__vueSetDailyAverage === "function") {
+          window.__vueSetDailyAverage({
+            averageValue: 12345,
+            daysWithData: 20,
+            isCurrentMonth: true,
+            summaryDailyRevenue: [
+              { date: "2025-11-01", amount: 1000 },
+              { date: "2025-11-02", amount: 1200 },
+              { date: "2025-11-03", amount: 1100 },
+              { date: "2025-11-04", amount: 1300 },
+              { date: "2025-11-05", amount: 900 },
+            ],
+            selectedMonthLabel: "Ноябрь 2025"
+          });
+        }
+      }, 1000);
     };
   }
 
