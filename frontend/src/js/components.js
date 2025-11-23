@@ -1151,8 +1151,22 @@ export class UIManager {
   }
 
   getSelectedMonthLabel() {
-    const option = this.elements.monthSelect.options[this.elements.monthSelect.selectedIndex];
-    return option ? option.textContent.trim() : "";
+    const selectedMonthIso = this.uiStore.getSelectedMonth() || this.selectedMonthIso;
+    if (!selectedMonthIso) {
+      return "";
+    }
+    try {
+      const date = new Date(selectedMonthIso);
+      if (Number.isNaN(date.getTime())) {
+        return "";
+      }
+      return date.toLocaleDateString("ru-RU", {
+        month: "long",
+        year: "numeric",
+      });
+    } catch (e) {
+      return "";
+    }
   }
 
   async downloadPdfReport(event) {
@@ -1160,7 +1174,8 @@ export class UIManager {
     if (this.elements.pdfButton.disabled) {
       return;
     }
-    const selectedMonth = this.getSelectedMonthLabel() || this.elements.monthSelect.value || "period";
+    const currentMonthIso = this.uiStore.getSelectedMonth() || this.selectedMonthIso || "";
+    const selectedMonth = this.getSelectedMonthLabel() || currentMonthIso || "period";
     const fileNameSlug = selectedMonth
       .toString()
       .trim()
@@ -1173,7 +1188,9 @@ export class UIManager {
     this.elements.pdfButton.innerHTML = "Формируем PDF…";
     try {
       const pdfUrl = new URL(this.apiPdfUrl, window.location.origin);
-      pdfUrl.searchParams.set("month", this.elements.monthSelect.value);
+      if (currentMonthIso) {
+        pdfUrl.searchParams.set("month", currentMonthIso);
+      }
       const response = await fetch(pdfUrl.toString(), {
         headers: {
           Accept: "application/pdf",
