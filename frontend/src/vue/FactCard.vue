@@ -11,7 +11,7 @@
     <div class="summary-value">{{ formattedValue }}</div>
     <div v-if="hasProgress" class="summary-progress" aria-live="polite">
       <div class="summary-progress-labels">
-        <span>ИСПОЛНЕНИЕ ПЛАНА</span>
+        <span>ИСПОЛНЕНИЕ</span>
         <strong>{{ progressLabelSafe }}</strong>
       </div>
       <div class="summary-progress-bar">
