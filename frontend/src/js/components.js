@@ -87,7 +87,7 @@ export class UIManager {
   }
 
   init() {
-    this.prepareWorkList();
+    // this.prepareWorkList(); // отключено для перехода на Vue
     this.liveRegion = this.createLiveRegion();
     this.bindEvents();
     // По умолчанию скрываем подсказку о ежедневных данных до выбора месяца
