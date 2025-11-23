@@ -1,29 +1,4 @@
 <template>
-  <div class="view-mode-switcher" role="tablist" aria-label="Режим отображения">
-    <button
-      id="tab-monthly"
-      class="tab-button"
-      role="tab"
-      type="button"
-      :class="{ 'is-active': viewMode === 'monthly' }"
-      :aria-selected="String(viewMode === 'monthly')"
-      @click="setViewMode('monthly')"
-    >
-      По месяцам
-    </button>
-    <button
-      id="tab-daily"
-      class="tab-button"
-      role="tab"
-      type="button"
-      :class="{ 'is-active': viewMode === 'daily' }"
-      :aria-selected="String(viewMode === 'daily')"
-      @click="setViewMode('daily')"
-    >
-      По дням
-    </button>
-  </div>
-
   <SummaryCard
     label="План, ₽"
     sub="Сметная стоимость"
