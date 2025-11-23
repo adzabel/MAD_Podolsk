@@ -1,11 +1,11 @@
 /* Layout primitives */
 
 .card {
-  background: var(--bg-card);
-  border: 1px solid var(--border-soft);
+  background: transparent;
+  border: none;
   border-radius: var(--radius-lg);
   padding: var(--card-padding);
-  box-shadow: var(--shadow-card);
+  box-shadow: none;
 }
 
 .card--xl {
