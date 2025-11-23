@@ -46,7 +46,8 @@
   height: 100%;
   display: flex;
   flex-direction: column;
-  align-items: flex-start;
+  width: 100%;
+  min-width: 0;
   box-sizing: border-box;
   transition: var(--transition-lift), var(--transition-border);
 }
