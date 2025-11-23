@@ -91,15 +91,16 @@ async function loadInitial() {
 
     // Выбираем initialDay:
     // 1) если передан initialDay и он в списке — берём его;
-    // 2) иначе ближайший к сегодняшней дате из доступных дней.
+    // 2) иначе ближайший к сегодняшней дате из доступных дней;
+    // 3) на всякий случай, если что-то пойдёт не так — первый доступный день.
     const initialFromProps = props.initialDay && normalized.includes(props.initialDay)
       ? props.initialDay
       : null;
     const closestToToday = pickClosestToToday(normalized);
-    const initialIso = initialFromProps || closestToToday;
+    const initialIso = initialFromProps || closestToToday || normalized[0];
 
     state.selected = initialIso;
-    if (typeof window !== "undefined" && typeof window.__onDayChange === "function") {
+    if (initialIso && typeof window !== "undefined" && typeof window.__onDayChange === "function") {
       window.__onDayChange(initialIso);
     }
   } catch (e) {
