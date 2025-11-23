@@ -82,10 +82,16 @@
   outline-offset: 4px;
 }
 
+
+/*
+  Эффект приподнимания при наведении нужен только для карточки
+  «Среднедневная выручка», поэтому для остальных интерактивных карточек
+  оставляем базовое состояние без каких‑либо визуальных изменений.
+*/
 .summary-card-interactive:not(.is-disabled):hover {
-  box-shadow: var(--shadow-summary-hover);
-  transform: translateY(-2px);
-  border-color: color-mix(in srgb, var(--accent) 35%, var(--border-soft));
+  box-shadow: var(--shadow-card);
+  transform: none;
+  border-color: var(--border-soft);
 }
 
 .summary-card-interactive.is-disabled {
