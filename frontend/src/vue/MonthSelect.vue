@@ -45,11 +45,18 @@ const props = defineProps({
   },
 });
 
+
 const emit = defineEmits(["monthChange"]);
-
 const selected = ref("");
-
 const isDisabled = computed(() => props.loading);
+
+// computed для массива опций
+const options = computed(() => {
+  if (!Array.isArray(props.months)) return [];
+  // Диагностика: логируем приходящие месяцы
+  console.log('[MonthSelect] options:', props.months);
+  return props.months;
+});
 
 function getCurrentMonthIso() {
   const now = new Date();
