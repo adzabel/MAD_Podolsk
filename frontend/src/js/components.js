@@ -20,18 +20,6 @@ import {
   renderDailyModalListView,
 } from "@js/ui/dailyModalView.js";
 import { showDailyLoadingState, showDailyEmptyState, handleDailyLoadError } from "@js/views/daily-view.js";
-import {
-  openAverageDailyModalView,
-  openWorkModalView,
-  closeDailyModalViewFacade,
-  renderDailyModalListViewFacade,
-  formatDailyDateLabel,
-} from "@js/views/daily-modal-view.js";
-// Removed imports related to openAverageDailyModalView
-
-function isValidPercent(value) {
-  return value !== null && value !== undefined && !Number.isNaN(value);
-}
 
 function normalizePercent(value) {
   if (!isValidPercent(value)) return 0;
@@ -204,16 +192,6 @@ export class UIManager {
       });
     }
     this.elements.pdfButton.addEventListener("click", (event) => this.downloadPdfReport(event));
-    if (this.elements.dailyModalClose) {
-      this.elements.dailyModalClose.addEventListener("click", () => this.closeDailyModal());
-    }
-    if (this.elements.dailyModal) {
-      this.elements.dailyModal.addEventListener("click", (event) => {
-        if (event.target === this.elements.dailyModal) {
-          this.closeDailyModal();
-        }
-      });
-    }
     if (this.elements.viewModeMonthly) {
       this.elements.viewModeMonthly.addEventListener("click", () => this.switchViewMode("monthly"));
     }
