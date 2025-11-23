@@ -30,11 +30,8 @@
           <button class="view-tab" role="tab" aria-selected="false" data-view="daily" id="tab-daily"><span class="view-tab-line1">По</span><span class="view-tab-line2">дням</span></button>
         </nav>
         <div class="month-info monthly-only" id="month-controls">
-          <div class="month-select">
-            <label for="month">Месяц</label>
-            <div class="month-select-control">
-              <select id="month"><!-- заполним в JS --></select>
-            </div>
+          <div id="month-select-vue-root" class="month-select-root">
+            <!-- Vue month select -->
           </div>
           <div class="pill" id="last-updated-pill">
             <span class="pill-dot" aria-hidden="true"></span>

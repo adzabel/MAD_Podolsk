@@ -247,63 +247,16 @@ export class UIManager {
   }
 
   async initMonthSelect() {
-    if (!this.elements.monthSelect) {
-      return;
-    }
+    if (typeof window !== "undefined") {
+      window.__fetchAvailableMonths = async () => {
+        const availableMonths = await this.dataManager.fetchAvailableMonths();
+        return availableMonths || [];
+      };
 
-    const selectEl = this.elements.monthSelect;
-    selectEl.innerHTML = "";
-    selectEl.disabled = true;
-
-    try {
-      const availableMonths = await this.dataManager.fetchAvailableMonths();
-      const months = (availableMonths || [])
-        .map((iso) => {
-          if (!iso) return null;
-          const date = new Date(iso);
-          if (Number.isNaN(date.getTime())) return null;
-          return {
-            iso,
-            label: date.toLocaleDateString("ru-RU", { month: "long", year: "numeric" }),
-          };
-        })
-        .filter(Boolean);
-
-      if (!months.length) {
-        const fallbackMonth = this.initialMonth || this.getCurrentMonthIso();
-        this.setMonthSelectPlaceholder("Нет данных");
-        if (fallbackMonth) {
-          await this.loadMonthData(fallbackMonth);
-        } else {
-          this.handleLoadError();
-        }
-        return;
-      }
-
-      const hasInitialMonth = this.initialMonth && months.some((item) => item.iso === this.initialMonth);
-      months.forEach((monthInfo, index) => {
-        const option = document.createElement("option");
-        option.value = monthInfo.iso;
-        option.textContent = monthInfo.label;
-        if ((hasInitialMonth && monthInfo.iso === this.initialMonth) || (!hasInitialMonth && index === 0)) {
-          option.selected = true;
-        }
-        selectEl.appendChild(option);
-      });
-
-      if (!this.monthOptionsLoaded) {
-        selectEl.addEventListener("change", () => {
-          this.loadMonthData(selectEl.value);
-        });
-        this.monthOptionsLoaded = true;
-      }
-
-      selectEl.disabled = false;
-      this.loadMonthData(selectEl.value || months[0].iso);
-    } catch (error) {
-      console.error("Не удалось загрузить список месяцев", error);
-      this.setMonthSelectPlaceholder("Ошибка загрузки");
-      this.handleLoadError();
+      window.__onMonthChange = (iso) => {
+        if (!iso) return;
+        this.loadMonthData(iso);
+      };
     }
   }
 

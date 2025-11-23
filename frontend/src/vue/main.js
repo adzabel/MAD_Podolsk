@@ -1,6 +1,7 @@
 import { createApp, reactive } from "vue";
 import App from "./App.vue";
 import ContractCard from "./ContractCard.vue";
+import MonthSelect from "./MonthSelect.vue";
 
 // Единое реактивное состояние для карточки контракта, чтобы сеттер из
 // старого JS-кода и Vue-компонент делили одни и те же данные.
@@ -32,6 +33,16 @@ export function mountSummary(selector = "#summary-grid") {
   if (!el) return null;
 
   const app = createApp(App);
+  const vm = app.mount(el);
+
+  return { app, vm };
+}
+
+export function mountMonthSelect(selector = "#month-select-vue-root", initialMonth = null) {
+  const el = document.querySelector(selector);
+  if (!el) return null;
+
+  const app = createApp(MonthSelect, { initialMonth });
   const vm = app.mount(el);
 
   return { app, vm };
