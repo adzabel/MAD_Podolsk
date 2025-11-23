@@ -1,6 +1,6 @@
 .summary-cards {
   display: grid;
-  grid-template-columns: repeat(2, 1fr);
+  grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 24px;
   width: 100%;
   margin-bottom: 32px;
@@ -8,9 +8,9 @@
   grid-auto-rows: 1fr;
 }
 
-@media (min-width: 900px) {
+@media (min-width: 1024px) {
   .summary-cards {
-    grid-template-columns: repeat(4, 1fr);
+    grid-template-columns: repeat(4, minmax(0, 1fr));
   }
 }
 .summary-grid {
@@ -50,9 +50,9 @@
 }
 
 
- .summary-card,
- .summary-card,
- .summary-card-interactive {
+.summary-card,
+.summary-card-skeleton,
+.summary-card-interactive {
   background: var(--bg-card);
   border: 1px solid var(--border-soft);
   border-radius: var(--radius-xl);
