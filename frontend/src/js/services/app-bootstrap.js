@@ -76,11 +76,6 @@ export function bootstrapApp() {
   const { visitorTracker, dataManager } = initServices();
   const { uiManager } = initUi({ elements, pdfButtonDefaultLabel, dataManager, visitorTracker });
 
-  // Вызовем window.__onUiReady, если она определена, чтобы смонтировать Vue-компоненты
-  if (typeof window !== "undefined" && typeof window.__onUiReady === "function") {
-    window.__onUiReady(uiManager);
-  }
-
   const endpointPath = new URL(API_URL, window.location.origin).pathname;
   visitorTracker.logInitialVisit({ apiBase: API_BASE, endpoint: endpointPath });
 }
