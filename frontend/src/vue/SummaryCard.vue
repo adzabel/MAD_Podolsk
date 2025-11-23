@@ -1,10 +1,14 @@
 <template>
   <div
     class="summary-card card card--stacked"
-    :class="deltaClass"
   >
     <div class="summary-label">{{ label }}</div>
-    <div class="summary-value">{{ formattedValue }}</div>
+    <div
+      class="summary-value"
+      :class="deltaClass"
+    >
+      {{ formattedValue }}
+    </div>
     <div class="summary-sub">{{ sub }}</div>
     <div
       v-if="hasProgress"

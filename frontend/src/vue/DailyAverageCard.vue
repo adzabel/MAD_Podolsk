@@ -5,6 +5,7 @@
     type="button"
     :class="{ 'is-disabled': !isInteractive }"
     :aria-disabled="String(!isInteractive)"
+    @click="handleClick"
   >
     <div class="summary-label">СРЕДНЕДНЕВНАЯ ВЫРУЧКА, ₽</div>
     <div class="summary-value">{{ formattedValue }}</div>
@@ -68,4 +69,11 @@ const formattedValue = computed(() => {
 const isInteractive = computed(() => {
   return Number.isFinite(props.daysWithData) && props.daysWithData > 0 && props.isCurrentMonth;
 });
+
+function handleClick() {
+  if (!isInteractive.value) return;
+  if (typeof window !== "undefined" && typeof window.__openDailyAverageModal === "function") {
+    window.__openDailyAverageModal();
+  }
+}
 </script>

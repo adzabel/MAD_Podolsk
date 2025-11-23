@@ -207,8 +207,9 @@ export class UIManager {
       });
     }
     this.elements.pdfButton.addEventListener("click", (event) => this.downloadPdfReport(event));
-    if (this.elements.dailyAverageCard) {
-      this.elements.dailyAverageCard.addEventListener("click", () => this.openDailyModal());
+    // Открытие модального окна среднедневной выручки теперь делается через Vue.
+    if (typeof window !== "undefined") {
+      window.__openDailyAverageModal = () => this.openDailyModal();
     }
     if (this.elements.dailyModalClose) {
       this.elements.dailyModalClose.addEventListener("click", () => this.closeDailyModal());
