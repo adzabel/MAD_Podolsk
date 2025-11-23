@@ -85,7 +85,9 @@ import { API_DAILY_URL } from "@config/config.frontend.js";
 const state = reactive({
   isLoading: true,
   hasData: false,
-  selectedDateIso: null,
+  selectedDateIso: typeof window !== "undefined" && window.__daySelectCurrentIso
+    ? window.__daySelectCurrentIso
+    : null,
   items: [],
   source: "none", // "day-select" | "external" | "none"
   requestToken: 0,
@@ -235,6 +237,9 @@ if (typeof window !== "undefined") {
   window.__onDayChange = (iso) => {
     state.selectedDateIso = iso || null;
     state.source = "day-select";
+    if (typeof window !== "undefined" && iso) {
+      window.__daySelectCurrentIso = iso;
+    }
   };
 
   // Фолбэк для старого кода, если где-то ещё вызывается __vueSetDailyReport.
