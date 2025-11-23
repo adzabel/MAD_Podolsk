@@ -10,6 +10,8 @@ from psycopg2 import InterfaceError, OperationalError
 from psycopg2.extras import RealDictCursor
 
 from .constants import (
+    CATEGORY_SUMMER,
+    CATEGORY_WINTER,
     CATEGORY_SEASONAL,
     CATEGORY_VNR_CODES,
     CATEGORY_VNR_LABEL,
