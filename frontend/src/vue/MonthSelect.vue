@@ -64,11 +64,16 @@ async function loadInitial() {
     const months = (availableMonths || [])
       .map((iso) => {
         if (!iso) return null;
+        // Бэкенд отдаёт YYYY-MM-DD; храним полный ISO, но
+        // ключ месяца строим так же, как в старой логике.
         const date = new Date(iso);
         if (Number.isNaN(date.getTime())) return null;
         return {
           iso,
-          label: date.toLocaleDateString("ru-RU", { month: "long", year: "numeric" }),
+          label: date.toLocaleDateString("ru-RU", {
+            month: "long",
+            year: "numeric",
+          }),
         };
       })
       .filter(Boolean);
@@ -76,15 +81,28 @@ async function loadInitial() {
     state.options = months;
 
     if (!months.length) {
-      const fallback = props.initialMonth || getCurrentMonthIso();
+      // Нет списка месяцев: используем текущий календарный месяц в формате YYYY-MM-01,
+      // как в старой реализации UIManager.getCurrentMonthIso.
+      const fallback = props.initialMonth || getCurrentMonthIso() + "-01";
       if (fallback && typeof window !== "undefined" && typeof window.__onMonthChange === "function") {
         window.__onMonthChange(fallback);
       }
       return;
     }
 
-    const hasInitial = props.initialMonth && months.some((m) => m.iso === props.initialMonth);
-    const initialIso = hasInitial ? props.initialMonth : months[0].iso;
+    // Пытаемся найти месяц, совпадающий по году и месяцу с initialMonth
+    // (учитываем форматы YYYY-MM и YYYY-MM-DD).
+    const normalizeMonth = (iso) => {
+      if (!iso) return null;
+      const m = /^(\d{4})-(\d{2})/.exec(iso);
+      return m ? `${m[1]}-${m[2]}` : null;
+    };
+
+    const initialNorm = normalizeMonth(props.initialMonth);
+    const initialFromList =
+      initialNorm && months.find((m) => normalizeMonth(m.iso) === initialNorm)?.iso;
+
+    const initialIso = initialFromList || months[0].iso;
     selected.value = initialIso;
     if (typeof window !== "undefined" && typeof window.__onMonthChange === "function") {
       window.__onMonthChange(initialIso);
