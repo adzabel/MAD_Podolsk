@@ -6,8 +6,8 @@
     <div class="work-list-surface">
       <div v-if="isMobile" class="work-list-mobile-header">
         <div class="work-list-mobile-title">
-          <span class="work-list-mobile-title-line">Работы по смете</span>
-          <span class="work-list-mobile-title-line work-list-mobile-title-sub">{{ mobileCategoryTitle }}</span>
+          <span class="work-list-mobile-title-label">Работы по смете</span>
+          <span class="work-list-mobile-title-value">{{ mobileCategoryTitle }}</span>
         </div>
         <WorkSortMobile :model-value="sortKey" @update:model-value="changeSort" />
       </div>

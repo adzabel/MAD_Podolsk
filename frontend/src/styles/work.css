@@ -475,22 +475,25 @@
     min-width: 0;
   }
 
-  .work-list-mobile-title-line {
-    line-height: 1.25;
-    font-size: var(--font-size-body);
-    color: var(--text-main);
+  .work-list-mobile-title-label {
+    font-size: var(--font-size-label);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: var(--text-muted);
   }
 
-  .work-list-mobile-title-sub {
-    font-weight: 700;
-    font-size: 1.05rem;
+  .work-list-mobile-title-value {
+    font-size: var(--font-size-h3);
+    font-weight: 600;
+    color: var(--text-primary);
+    line-height: 1.25;
     word-break: break-word;
   }
 
   .work-mobile-sort {
     display: flex;
     flex-direction: column;
-    width: min(46vw, 210px);
+    width: min(40vw, 180px);
     flex-shrink: 0;
   }
 
