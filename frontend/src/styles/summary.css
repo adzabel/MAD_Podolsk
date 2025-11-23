@@ -159,7 +159,6 @@
 .summary-value {
   text-align: left;
   padding-left: 32px;
-    margin-top: 6px; /* уменьшенный воздух между заголовком и значением для мобильной версии */
 }
 
 .summary-card,
@@ -237,9 +236,15 @@
 }
 
 @media (max-width: 640px) {
-  .summary-value,
+.summary-value,
   .summary-card-interactive .summary-value {
     font-size: var(--font-size-body);
+  }
+
+  /* Уменьшаем отступ между заголовком и значением на мобильных */
+  .summary-value,
+  .summary-card-interactive .summary-value {
+    margin-top: 6px;
   }
 }
 
