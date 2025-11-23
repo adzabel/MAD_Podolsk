@@ -11,7 +11,7 @@ import {
 } from "@shared/utils.js";
 // ...existing code...
 import { UiStore } from "@js/store/index.js";
-import { renderCategoriesFacade } from "@js/views/categories-view.js";
+// import { renderCategoriesFacade } from "@js/views/categories-view.js"; // отключено для Vue
 // import { initWorkListView, renderWorkRowsView } from "@js/ui/workListView.js";
 import {
   openAverageDailyModal,
@@ -579,22 +579,8 @@ export class UIManager {
   }
 
 
-  renderCategories() {
-  renderCategoriesFacade({
-    groupedCategories: this.groupedCategories,
-    activeCategoryKey: this.activeCategoryKey,
-    elements: this.elements,
-    onSelect: (key) => {
-    this.activeCategoryKey = key;
-    this.renderCategories();
-    this.renderWorkList();
-    },
-  });
-
-    this.enhanceAccessibility();
-  }
-
-  // renderWorkList отключён для Vue-дашборда
+  // Отключено: рендеринг категорий и работ теперь полностью на Vue
+  renderCategories() {}
   renderWorkList() {}
 
   handleWorkSortChange(column) {
