@@ -424,16 +424,14 @@ export class UIManager {
       label: this.getSelectedMonthLabel() || "",
     });
     // Отладка: логируем метрики, которые передаются во Vue-компоненты
-    const metrics = this.dataManager.calculateMetrics(data);
-    // Обновляем Vue-компоненты с метриками
+    // Обновляем Vue-компоненты с метриками напрямую из data.summary
     if (typeof window !== "undefined" && typeof window.__vueSetSummaryMetrics === "function") {
       window.__vueSetSummaryMetrics({
-        planned: metrics?.planned ?? null,
-        fact: metrics?.fact ?? null,
-        delta: metrics?.delta ?? null,
-        completion: metrics?.completion ?? null,
-        completionLabel: metrics?.completion !== null && metrics?.completion !== undefined ?
-          (typeof formatPercent === 'function' ? formatPercent(metrics.completion) : "–") : "–",
+        planned: data.summary?.planned_amount ?? null,
+        fact: data.summary?.fact_amount ?? null,
+        delta: data.summary?.delta_amount ?? null,
+        completion: null,
+        completionLabel: "–",
       });
     }
     if (typeof window !== "undefined" && typeof window.__vueSetDailyAverage === "function") {
