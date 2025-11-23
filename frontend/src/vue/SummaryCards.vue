@@ -30,9 +30,8 @@ const props = defineProps({
 });
 </script>
 
-<style scoped>
 
-
+<style>
 .summary-cards {
   display: grid;
   grid-template-columns: repeat(2, 1fr);
