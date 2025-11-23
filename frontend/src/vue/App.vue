@@ -1,4 +1,29 @@
 <template>
+  <div class="view-mode-switcher" role="tablist" aria-label="Режим отображения">
+    <button
+      id="tab-monthly"
+      class="tab-button"
+      role="tab"
+      type="button"
+      :class="{ 'is-active': viewMode === 'monthly' }"
+      :aria-selected="String(viewMode === 'monthly')"
+      @click="setViewMode('monthly')"
+    >
+      По месяцам
+    </button>
+    <button
+      id="tab-daily"
+      class="tab-button"
+      role="tab"
+      type="button"
+      :class="{ 'is-active': viewMode === 'daily' }"
+      :aria-selected="String(viewMode === 'daily')"
+      @click="setViewMode('daily')"
+    >
+      По дням
+    </button>
+  </div>
+
   <SummaryCard
     label="План, ₽"
     sub="Сметная стоимость"
@@ -25,7 +50,7 @@
 </template>
 
 <script setup>
-import { reactive } from "vue";
+import { reactive, ref } from "vue";
 import SummaryCard from "./SummaryCard.vue";
 import DailyAverageCard from "./DailyAverageCard.vue";
 
@@ -42,6 +67,8 @@ const dailyAverageState = reactive({
   daysWithData: 0,
   isCurrentMonth: false,
 });
+
+const viewMode = ref("monthly");
 
 if (typeof window !== "undefined") {
   window.__vueSetSummaryMetrics = (payload) => {
@@ -64,5 +91,13 @@ if (typeof window !== "undefined") {
       viewMode.value = mode;
     }
   };
+}
+
+function setViewMode(mode) {
+  if (mode !== "monthly" && mode !== "daily") return;
+  viewMode.value = mode;
+  if (typeof window !== "undefined" && typeof window.__setViewMode === "function") {
+    window.__setViewMode(mode);
+  }
 }
 </script>
