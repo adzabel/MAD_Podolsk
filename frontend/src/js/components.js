@@ -516,6 +516,16 @@ export class UIManager {
         isCurrentMonth: this.isCurrentMonth(this.uiStore.getSelectedMonth()),
       });
     }
+    // Обновляем Vue-компонент ContractCard
+    const contractMetrics = this.dataManager.calculateContractMetrics(data);
+    if (typeof window !== "undefined" && typeof window.__vueSetContractMetrics === "function") {
+      window.__vueSetContractMetrics({
+        contractAmount: contractMetrics?.contractAmount ?? null,
+        executed: contractMetrics?.executed ?? null,
+        completion: contractMetrics?.completion ?? null,
+        // Можно добавить titleDate, если нужно
+      });
+    }
     this.renderCategories();
     this.renderWorkList();
   }
