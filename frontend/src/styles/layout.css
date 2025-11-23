@@ -112,7 +112,7 @@ header {
 
 .view-toggle {
 	display: inline-flex;
-	border: 1px solid var(--border-soft);
+	/* border: 1px solid var(--border-soft); */
 	border-radius: var(--radius-xxl);
 	background: var(--bg-card);
 	box-shadow: var(--shadow-card);
