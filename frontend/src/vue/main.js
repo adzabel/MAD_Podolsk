@@ -1,22 +1,17 @@
-import { createApp, reactive } from "vue";
+import { createApp } from "vue";
 import App from "./App.vue";
 import ContractCard from "./ContractCard.vue";
-
-// Глобальное (для фронтенда) реактивное состояние Vue для дашборда.
-// На него могут ссылаться как Vue-компоненты, так и мост из legacy-кода.
-export const dashboardState = reactive({
-  contractMetrics: null,
-});
 
 export function mountContractCard(selector = "#contract-card") {
   const el = document.querySelector(selector);
   if (!el) return null;
 
-  const app = createApp(ContractCard, { dashboardState });
+  const app = createApp(ContractCard, { contractMetrics: null });
   const vm = app.mount(el);
 
   if (typeof window !== "undefined") {
-    window.__dashboardState = dashboardState;
+    window.__contractCardApp = app;
+    window.__contractCardVm = vm;
   }
 
   return { app, vm };

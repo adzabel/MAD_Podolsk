@@ -46,9 +46,9 @@
 import { computed } from "vue";
 
 const props = defineProps({
-  dashboardState: {
+  contractMetrics: {
     type: Object,
-    required: true,
+    default: null,
   },
 });
 
@@ -57,7 +57,7 @@ const PROGRESS_MAX_ARIA = 120;
 const PROGRESS_OVERFLOW_COLOR = "#16a34a";
 const PROGRESS_BASE_ACCENT = "var(--accent)";
 
-const contractMetrics = computed(() => props.dashboardState?.contractMetrics || null);
+const contractMetrics = computed(() => props.contractMetrics || null);
 
 const hasData = computed(() => {
   const m = contractMetrics.value;

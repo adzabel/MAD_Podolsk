@@ -732,13 +732,13 @@ export class UIManager {
           : this.lastUpdatedMonthlyDateLabel || "",
     };
 
-    // Если Vue-дашборд активен — обновляем его реактивное состояние.
-    // Иначе используем старый DOM-рендер.
-    if (typeof window !== "undefined" && window.__dashboardState) {
-      window.__dashboardState.contractMetrics = payload;
+    // Если Vue-карточка смонтирована — обновляем её проп напрямую.
+    if (typeof window !== "undefined" && window.__contractCardVm) {
+      window.__contractCardVm.contractMetrics = payload;
       return;
     }
 
+    // Фолбэк: старый DOM-рендер карточки.
     updateContractCardExternal({
       contractMetrics,
       elements: this.elements,
