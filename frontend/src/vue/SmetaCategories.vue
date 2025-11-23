@@ -18,8 +18,7 @@
       >
         <div class="category-title">
           <span>{{ category.title }}</span>
-          <span v-if="isOffPlan(category)"><span class="category-offplan-note"><span>30% от</span><span>общего плана</span></span></span>
-          <span v-else class="category-pill">{{ category.works.length }} работ</span>
+          <span class="category-pill">{{ category.works.length }} работ</span>
         </div>
         <div class="category-values">
           <span><span class="label">План</span><strong>{{ formatMoney(category.planned) }}</strong></span>
@@ -41,7 +40,6 @@
 </template>
 
 <script setup>
-import { computed, toRefs } from 'vue';
 import { formatMoney, formatPercent } from '@/shared/utils.js';
 
 const props = defineProps({
@@ -60,9 +58,6 @@ function selectCategory(key) {
   emit('select', key);
 }
 
-function isOffPlan(category) {
-  return typeof category.key === 'string' && category.key.toLowerCase() === 'внерегламент';
-}
 function deltaClass(category) {
   return category.delta > 0 ? 'delta-positive' : category.delta < 0 ? 'delta-negative' : '';
 }

@@ -41,21 +41,19 @@ import WorkBreakdownList from "./WorkBreakdownList.vue";
 import SmetaCategories from "./SmetaCategories.vue";
 const groupedCategories = ref([]);
 const activeCategoryKey = ref('');
+const VNR_CODES = ['внерегл_ч_1', 'внерегл_ч_2'];
+const CATEGORY_KEYS = ['лето', 'зима', 'внерегламент'];
+
 const activeCategoryTitle = computed(() => {
   const activeCategory = groupedCategories.value.find((category) => category.key === activeCategoryKey.value);
   return activeCategory ? activeCategory.title || '' : '';
 });
+
 function onCategorySelect(key) {
   activeCategoryKey.value = key;
 }
-const CATEGORY_META = [
-  { key: 'лето', normalized: 'лето' },
-  { key: 'зима', normalized: 'зима' },
-  { key: 'внерегл_ч_1', normalized: 'внерегл_ч_1' },
-  { key: 'внерегл_ч_2', normalized: 'внерегл_ч_2' },
-];
 
-function normalizeCategoryKey(value) {
+function normalizeSmeta(value) {
   return (value || '')
     .toString()
     .trim()
@@ -63,39 +61,56 @@ function normalizeCategoryKey(value) {
     .replace(/\s+/g, '');
 }
 
-function resolveCategory(rawValue) {
-  const normalized = normalizeCategoryKey(rawValue);
-  if (!normalized) return null;
-  return CATEGORY_META.find((item) => item.normalized === normalized) || null;
-}
-
-// Пример загрузки категорий (группировка по сметам)
 function groupCategories(items) {
-  // Группируем по category/smeta, аналогично старой логике
   const groups = {};
+  let virtualPlan = 0;
+
+  CATEGORY_KEYS.forEach((key) => {
+    groups[key] = {
+      key,
+      title: key,
+      planned: 0,
+      fact: 0,
+      delta: 0,
+      works: [],
+    };
+  });
+
   items.forEach((item) => {
-    const rawKey = item.category || item.smeta || '';
-    const resolvedCategory = resolveCategory(rawKey);
-    if (!resolvedCategory) {
+    const smetaKey = normalizeSmeta(item.smeta);
+    const categoryKey =
+      smetaKey === 'внерегламент'
+        ? 'внерегламент'
+        : VNR_CODES.includes(smetaKey)
+        ? 'внерегламент'
+        : CATEGORY_KEYS.includes(smetaKey)
+        ? smetaKey
+        : null;
+
+    if (!categoryKey) return;
+
+    if (smetaKey === 'внерегламент') {
+      virtualPlan = Number(item.planned_amount) || 0;
       return;
     }
-    const key = resolvedCategory.key;
-    if (!groups[key]) {
-      groups[key] = {
-        key,
-        title: key,
-        planned: 0,
-        fact: 0,
-        delta: 0,
-        works: [],
-      };
-    }
-    groups[key].works.push(item);
-    groups[key].planned += item.planned_amount || 0;
-    groups[key].fact += item.fact_amount || 0;
-    groups[key].delta += item.delta_amount || ((item.fact_amount || 0) - (item.planned_amount || 0));
+
+    const planned = Number(item.planned_amount) || 0;
+    const fact = Number(item.fact_amount) || 0;
+    groups[categoryKey].works.push(item);
+    groups[categoryKey].planned += planned;
+    groups[categoryKey].fact += fact;
   });
-  return Object.values(groups);
+
+  if (groups['внерегламент']) {
+    groups['внерегламент'].planned = virtualPlan;
+  }
+
+  return Object.values(groups)
+    .filter((group) => group.planned || group.fact || group.works.length)
+    .map((group) => ({
+      ...group,
+      delta: (group.fact || 0) - (group.planned || 0),
+    }));
 }
 // Прямая загрузка данных дашборда при монтировании
 async function loadDashboardItems() {
