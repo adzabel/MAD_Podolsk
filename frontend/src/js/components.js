@@ -594,51 +594,8 @@ export class UIManager {
     this.enhanceAccessibility();
   }
 
-  renderWorkList() {
-    const currentData = this.dataManager.getCurrentData();
-    const activeCategory = this.groupedCategories.find((cat) => cat.key === this.activeCategoryKey) || null;
-    if (this.elements.workSortSelect) {
-      this.elements.workSortSelect.disabled = !activeCategory;
-    }
-
-    if (!activeCategory) {
-      this.elements.workEmptyState.style.display = "block";
-      this.elements.workEmptyState.textContent = currentData && !currentData.has_data
-        ? "Данные за выбранный месяц отсутствуют"
-        : "Здесь появится список работ выбранной сметы.";
-      this.setActiveCategoryTitle("Смета не выбрана");
-      this.elements.workList.classList.remove("has-data");
-      this.workHeaderEl.hidden = true;
-      this.elements.workListScroller.style.display = "none";
-      this.clearWorkRows();
-      return;
-    }
-
-    const works = [...activeCategory.works];
-
-    this.sortWorks(works);
-
-    this.setActiveCategoryTitle(
-      `Расшифровка работ по смете «${activeCategory.title}»`,
-      activeCategory.title
-    );
-
-    if (!works.length) {
-      this.elements.workEmptyState.style.display = "block";
-      this.elements.workEmptyState.textContent = "В этой смете нет строк для отображения";
-      this.elements.workList.classList.remove("has-data");
-      this.workHeaderEl.hidden = true;
-      this.elements.workListScroller.style.display = "none";
-      this.clearWorkRows();
-      return;
-    }
-
-    this.elements.workEmptyState.style.display = "none";
-    this.elements.workList.classList.add("has-data");
-    this.workHeaderEl.hidden = false;
-    this.elements.workListScroller.style.display = "block";
-    this.renderWorkRows(works);
-  }
+  // renderWorkList отключён для Vue-дашборда
+  renderWorkList() {}
 
   handleWorkSortChange(column) {
     if (!column || this.workSort.column === column) {
