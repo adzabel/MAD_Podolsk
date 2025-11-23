@@ -100,6 +100,9 @@ async function loadInitial() {
     const initialIso = initialFromProps || closestToToday || normalized[0];
 
     state.selected = initialIso;
+    if (typeof window !== "undefined") {
+      window.__daySelectCurrentIso = initialIso;
+    }
     if (initialIso && typeof window !== "undefined" && typeof window.__onDayChange === "function") {
       window.__onDayChange(initialIso);
     }
@@ -114,6 +117,9 @@ async function loadInitial() {
 function onInputChange() {
   const iso = state.selected;
   if (!iso) return;
+  if (typeof window !== "undefined") {
+    window.__daySelectCurrentIso = iso;
+  }
   if (typeof window !== "undefined" && typeof window.__onDayChange === "function") {
     window.__onDayChange(iso);
   }
