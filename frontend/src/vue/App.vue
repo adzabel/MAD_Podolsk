@@ -144,11 +144,17 @@ function onMonthChange(iso) {
 }
 
 onMounted(() => {
-  // Можно получить initialMonth из window или другого источника
-  if (typeof window !== "undefined" && window.uiManager && window.uiManager.initialMonth) {
-    initialMonth.value = window.uiManager.initialMonth;
-  }
-  loadMonths();
+  // Получаем список месяцев и выбираем последний доступный
+  loadMonths().then(() => {
+    if (months.value.length) {
+      initialMonth.value = months.value[months.value.length - 1].iso;
+    } else {
+      // fallback: текущий месяц
+      const now = new Date();
+      initialMonth.value = `${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}-01`;
+    }
+    loadDashboardItems();
+  });
 });
 const summaryState = reactive({
   planned: null,
