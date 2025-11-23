@@ -10,7 +10,7 @@
     <div class="summary-label daily-average">СР.ДНЕВ. ВЫРУЧКА, ₽</div>
     <div class="summary-value">{{ formattedValue }}</div>
     <div class="summary-sub summary-note">
-      <span class="summary-note-line">Расчет без выручки</span>
+      <span class="summary-note-line">Расчет без выручки&nbsp;</span>
       <span class="summary-note-line">за сегодня</span>
     </div>
     <span v-if="isCurrentMonth" class="summary-card-hint" aria-hidden="true">
