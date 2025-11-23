@@ -7,7 +7,7 @@
     :aria-disabled="String(!isInteractive)"
     @click="handleClick"
   >
-    <div class="summary-label">СРЕДНЕДНЕВНАЯ ВЫРУЧКА, ₽</div>
+    <div class="summary-label daily-average">СР.ДНЕВ. ВЫРУЧКА, ₽</div>
     <div class="summary-value">{{ formattedValue }}</div>
     <div class="summary-sub summary-note">
       <span class="summary-note-line">Расчет без выручки</span>
