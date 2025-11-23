@@ -504,14 +504,22 @@ def fetch_plan_vs_fact_for_month(
                             for row in items_raw
                             if normalize_string(row["smeta_code"], "") == cat and row["description"] == desc
                         )
-                    if planned > 1 or fact > 1:
-                        work_items.append({
-                            "category": cat,
-                            "description": desc,
-                            "planned_amount": planned,
-                            "fact_amount": fact,
-                            "delta": planned - fact,
-                        })
+                        if planned > 1 or fact > 1:
+                            # Найдём первую строку для desc и cat, чтобы взять month_start и smeta_code
+                            row_match = next((row for row in items_raw if row["description"] == desc and (
+                                (cat == "внерегламент" and normalize_string(row["smeta_code"], "") in CATEGORY_VNR_CODES) or
+                                (cat != "внерегламент" and normalize_string(row["smeta_code"], "") == cat)
+                            )), None)
+                            work_items.append({
+                                "month_start": row_match["month_start"] if row_match else None,
+                                "smeta": row_match["smeta_code"] if row_match else None,
+                                "work_name": desc,
+                                "category": cat,
+                                "description": desc,
+                                "planned_amount": planned,
+                                "fact_amount": fact,
+                                "delta": planned - fact,
+                            })
 
             # last_updated
             last_updated = _fetch_last_updated(conn)
