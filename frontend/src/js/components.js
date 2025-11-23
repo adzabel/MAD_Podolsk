@@ -12,7 +12,7 @@ import {
 // ...existing code...
 import { UiStore } from "@js/store/index.js";
 import { renderCategoriesFacade } from "@js/views/categories-view.js";
-import { initWorkListView, renderWorkRowsView } from "@js/ui/workListView.js";
+// import { initWorkListView, renderWorkRowsView } from "@js/ui/workListView.js";
 import {
   openAverageDailyModal,
   openWorkBreakdownModal,
@@ -148,41 +148,7 @@ export class UIManager {
     this.updateLastUpdatedPills();
   }
 
-  prepareWorkList() {
-    const { headerEl, scroller, sortButtons } = initWorkListView({
-      container: this.elements.workList,
-      onSortChange: (column) => this.handleWorkSortChange(column),
-      onWorkClick: (item, event) => {
-        if (event && event.target.closest(".work-row-name-toggle")) return;
-        this.openWorkModal(item);
-      },
-      initializeNameToggle: (nameWrapper) => this.initializeNameToggle(nameWrapper),
-    });
-
-    this.workHeaderEl = headerEl;
-    this.elements.workListScroller = scroller;
-    this.workSortButtons = sortButtons;
-    this.updateWorkSortButtons();
-  }
-
-  clearWorkRows() {
-    if (this.elements.workListScroller) {
-      this.elements.workListScroller.innerHTML = "";
-    }
-  }
-
-  renderWorkRows(works) {
-    renderWorkRowsView({
-      scroller: this.elements.workListScroller,
-      works,
-      onWorkClick: (item, event) => {
-        if (event && event.target.closest(".work-row-name-toggle")) return;
-        this.openWorkModal(item);
-      },
-      initializeNameToggle: (nameWrapper) => this.initializeNameToggle(nameWrapper),
-    });
-    requestAnimationFrame(() => this.updateWorkNameCollapsers());
-  }
+  // prepareWorkList, clearWorkRows, renderWorkRows отключены для перехода на Vue
 
   bindEvents() {
     if (this.elements.workSortSelect) {
