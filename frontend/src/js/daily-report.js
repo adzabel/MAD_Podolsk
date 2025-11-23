@@ -1,11 +1,21 @@
-import { applyDailyDataView, renderDailyTableView } from "@js/ui/dailyReportView.js";
+// Прокси-слой для дневных данных. Логика отображения
+// постепенно переносится во Vue-компонент DailyReport.
 
-// Прокси-функции для обратной совместимости. Весь UI-код теперь в ui/dailyReportView.
+export function applyDailyData({ data }) {
+  if (typeof window !== "undefined" && typeof window.__vueSetDailyReport === "function") {
+    const items = Array.isArray(data?.items) ? data.items : [];
+    const hasData = Boolean(data?.has_data);
 
-export function applyDailyData(args) {
-  return applyDailyDataView(args);
+    window.__vueSetDailyReport({
+      isLoading: false,
+      hasData,
+      selectedDateIso: data?.date || null,
+      items,
+    });
+  }
 }
 
 export function renderDailyTable(args) {
-  return renderDailyTableView(args.items, args.elements);
+  // Таблица теперь рендерится Vue, функция оставлена для совместимости.
+  return null;
 }
