@@ -181,6 +181,10 @@
   transition: opacity 0.2s ease;
 }
 
+.work-sort-button .sort-indicator.desc {
+  transform: rotate(180deg);
+}
+
 .work-sort-button.active {
   color: var(--accent-strong);
   background-color: rgba(47, 111, 237, 0.1);
