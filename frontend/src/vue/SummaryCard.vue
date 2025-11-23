@@ -16,7 +16,7 @@
       aria-live="polite"
     >
       <div class="summary-progress-labels">
-        <span>Исполнение</span>
+        <span>ИСПОЛНЕНИЕ ПЛАНА</span>
         <strong>{{ progressLabelSafe }}</strong>
       </div>
       <div class="summary-progress-bar">
