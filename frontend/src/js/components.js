@@ -10,9 +10,6 @@ import {
   debounce,
 } from "@shared/utils.js";
 import {
-  renderSummary as renderSummaryExternal,
-  updateSummaryProgress as updateSummaryProgressExternal,
-  updateDailyAverage as updateDailyAverageExternal,
   updateContractCard as updateContractCardExternal,
   updateContractProgress as updateContractProgressExternal,
 } from "@js/views/summary-view.js";
@@ -492,7 +489,7 @@ export class UIManager {
     const metrics = this.dataManager.calculateMetrics(data);
     console.log('[DEBUG] Metrics for Vue:', metrics);
     // ...existing code...
-    this.renderSummary();
+    // Сводка теперь рендерится только через Vue-компоненты
     this.renderCategories();
     this.renderWorkList();
   }
@@ -504,42 +501,9 @@ export class UIManager {
     this.activeCategoryKey = this.groupedCategories.length ? this.groupedCategories[0].key : null;
   }
 
-  renderSummary() {
-    const currentData = this.dataManager.getCurrentData();
-    const metrics = currentData && currentData.has_data
-      ? this.dataManager.calculateMetrics(currentData)
-      : null;
-    const contractMetrics = this.dataManager.calculateContractMetrics(currentData || {});
-    this.updateContractCard(contractMetrics);
-    this.metrics = metrics;
+  // ...existing code...
 
-    const {
-      summaryDailyRevenue,
-      averageDailyRevenue,
-      completion,
-      completionLabel,
-    } = renderSummaryExternal({ metrics, elements: this.elements });
-
-    // Передаём сводку в Vue (если он подключен)
-    if (typeof window !== "undefined" && typeof window.__vueSetSummaryMetrics === "function") {
-      window.__vueSetSummaryMetrics({
-        planned: metrics ? metrics.planned : null,
-        fact: metrics ? metrics.fact : null,
-        delta: metrics ? metrics.delta : null,
-        completion: metrics ? metrics.completion : null,
-        completionLabel,
-      });
-    }
-
-    this.summaryDailyRevenue = summaryDailyRevenue || [];
-    this.dailyRevenue = [...this.summaryDailyRevenue];
-    this.updateSummaryProgress(completion, completionLabel);
-    this.updateDailyAverage(averageDailyRevenue, this.summaryDailyRevenue.length);
-  }
-
-  updateSummaryProgress(completion, label) {
-    updateSummaryProgressExternal({ completion, label, elements: this.elements });
-  }
+  // ...existing code...
 
   updateLastUpdatedPills() {
     const monthlyLabel = this.lastUpdatedMonthlyLabel || "Нет данных";
@@ -581,24 +545,7 @@ export class UIManager {
     updateContractProgressExternal({ completion, elements: this.elements });
   }
 
-  updateDailyAverage(averageValue, daysWithData) {
-    const isCurrentMonth = this.isCurrentMonth(this.uiStore.getSelectedMonth());
-    // Пробрасываем среднедневную выручку во Vue-компонент, если он активен.
-    if (typeof window !== "undefined" && typeof window.__vueSetDailyAverage === "function") {
-      window.__vueSetDailyAverage({
-        averageValue,
-        daysWithData,
-        isCurrentMonth,
-      });
-    } else {
-      updateDailyAverageExternal({
-        averageValue,
-        daysWithData,
-        isCurrentMonth,
-        elements: this.elements,
-      });
-    }
-  }
+  // ...existing code...
 
   setDaySelectValue(dayIso) {
     if (!this.elements.daySelect || !dayIso) {
