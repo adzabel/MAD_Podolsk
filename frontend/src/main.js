@@ -9,10 +9,12 @@ import "@styles/work.css";
 import "@styles/modal.css";
 
 import { initApp } from "@js/app.js";
-import { mountContractCard } from "./vue/main.js";
+import { mountContractCard, mountSummary } from "./vue/main.js";
 
 document.addEventListener("DOMContentLoaded", () => {
   initApp();
   // Монтируем Vue-карточку контракта поверх существующей секции.
   mountContractCard("#contract-card");
+  // Монтируем Vue-сводку в выделенный контейнер.
+  mountSummary("#summary-grid");
 });

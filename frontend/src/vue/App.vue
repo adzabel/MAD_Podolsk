@@ -1,9 +1,4 @@
 <template>
-  <ContractCard
-    :contract-metrics="contractMetrics"
-    :view-mode="viewMode"
-  />
-
   <section class="summary-grid layout-grid monthly-only" id="summary-grid">
     <SummaryCard
       label="План, ₽"
