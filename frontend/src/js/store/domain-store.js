@@ -1,19 +1,12 @@
+
 import {
   hasMeaningfulAmount,
   shouldIncludeItem,
-  resolveCategoryMeta,
-  summarizeItems,
-  calculateMetrics,
-  calculateContractMetrics,
-  buildCategories,
+  resolveCategoryMeta
 } from "@js/domain.js";
 
 export const domainStore = {
   hasMeaningfulAmount,
   shouldIncludeItem,
-  resolveCategoryMeta,
-  summarizeItems,
-  calculateMetrics,
-  calculateContractMetrics,
-  buildCategories,
+  resolveCategoryMeta
 };
