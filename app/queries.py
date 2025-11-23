@@ -19,6 +19,7 @@ from .constants import (
     TABLE_PLAN_AGG,
     TABLE_PLAN_VS_FACT_MONTHLY,
     TABLE_RATES,
+    UNTITLED_WORK_LABEL,
 )
 from .db import get_connection
 from .retry import db_retry
@@ -56,12 +57,8 @@ T = TypeVar("T")
 
 ITEMS_SQL = f"""
     SELECT
-        pvf.*,
-        pvf.description AS work_name,
-        rates.smeta_code AS category_code
+        pvf.*
     FROM {TABLE_PLAN_VS_FACT_MONTHLY} AS pvf
-    LEFT JOIN {TABLE_RATES} AS rates
-        ON TRIM(LOWER(rates.work_name)) = TRIM(LOWER(pvf.description))
     WHERE pvf.month_start = %s
     ORDER BY ABS(COALESCE(pvf.delta_amount_done, 0)) DESC, pvf.description;
 """
@@ -222,18 +219,20 @@ def _aggregate_items_streaming(cursor) -> list[DashboardItem]:
     Минимизирует использование памяти для больших результатов.
     Cursor должен быть RealDictCursor и находиться в контексте транзакции.
     """
-    items_map: dict[tuple[str | None, str | None, str | None, str], dict[str, Any]] = {}
-    
+
+    items_map: dict[str, dict[str, Any]] = {}
+
     for row in cursor:
-        category, smeta, work_name, description = extract_dict_strings(row)
-        key = (category, smeta, work_name, description)
+        smeta_code, work_name, unit = extract_dict_strings(row)
+        description = work_name or unit or UNTITLED_WORK_LABEL
+        key = description
 
         item = items_map.get(key)
         if item is None:
             item = {
-                "category": category,
-                "smeta": smeta,
-                "work_name": work_name,
+                "category": smeta_code,
+                "smeta": smeta_code,
+                "work_name": description,
                 "description": description,
                 "planned_amount": None,
                 "fact_amount": None,

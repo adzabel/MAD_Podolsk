@@ -124,28 +124,32 @@ def format_percent(value: float | None, decimals: int = 1) -> str:
 
 def extract_dict_strings(
     row: dict[str, Any],
-    category_keys: tuple[str, ...] = ("category_code", "smeta"),
+    category_keys: tuple[str, ...] = ("smeta_code",),
     smeta_keys: tuple[str, ...] = ("smeta_code",),
-    work_keys: tuple[str, ...] = ("work_name", "work_title"),
+    work_keys: tuple[str, ...] = ("description",),
     description_keys: tuple[str, ...] = ("description",),
     default_description: str = "",
-) -> tuple[str | None, str | None, str | None, str]:
+) -> tuple[str | None, str, str]:
     """Извлекает и нормализует строковые поля из словаря строки БД.
-    
+
+    Используется фиксированный набор колонок: `smeta_code`, `description`, `unit`.
+
     Args:
         row: Словарь с данными строки.
-        category_keys: Ключи для поля "категория".
+        category_keys: Ключи для поля "категория" (используем смету).
         smeta_keys: Ключи для поля "смета".
         work_keys: Ключи для поля "название работы".
         description_keys: Ключи для поля "описание".
         default_description: Значение по умолчанию для описания.
-    
+
     Returns:
-        Кортеж (category, smeta, work_name, description).
+        Кортеж (smeta_code, description, unit).
     """
-    description = safe_get_from_dict(row, *description_keys, default=default_description)
-    category = safe_get_from_dict(row, *category_keys)
-    smeta = safe_get_from_dict(row, *smeta_keys)
-    work_name = safe_get_from_dict(row, *work_keys, default=description)
-    
-    return category, smeta, work_name, description
+    description = normalize_string(
+        safe_get_from_dict(row, *description_keys, default=default_description)
+    )
+    smeta = normalize_string(safe_get_from_dict(row, *smeta_keys)) or None
+    work_name = normalize_string(safe_get_from_dict(row, *work_keys, default=description))
+    unit = normalize_string(safe_get_from_dict(row, "unit"))
+
+    return smeta, work_name, unit
