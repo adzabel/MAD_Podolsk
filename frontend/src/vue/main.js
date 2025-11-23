@@ -68,6 +68,11 @@ export function mountDailyReport(selector = "#daily-panel") {
   const el = document.querySelector(selector);
   if (!el) return null;
 
+  // Контейнер уже может быть оформлен как pill снаружи.
+  // Удаляем класс, чтобы компонент не вкладывался в стилизованный элемент
+  // и не создавал двойную рамку.
+  el.classList.remove("pill");
+
   const app = createApp(DailyReport);
   const vm = app.mount(el);
 
