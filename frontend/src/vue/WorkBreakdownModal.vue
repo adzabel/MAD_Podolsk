@@ -12,7 +12,7 @@
       <button class="modal-close" type="button" @click="$emit('close')" aria-label="Закрыть">×</button>
       <div class="modal-body" id="work-modal-body">
         <div v-if="!safeWorkBreakdown.length" class="modal-empty" id="work-modal-empty">Нет данных для выбранной работы</div>
-        <div v-else class="modal-list" id="work-modal-list">
+        <div v-else class="modal-list" id="work-modal-list" data-columns="3">
           <div class="modal-row modal-row-header">
             <div class="modal-row-date">Дата</div>
             <div class="modal-row-volume">Объём ({{ safeWorkBreakdown[0]?.unit || '—' }})</div>
