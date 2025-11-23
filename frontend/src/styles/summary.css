@@ -159,7 +159,7 @@
 .summary-value {
   text-align: left;
   padding-left: 32px;
-  margin-top: 12px; /* воздух между заголовком и значением */
+    margin-top: 6px; /* уменьшенный воздух между заголовком и значением для мобильной версии */
 }
 
 .summary-card,
