@@ -414,8 +414,13 @@ export class UIManager {
         completionLabel: "…",
       });
     }
-    this.updateSummaryProgress(null, "…");
-    this.updateDailyAverage(null, 0);
+    if (typeof window !== "undefined" && typeof window.__vueSetDailyAverage === "function") {
+      window.__vueSetDailyAverage({
+        averageValue: null,
+        daysWithData: 0,
+        isCurrentMonth: false,
+      });
+    }
     this.setActiveCategoryTitle("Загрузка...");
     this.elements.workEmptyState.style.display = "none";
     this.elements.workList.classList.remove("has-data");
@@ -449,8 +454,13 @@ export class UIManager {
     }
     this.summaryDailyRevenue = [];
     this.dailyRevenue = [];
-    this.updateSummaryProgress(null, "–");
-    this.updateDailyAverage(null, 0);
+    if (typeof window !== "undefined" && typeof window.__vueSetDailyAverage === "function") {
+      window.__vueSetDailyAverage({
+        averageValue: null,
+        daysWithData: 0,
+        isCurrentMonth: false,
+      });
+    }
     this.updateContractCard(null);
     this.setActiveCategoryTitle("Смета не выбрана");
     this.elements.workList.classList.remove("has-data");
@@ -488,8 +498,24 @@ export class UIManager {
     // Отладка: логируем метрики, которые передаются во Vue-компоненты
     const metrics = this.dataManager.calculateMetrics(data);
     console.log('[DEBUG] Metrics for Vue:', metrics);
-    // ...existing code...
-    // Сводка теперь рендерится только через Vue-компоненты
+    // Обновляем Vue-компоненты с метриками
+    if (typeof window !== "undefined" && typeof window.__vueSetSummaryMetrics === "function") {
+      window.__vueSetSummaryMetrics({
+        planned: metrics?.planned ?? null,
+        fact: metrics?.fact ?? null,
+        delta: metrics?.delta ?? null,
+        completion: metrics?.completion ?? null,
+        completionLabel: metrics?.completion !== null && metrics?.completion !== undefined ?
+          (typeof formatPercent === 'function' ? formatPercent(metrics.completion) : "–") : "–",
+      });
+    }
+    if (typeof window !== "undefined" && typeof window.__vueSetDailyAverage === "function") {
+      window.__vueSetDailyAverage({
+        averageValue: metrics?.averageDailyRevenue ?? null,
+        daysWithData: Array.isArray(metrics?.dailyRevenue) ? metrics.dailyRevenue.length : 0,
+        isCurrentMonth: this.isCurrentMonth(this.uiStore.getSelectedMonth()),
+      });
+    }
     this.renderCategories();
     this.renderWorkList();
   }
