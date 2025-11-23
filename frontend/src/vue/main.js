@@ -8,6 +8,7 @@ import DaySelect from "./DaySelect.vue";
 import DailyReport from "./DailyReport.vue";
 import LastUpdatedPill from "./LastUpdatedPill.vue";
 import { useLastUpdatedStore } from "./useLastUpdatedStore";
+import WorkBreakdownList from "./WorkBreakdownList.vue";
 
 // Единое реактивное состояние для карточки контракта, чтобы сеттер из
 // старого JS-кода и Vue-компонент делили одни и те же данные.
@@ -121,3 +122,33 @@ export function mountLastUpdatedPillDaily(selector = "#last-updated-pill-daily")
   const vm = app.mount(el);
   return { app, vm };
 }
+
+export function mountWorkBreakdownList(selector = "#work-breakdown-list-vue-root") {
+  const el = document.querySelector(selector);
+  if (!el) return null;
+  const app = createApp(WorkBreakdownList);
+  const vm = app.mount(el);
+  return { app, vm };
+}
+
+document.addEventListener("DOMContentLoaded", () => {
+  if (typeof window !== "undefined") {
+    window.__onUiReady = (uiManager) => {
+      // Монтируем Vue-сводку в выделенный контейнер.
+      mountSummary("#summary-grid");
+      // Монтируем Vue-карточку исполнения контракта, если контейнер доступен.
+      mountContractCard("#contract-card");
+      // Монтируем селектор месяца в шапке, передавая начальный месяц.
+      const initialMonth = uiManager && uiManager.initialMonth ? uiManager.initialMonth : null;
+      mountMonthSelect("#month-select-vue-root", initialMonth);
+      // Монтируем селектор дня в шапке, передавая выбранный день (если есть).
+      const initialDay = uiManager && uiManager.uiStore ? uiManager.uiStore.getSelectedDay() : null;
+      mountDaySelect("#day-select-vue-root", initialDay);
+      // Монтируем Vue-блок расшифровки работ по смете
+      mountWorkBreakdownList("#work-breakdown-list-vue-root");
+      // Монтируем Vue-индикаторы "Данные обновлены".
+      mountLastUpdatedPillMonthly("#last-updated-pill");
+      mountLastUpdatedPillDaily("#last-updated-pill-daily");
+    };
+  }
+});
