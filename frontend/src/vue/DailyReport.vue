@@ -73,21 +73,12 @@
       </div>
     </div>
 
-    <!-- WorkBreakdownModal: модальное окно для расшифровки работ -->
-    <WorkBreakdownModal
-      :visible="isWorkModalOpen"
-      :workName="workModalData.workName"
-      :workBreakdown="workModalData.workBreakdown"
-      :selectedMonthLabel="workModalData.selectedMonthLabel"
-      @close="isWorkModalOpen = false"
-    />
   </section>
 </template>
 
 <script setup>
-import { computed, reactive, watchEffect, ref } from "vue";
+import { computed, reactive, watchEffect } from "vue";
 import { API_DAILY_URL } from "@config/config.frontend.js";
-import WorkBreakdownModal from "./WorkBreakdownModal.vue";
 
 const state = reactive({
   isLoading: true,
@@ -263,19 +254,4 @@ watchEffect(() => {
 
 const isLoading = computed(() => state.isLoading);
 
-// Состояния для модального окна расшифровки работ
-const isWorkModalOpen = ref(false);
-const workModalData = reactive({
-  workName: '',
-  workBreakdown: [],
-  selectedMonthLabel: ''
-});
-function openWorkModal(item) {
-  console.log('Открытие модального окна по работе', item);
-  workModalData.workName = item.description || 'Без названия';
-  workModalData.selectedMonthLabel = formatDateLabel(state.selectedDateIso) || '';
-  workModalData.workBreakdown = Array.isArray(item.breakdown) ? item.breakdown : [];
-  isWorkModalOpen.value = true;
-  console.log('isWorkModalOpen:', isWorkModalOpen.value, 'workModalData:', JSON.stringify(workModalData));
-}
 </script>

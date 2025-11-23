@@ -108,6 +108,17 @@ function createWorkRow(item, index, total, calculateDeltaFn, onWorkClick, initia
 
   row.addEventListener("click", (event) => {
     if (event.target.closest(".work-row-name-toggle")) return;
+    // Открываем Vue WorkBreakdownModal через глобальную функцию
+    if (window.__openWorkBreakdownModal) {
+      // Формируем данные для модального окна
+      const modalData = {
+        workName: workName,
+        breakdown: Array.isArray(item.breakdown) ? item.breakdown : [],
+        selectedMonthLabel: item.selectedMonthLabel || '',
+        ...item // если нужны дополнительные поля
+      };
+      window.__openWorkBreakdownModal(modalData);
+    }
     if (onWorkClick) onWorkClick(item, event);
   });
 

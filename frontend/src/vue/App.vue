@@ -1,4 +1,3 @@
-
 <template>
   <SummaryCards
     :plan="summaryState.planned"
@@ -13,12 +12,20 @@
     :summaryDailyRevenue="dailyAverageState.summaryDailyRevenue"
     :selectedMonthLabel="dailyAverageState.selectedMonthLabel"
   />
+  <WorkBreakdownModal
+    :visible="isWorkModalOpen"
+    :workName="workModalData.workName"
+    :workBreakdown="workModalData.workBreakdown"
+    :selectedMonthLabel="workModalData.selectedMonthLabel"
+    @close="isWorkModalOpen = false"
+  />
 </template>
 
 <script setup>
 import { reactive, ref, onMounted } from "vue";
 import SummaryCards from "./SummaryCards.vue";
 import MonthSelect from "./MonthSelect.vue";
+import WorkBreakdownModal from "./WorkBreakdownModal.vue";
 
 const months = ref([]);
 const loading = ref(true);
@@ -113,6 +120,13 @@ if (typeof window !== "undefined") {
     if (mode === "monthly" || mode === "daily") {
       viewMode.value = mode;
     }
+  };
+
+  window.__openWorkBreakdownModal = (payload) => {
+    workModalData.workName = payload?.workName || payload?.description || 'Без названия';
+    workModalData.selectedMonthLabel = payload?.selectedMonthLabel || '';
+    workModalData.workBreakdown = Array.isArray(payload?.breakdown) ? payload.breakdown : [];
+    isWorkModalOpen.value = true;
   };
 }
 
