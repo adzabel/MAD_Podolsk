@@ -8,7 +8,6 @@ import DaySelect from "./DaySelect.vue";
 import DailyReport from "./DailyReport.vue";
 import LastUpdatedPill from "./LastUpdatedPill.vue";
 import { useLastUpdatedStore } from "./useLastUpdatedStore";
-import WorkBreakdownList from "./WorkBreakdownList.vue";
 
 // Единое реактивное состояние для карточки контракта, чтобы сеттер из
 // старого JS-кода и Vue-компонент делили одни и те же данные.
@@ -119,14 +118,6 @@ export function mountLastUpdatedPillDaily(selector = "#last-updated-pill-daily")
   if (!el) return null;
 
   const app = createApp(DailyLastUpdatedShell);
-  const vm = app.mount(el);
-  return { app, vm };
-}
-
-export function mountWorkBreakdownList(selector = "#work-breakdown-list-vue-root") {
-  const el = document.querySelector(selector);
-  if (!el) return null;
-  const app = createApp(WorkBreakdownList);
   const vm = app.mount(el);
   return { app, vm };
 }

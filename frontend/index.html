@@ -57,68 +57,6 @@
     <section class="summary-grid layout-grid monthly-only" id="summary-grid">
     </section>
 
-    <!-- Сводка по сметам -->
-    <section class="panel monthly-only">
-      <div class="panel-header">
-        <div>
-          <div class="panel-title">Работы в разрезе Смет</div>
-        </div>
-      </div>
-      <div class="category-grid layout-grid layout-grid--auto-fit skeleton-category" id="category-skeleton" aria-hidden="true">
-        <div class="category-card-skeleton">
-          <div class="skeleton skeleton-line skeleton-line-sm"></div>
-          <div class="skeleton skeleton-line skeleton-line-lg"></div>
-          <div class="skeleton skeleton-line"></div>
-        </div>
-        <div class="category-card-skeleton">
-          <div class="skeleton skeleton-line skeleton-line-sm"></div>
-          <div class="skeleton skeleton-line skeleton-line-lg"></div>
-          <div class="skeleton skeleton-line"></div>
-        </div>
-        <div class="category-card-skeleton">
-          <div class="skeleton skeleton-line skeleton-line-sm"></div>
-          <div class="skeleton skeleton-line skeleton-line-lg"></div>
-          <div class="skeleton skeleton-line"></div>
-        </div>
-        <div class="category-card-skeleton">
-          <div class="skeleton skeleton-line skeleton-line-sm"></div>
-          <div class="skeleton skeleton-line skeleton-line-lg"></div>
-          <div class="skeleton skeleton-line"></div>
-        </div>
-      </div>
-      <div class="category-grid layout-grid layout-grid--auto-fit" id="category-grid"></div>
-    </section>
-
-    <!-- Список работ выбранной сметы -->
-    <section class="panel monthly-only">
-      <div class="panel-header work-panel-header">
-        <div class="work-panel-title-area">
-          <div class="panel-title-group">
-            <div class="panel-title" id="active-category-title">
-              <span class="panel-title-text panel-title-text-desktop" id="active-category-title-desktop">Смета не выбрана</span>
-              <span class="panel-title-mobile" id="active-category-title-mobile">
-                <span class="panel-title-mobile-label">Работы по смете</span>
-                <span class="panel-title-mobile-value" id="active-category-title-mobile-value">Смета не выбрана</span>
-              </span>
-            </div>
-          </div>
-        </div>
-        <p class="panel-subtitle work-detail-hint" id="work-detail-hint">Ежедневные данные <span class="work-detail-hint-line-break"><br /></span>при нажатии на вид работы</p>
-        <div class="work-sort-select">
-          <label for="work-sort-select" class="work-sort-select-label">Сортировка</label>
-          <div class="work-sort-select-control">
-            <select id="work-sort-select">
-              <option value="planned" selected>План</option>
-              <option value="fact">Факт</option>
-              <option value="delta">Отклонение</option>
-            </select>
-          </div>
-        </div>
-      </div>
-      <!-- Vue-компонент: Расшифровка работ по смете -->
-      <div id="work-breakdown-list-vue-root"></div>
-    </section>
-
     <!-- Ежедневные данные -->
     <section class="panel daily-only" id="daily-panel">
       <div class="panel-header">
