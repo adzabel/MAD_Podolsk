@@ -436,10 +436,10 @@ export class UIManager {
     }
     if (typeof window !== "undefined" && typeof window.__vueSetDailyAverage === "function") {
       window.__vueSetDailyAverage({
-        averageValue: metrics?.averageDailyRevenue ?? null,
-        daysWithData: Array.isArray(metrics?.dailyRevenue) ? metrics.dailyRevenue.length : 0,
+        averageValue: data.summary?.average_daily ?? null,
+        daysWithData: data.summary?.days_with_data ?? 0,
         isCurrentMonth: this.isCurrentMonth(this.uiStore.getSelectedMonth()),
-        summaryDailyRevenue: Array.isArray(metrics?.dailyRevenue) ? metrics.dailyRevenue : [],
+        summaryDailyRevenue: Array.isArray(data.summary?.daily_revenue) ? data.summary.daily_revenue : [],
         selectedMonthLabel: this.getSelectedMonthLabel ? this.getSelectedMonthLabel() : '',
       });
     }
