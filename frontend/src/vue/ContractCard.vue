@@ -58,15 +58,15 @@ const PROGRESS_OVERFLOW_COLOR = "#16a34a";
 const PROGRESS_BASE_ACCENT = "var(--accent)";
 
 const hasData = computed(() => {
-  return (
-    props.contractMetrics &&
-    props.contractMetrics.contractAmount != null &&
-    props.contractMetrics.executed != null
-  );
+  if (!props.contractMetrics) return false;
+  const hasAmount = props.contractMetrics.contractAmount != null;
+  const hasExecuted = props.contractMetrics.executed != null;
+  const hasCompletion = props.contractMetrics.completion != null;
+  return hasAmount || hasExecuted || hasCompletion;
 });
 
 const contractAmountLabel = computed(() => {
-  if (!hasData.value) return "–";
+  if (!hasData.value || props.contractMetrics.contractAmount == null) return "–";
   return new Intl.NumberFormat("ru-RU", {
     style: "currency",
     currency: "RUB",
@@ -75,7 +75,7 @@ const contractAmountLabel = computed(() => {
 });
 
 const executedLabel = computed(() => {
-  if (!hasData.value) return "–";
+  if (!hasData.value || props.contractMetrics.executed == null) return "–";
   return new Intl.NumberFormat("ru-RU", {
     style: "currency",
     currency: "RUB",
