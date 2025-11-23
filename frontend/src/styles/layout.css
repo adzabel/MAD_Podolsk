@@ -377,13 +377,12 @@ input[type="date"] {
 	font-size: var(--font-size-caption);
 	padding: var(--gap-sm) 14px;
 	border-radius: var(--radius-md);
-	/* border: 1px solid var(--border-soft); */
+	border: 1px solid var(--border-soft);
 	background: var(--bg-muted);
 	color: var(--text-main);
 	display: inline-flex;
 	align-items: center;
 	gap: var(--gap-sm);
-	/* box-shadow: inset 0 1px 0 rgba(255,255,255,0.6); */
 	min-height: var(--control-height);
 }
 
